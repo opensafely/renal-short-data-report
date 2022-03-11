@@ -44,8 +44,6 @@ study = StudyDefinition(
        
 #Clinical variables
 
-#eGFR tests
-
     eGFR_test=patients.with_these_clinical_events(
         codelist=eGFR_tests_codes,
         between=["index_date", "last_day_of_month(index_date)"],
@@ -53,63 +51,31 @@ study = StudyDefinition(
         return_expectations={"incidence": 0.2}
     ),
 
-    eGFR_test_count=patients.with_these_clinical_events(
-        codelist=eGFR_tests_codes,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int" : {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2
-            }
-    ),
-
-    eGFR_test_codes=patients.with_these_clinical_events(
-        codelist=eGFR_tests_codes,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "category": {"ratios": {"code1": 0.1, "code2": 0.2, "code3": 0.7}}, 
-            "incidence" : 0.2
-            }
-    ),
-
-#eGFR values
-
     eGFR_values=patients.with_these_clinical_events(
         codelist=eGFR_values_codes,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="binary_flag",
         return_expectations={"incidence": 0.2}
     ),
-
-    eGFR_values_count=patients.with_these_clinical_events(
-        codelist=eGFR_values_codes,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int" : {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2
-            }
-    ),
     
-    eGFR_values_codes=patients.with_these_clinical_events(
-        codelist=eGFR_values_codes,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "category": {"ratios": {"code1": 0.1, "code2": 0.2, "code3": 0.7}}, 
-            "incidence" : 0.2
-            }
-    ),
+#    eGFR_values=patients.with_these_clinical_events(    
+#        codelist=eGFR_values_codes,
+#        between=["index_date", "last_day_of_month(index_date)"],
+#        returning="numeric_value",
+#        find_last_match_in_period=True
+#        return_expectations={
+#            "float" : {"distribution": "normal", "mean": 70, "stddev": 30},
+#            "incidence" : 0.2
+#            }
+#    ),
 
   **demographic_variables
     
 )
-# Define measures by region, practice, sex, age ethnicity. Can we use a function here?
+# Define measures by region, practice, sex, age ethnicity. 
+
 
 measures = [
-
-    #eGFR tests
     Measure(
         id="eGFR_test_region",
         numerator="eGFR_test",
@@ -128,7 +94,7 @@ measures = [
 
     Measure(
         id="eGFR_test_sex",
-        numerator="eGFR_test",
+        numerator="eGFR_values",
         denominator="population",
         group_by=["sex"],
         small_number_suppression=False
@@ -136,29 +102,29 @@ measures = [
 
     Measure(
         id="eGFR_test_ethnicity",
-        numerator="eGFR_test",
+        numerator="eGFR_values",
         denominator="population",
         group_by=["ethnicity"],
         small_number_suppression=False
     ),
 
     Measure(
-        id="eGFR_test_by_codes",
-        numerator="eGFR_test",
+        id="eGFR_values_rate_sex",
+        numerator="eGFR_values",
         denominator="population",
-        group_by=["eGFR_test_codes"],
+        group_by=["sex"],
         small_number_suppression=False
     ),
 
     Measure(
-        id="eGFR_test_count_mean",
-        numerator="eGFR_test_count",
-        denominator="eGFR_test",
+        id="eGFR_values_rate_ethnicity",
+        numerator="eGFR_values",
+        denominator="population",
+        group_by=["ethnicity"],
         small_number_suppression=False
     ),
 
-#eGFR values
-    Measure(
+        Measure(
         id="eGFR_values_region",
         numerator="eGFR_values",
         denominator="population",
@@ -187,21 +153,6 @@ measures = [
         numerator="eGFR_values",
         denominator="population",
         group_by=["ethnicity"],
-        small_number_suppression=False
-    ),
-
-    Measure(
-        id="eGFR_values_by_codes",
-        numerator="eGFR_values",
-        denominator="population",
-        group_by=["eGFR_values_codes"],
-        small_number_suppression=False
-    ),
-
-     Measure(
-        id="eGFR_values_count_mean",
-        numerator="eGFR_values_count",
-        denominator="eGFR_values",
         small_number_suppression=False
     ),
 ]

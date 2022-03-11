@@ -1,3 +1,22 @@
 {
-  "files": {}
+  "files": {
+    "user-ss808-estimated-glomerular-filtration-rate-egfr-recorded-tests.csv": {
+      "id": "user/ss808/estimated-glomerular-filtration-rate-egfr-recorded-tests/76a6b7b5",
+      "url": "https://codelists.opensafely.org/codelist/user/ss808/estimated-glomerular-filtration-rate-egfr-recorded-tests/76a6b7b5/",
+      "downloaded_at": "2022-03-11 09:15:45.829600Z",
+      "sha": "f9486ebded5f3fa463abdefdbee08feb503bd653"
+    },
+    "user-ss808-estimated-glomerular-filtration-rate-egfr-values.csv": {
+      "id": "user/ss808/estimated-glomerular-filtration-rate-egfr-values/5d974480",
+      "url": "https://codelists.opensafely.org/codelist/user/ss808/estimated-glomerular-filtration-rate-egfr-values/5d974480/",
+      "downloaded_at": "2022-03-11 09:15:46.063652Z",
+      "sha": "8c153aae62a3c7cf196cfe066f1e63123ce4ce99"
+    },
+    "primis-covid19-vacc-uptake-eth2001.csv": {
+      "id": "primis-covid19-vacc-uptake/eth2001/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/eth2001/v1/",
+      "downloaded_at": "2022-03-11 14:58:25.133768Z",
+      "sha": "36e4eacba898e6ec72da8ff66e8c673bfd9aa8e4"
+    }
+  }
 }
