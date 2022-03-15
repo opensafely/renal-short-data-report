@@ -259,7 +259,8 @@ measures = [
     Measure(
         id=f"cr_cl_rate",
         numerator="cr_cl",
-        denominator="population"
+        denominator="population",
+        group_by=["practice"]
     ),
     Measure(
         id=f"cr_cl_code_rate",
@@ -270,7 +271,8 @@ measures = [
     Measure(
         id=f"creatinine_rate",
         numerator="creatinine",
-        denominator="population"
+        denominator="population",
+        group_by=["practice"]
     ),
     Measure(
         id=f"creatinine_code_rate",
