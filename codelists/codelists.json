@@ -5,6 +5,12 @@
       "url": "https://codelists.opensafely.org/codelist/user/Louis/creatinine-clearance/6faa67ae/",
       "downloaded_at": "2022-03-15 09:25:28.287671Z",
       "sha": "ffb3196d9f08c943cc85edd68e05aff50cc7521a"
+    },
+    "opensafely-weight-snomed.csv": {
+      "id": "opensafely/weight-snomed/5459abc6",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/weight-snomed/5459abc6/",
+      "downloaded_at": "2022-03-15 09:31:24.226408Z",
+      "sha": "66c5fa2b4fc41bd55982e97ba2a30b148136b2dd"
     }
   }
 }

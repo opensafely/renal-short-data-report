@@ -169,6 +169,17 @@ study = StudyDefinition(
             "incidence": 0.80,
         },
     ),
+    weight=patients.with_these_clinical_events(
+        weight_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        returning="numeric_value",
+        return_expectations={
+            "incidence": 0.8,
+            "float": {"distribution": "normal", "mean": 70.0, "stddev": 10.0},
+        },
+    ),
 )
 
 measures = [

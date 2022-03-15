@@ -11,3 +11,14 @@ creatinine_clearance_level_codelist = codelist_from_csv(
     system="snomed",
     column="code",
 )
+
+height_codes_snomed = codelist_from_csv(
+    "codelists/opensafely-height-snomed.csv",
+    system="snomed",
+    column='code'
+)
+weight_codes_snomed = codelist_from_csv(
+    "codelists/opensafely-weight-snomed.csv",
+    system="snomed",
+    column='code'
+)
