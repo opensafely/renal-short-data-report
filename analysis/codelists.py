@@ -23,3 +23,9 @@ weight_codelist = codelist_from_csv(
     system="snomed",
     column='code'
 )
+
+height_codelist = codelist_from_csv(
+    "codelists/opensafely-height-snomed.csv",
+    system="snomed",
+    column='code'
+)

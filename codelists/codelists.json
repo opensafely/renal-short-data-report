@@ -12,6 +12,12 @@
       "downloaded_at": "2022-03-15 09:31:24.226408Z",
       "sha": "66c5fa2b4fc41bd55982e97ba2a30b148136b2dd"
     },
+    "opensafely-height-snomed.csv": {
+      "id": "opensafely/height-snomed/3b4a3891",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/height-snomed/3b4a3891/",
+      "downloaded_at": "2022-03-15 10:02:23.396180Z",
+      "sha": "22988f25528e7ebcbcd079afe54c39c883bcf63c"
+    },
     "user-bangzheng-creatinine.csv": {
       "id": "user/bangzheng/creatinine/7a202b3a",
       "url": "https://codelists.opensafely.org/codelist/user/bangzheng/creatinine/7a202b3a/",
