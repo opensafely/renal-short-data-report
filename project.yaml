@@ -28,3 +28,10 @@ actions:
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv
+
+  generate_plots:
+    run: python:latest analysis/plot_measures.py
+    needs: [generate_measures]
+    outputs:
+      moderately_sensitive:
+        counts: output/figures/plot_*.jpeg
