@@ -125,7 +125,26 @@ study = StudyDefinition(
             codelist=creatinine_codelist,
             between=["index_date", "last_day_of_month(index_date)"],
             returning="binary_flag",
-            return_expectations={"incidence": 0.5}
+            date_format="YYYY-MM-DD",
+            include_date_of_match=True,
+            return_expectations={
+                "incidence": 0.5,
+                "date": {"earliest": "1900-01-01", "latest": "today"},
+                }
+    ),
+    creatinine_code=patients.with_these_clinical_events(
+            codelist=creatinine_codelist,
+            between=["index_date", "last_day_of_month(index_date)"],
+            returning="code",
+            return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "1000731000000107": 0.5,
+                    "1000981000000109": 0.5
+                }
+            },
+        },
     ),
     creatinine_numeric_value=patients.with_these_clinical_events(
             codelist=creatinine_codelist,
@@ -213,6 +232,18 @@ study = StudyDefinition(
             "float": {"distribution": "normal", "mean": 70.0, "stddev": 10.0},
         },
     ),
+
+    #weight in 6 months before creatinine
+    weight_before_creatinine=patients.with_these_clinical_events(
+        weight_codelist,
+        between=["creatinine_date - 6 months", "creatinine_date"],
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        returning="binary_flag",
+        return_expectations={
+            "incidence": 0.8,
+        },
+    ),
 )
 
 measures = [
@@ -226,14 +257,37 @@ measures = [
         numerator="cr_cl",
         denominator="population",
         group_by=["cr_cl_code"]
+    ),
+    Measure(
+        id=f"creatinine_rate",
+        numerator="creatinine",
+        denominator="population"
+    ),
+    Measure(
+        id=f"creatinine_code_rate",
+        numerator="creatinine",
+        denominator="population",
+        group_by=["creatinine_code"]
+    ),
+    Measure(
+        id=f"weight_before_creatinine_rate",
+        numerator="weight_before_creatinine",
+        denominator="population"
     )
 ]
 
 for d in demographics:
-    m = Measure(
-        id=f"cr_cl_rate",
+    m_crcl = Measure(
+        id=f"cr_cl_{d}_rate",
         numerator="cr_cl",
         denominator="population",
         group_by=[d]
     )
-    measures.append(m)
+    m_cr = Measure(
+        id=f"creatinine_{d}_rate",
+        numerator="creatinine",
+        denominator="population",
+        group_by=[d]
+    )
+
+    measures.extend([m_crcl, m_cr])
