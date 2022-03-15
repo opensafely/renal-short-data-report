@@ -21,3 +21,10 @@ actions:
     outputs:
       moderately_sensitive:
         measure_csv: output/measure_*_rate.csv
+
+  get_counts:
+    run: python:latest analysis/combine_operators.py
+    needs: [generate_study_population]
+    outputs:
+      moderately_sensitive:
+        counts: output/*_count.csv
