@@ -121,6 +121,39 @@ study = StudyDefinition(
             },
         },
     ),
+    creatinine=patients.with_these_clinical_events(
+            codelist=creatinine_codelist,
+            between=["index_date", "last_day_of_month(index_date)"],
+            returning="binary_flag",
+            return_expectations={"incidence": 0.5}
+    ),
+    creatinine_numeric_value=patients.with_these_clinical_events(
+            codelist=creatinine_codelist,
+            between=["index_date", "last_day_of_month(index_date)"],
+            returning="numeric_value",
+            return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    creatinine_operator = patients.comparator_from(
+        "creatinine_numeric_value",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {  # ~, =, >= , > , < , <=
+                    None: 0.10,
+                    "~": 0.05,
+                    "=": 0.65,
+                    ">=": 0.05,
+                    ">": 0.05,
+                    "<": 0.05,
+                    "<=": 0.05,
+                }
+            },
+            "incidence": 0.80,
+        },
+    ),
     cr_cl = patients.with_these_clinical_events(
         codelist=creatinine_clearance_codelist,
         between=["index_date", "last_day_of_month(index_date)"],

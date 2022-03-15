@@ -11,6 +11,12 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/weight-snomed/5459abc6/",
       "downloaded_at": "2022-03-15 09:31:24.226408Z",
       "sha": "66c5fa2b4fc41bd55982e97ba2a30b148136b2dd"
+    },
+    "user-bangzheng-creatinine.csv": {
+      "id": "user/bangzheng/creatinine/7a202b3a",
+      "url": "https://codelists.opensafely.org/codelist/user/bangzheng/creatinine/7a202b3a/",
+      "downloaded_at": "2022-03-15 09:33:02.623997Z",
+      "sha": "eb6442307e5f366e50b8b08bc9e6b4cf2339096a"
     }
   }
 }
