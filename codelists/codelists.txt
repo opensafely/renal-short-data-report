@@ -2,3 +2,8 @@ user/Louis/creatinine-clearance/6faa67ae
 opensafely/weight-snomed/5459abc6/
 opensafely/height-snomed/3b4a3891/
 user/bangzheng/creatinine/7a202b3a
+opensafely/hypertension-snomed/2020-04-28
+opensafely/type-1-diabetes-secondary-care/2020-09-27
+opensafely/type-1-diabetes/2020-06-29
+opensafely/type-2-diabetes/2020-06-29
+opensafely/diabetes-unknown-type/2020-06-29
