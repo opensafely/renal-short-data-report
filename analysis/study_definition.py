@@ -121,6 +121,62 @@ study = StudyDefinition(
             },
         },
     ),
+    at_risk = patients.satisfying(
+        """
+        (
+            diabetes_any AND
+            (NOT diabetes_resolved)
+        ) 
+    
+        OR
+
+        (
+            diabetes_any AND
+            diabetes_resolved AND
+            (diabetes_resolved_date < diabetes_date) OR (diabetes_resolved_date < diabetes_primis_date)
+        )
+        """,
+        diabetes = patients.with_these_clinical_events(
+            codelist=diabetes_any_codelist,
+            on_or_before = "index_date",
+            returning="binary_flag",
+            date_format="YYYY-MM-DD",
+            include_date_of_match=True,
+            return_expectations={
+                "incidence": 0.5,
+                "date": {"earliest": "1900-01-01", "latest": "today"},
+                }
+        ),
+        diabetes_primis = patients.with_these_clinical_events(
+            codelist=diabetes_primis_codelist,
+            on_or_before = "index_date",
+            returning="binary_flag",
+            date_format="YYYY-MM-DD",
+            include_date_of_match=True,
+            return_expectations={
+                "incidence": 0.5,
+                "date": {"earliest": "1900-01-01", "latest": "today"},
+                }
+        ),
+        diabetes_any = patients.satisfying(
+            """
+            diabetes OR diabetes_primis
+            """
+        ),
+        
+        diabetes_resolved = patients.with_these_clinical_events(
+            codelist=diabetes_resolved_primis_codelist,
+            on_or_before = "index_date",
+            returning="binary_flag",
+            date_format="YYYY-MM-DD",
+            include_date_of_match=True,
+            return_expectations={
+                "incidence": 0.5,
+                "date": {"earliest": "1900-01-01", "latest": "today"},
+                }
+        ),
+    ),
+
     creatinine=patients.with_these_clinical_events(
             codelist=creatinine_codelist,
             between=["index_date", "last_day_of_month(index_date)"],
@@ -255,51 +311,68 @@ study = StudyDefinition(
     ),
 )
 
-measures = [
-    Measure(
-        id=f"cr_cl_rate",
-        numerator="cr_cl",
-        denominator="population",
-        group_by=["practice"]
-    ),
-    Measure(
-        id=f"cr_cl_code_rate",
-        numerator="cr_cl",
-        denominator="population",
-        group_by=["cr_cl_code"]
-    ),
-    Measure(
-        id=f"creatinine_rate",
-        numerator="creatinine",
-        denominator="population",
-        group_by=["practice"]
-    ),
-    Measure(
-        id=f"creatinine_code_rate",
-        numerator="creatinine",
-        denominator="population",
-        group_by=["creatinine_code"]
-    ),
-    Measure(
-        id=f"weight_before_creatinine_rate",
-        numerator="weight_before_creatinine",
-        denominator="population",
-        group_by="population"
-    )
-]
+measures = []
 
-for d in demographics:
-    m_crcl = Measure(
-        id=f"cr_cl_{d}_rate",
-        numerator="cr_cl",
-        denominator="population",
-        group_by=[d]
-    )
-    m_cr = Measure(
-        id=f"creatinine_{d}_rate",
-        numerator="creatinine",
-        denominator="population",
-        group_by=[d]
+for pop in ["population", "at_risk"]:
+    measures.extend(
+        [
+        Measure(
+            id=f"cr_cl_{pop}_rate",
+            numerator="cr_cl",
+            denominator=pop,
+            group_by=["practice"]
+        ),
+        Measure(
+            id=f"cr_cl_code_{pop}_rate",
+            numerator="cr_cl",
+            denominator=pop,
+            group_by=["cr_cl_code"]
+        ),
+        Measure(
+            id=f"creatinine_{pop}_rate",
+            numerator="creatinine",
+            denominator=pop,
+            group_by=["practice"]
+        ),
+        Measure(
+            id=f"creatinine_code_{pop}_rate",
+            numerator="creatinine",
+            denominator=pop,
+            group_by=["creatinine_code"]
+        )
+        ] 
     )
 
-    measures.extend([m_crcl, m_cr])
+    if pop == "population":
+        measures.append(Measure(
+                id=f"weight_before_creatinine_{pop}_rate",
+                numerator="weight_before_creatinine",
+                denominator=pop,
+                group_by=pop
+            )
+        )
+    else:
+        measures.append(Measure(
+                id=f"weight_before_creatinine_{pop}_rate",
+                numerator="weight_before_creatinine",
+                denominator="population",
+                group_by=pop
+            )
+        )
+
+
+    for d in demographics:
+        m_crcl = Measure(
+            id=f"cr_cl_{d}_{pop}_rate",
+            numerator="cr_cl",
+            denominator=pop,
+            group_by=[d]
+        )
+        m_cr = Measure(
+            id=f"creatinine_{d}_{pop}_rate",
+            numerator="creatinine",
+            denominator=pop,
+            group_by=[d]
+        )
+
+        measures.extend([m_crcl, m_cr])
