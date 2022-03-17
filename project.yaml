@@ -23,14 +23,14 @@ actions:
         measure_csv: output/measure_*_rate.csv
 
   get_counts:
-    run: python:latest analysis/combine_operators.py
+    run: python:latest python analysis/combine_operators.py
     needs: [generate_study_population]
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv
 
   generate_plots:
-    run: python:latest analysis/plot_measures.py
+    run: python:latest python analysis/plot_measures.py
     needs: [generate_measures]
     outputs:
       moderately_sensitive:
