@@ -5,8 +5,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parents[1]
-OUTPUT_DIR = BASE_DIR / "output"
+OUTPUT_DIR = Path("output")
 
 BEST = 0
 UPPER_RIGHT = 1

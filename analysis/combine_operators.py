@@ -2,8 +2,7 @@ import pandas as pd
 import re
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parents[1]
-OUTPUT_DIR = BASE_DIR / "output"
+OUTPUT_DIR = Path("output")
 
 
 def match_input_files(file: str) -> bool:
