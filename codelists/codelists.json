@@ -30,12 +30,6 @@
       "downloaded_at": "2022-03-17 14:51:32.459405Z",
       "sha": "5d5471bb6a8a01e362b191b3eb8e80c2febeb1da"
     },
-    "opensafely-type-1-diabetes-secondary-care.csv": {
-      "id": "opensafely/type-1-diabetes-secondary-care/2020-09-27",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/type-1-diabetes-secondary-care/2020-09-27/",
-      "downloaded_at": "2022-03-17 14:51:32.792167Z",
-      "sha": "e51303ce0e7eb6ac9e0d1763bd23e49b0f273429"
-    },
     "opensafely-type-1-diabetes.csv": {
       "id": "opensafely/type-1-diabetes/2020-06-29",
       "url": "https://codelists.opensafely.org/codelist/opensafely/type-1-diabetes/2020-06-29/",
