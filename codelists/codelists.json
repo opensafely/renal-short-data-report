@@ -23,6 +23,42 @@
       "url": "https://codelists.opensafely.org/codelist/user/bangzheng/creatinine/7a202b3a/",
       "downloaded_at": "2022-03-15 09:33:02.623997Z",
       "sha": "eb6442307e5f366e50b8b08bc9e6b4cf2339096a"
+    },
+    "opensafely-hypertension-snomed.csv": {
+      "id": "opensafely/hypertension-snomed/2020-04-28",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/hypertension-snomed/2020-04-28/",
+      "downloaded_at": "2022-03-17 14:51:32.459405Z",
+      "sha": "5d5471bb6a8a01e362b191b3eb8e80c2febeb1da"
+    },
+    "opensafely-type-1-diabetes.csv": {
+      "id": "opensafely/type-1-diabetes/2020-06-29",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/type-1-diabetes/2020-06-29/",
+      "downloaded_at": "2022-03-17 14:51:33.212972Z",
+      "sha": "dc4ce0fbdb8500cc7dc6288e8eec9c783e31de57"
+    },
+    "opensafely-type-2-diabetes.csv": {
+      "id": "opensafely/type-2-diabetes/2020-06-29",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/type-2-diabetes/2020-06-29/",
+      "downloaded_at": "2022-03-17 14:51:33.569664Z",
+      "sha": "21a0fd8e041c19abd876970d75b389b6904dc901"
+    },
+    "opensafely-diabetes-unknown-type.csv": {
+      "id": "opensafely/diabetes-unknown-type/2020-06-29",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/diabetes-unknown-type/2020-06-29/",
+      "downloaded_at": "2022-03-17 14:51:33.932838Z",
+      "sha": "eaaa1867e6bbcb436df91e8b75189d7ff1ca4b0c"
+    },
+    "primis-covid19-vacc-uptake-dmres.csv": {
+      "id": "primis-covid19-vacc-uptake/dmres/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/dmres/v1/",
+      "downloaded_at": "2022-03-17 14:56:51.629058Z",
+      "sha": "57682a6345da78472609f01f1ca065ace27fcb43"
+    },
+    "primis-covid19-vacc-uptake-diab.csv": {
+      "id": "primis-covid19-vacc-uptake/diab/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/diab/v1/",
+      "downloaded_at": "2022-03-17 14:56:52.053162Z",
+      "sha": "e7065f7285300aa9e276fc8dc80a5290bb01a26e"
     }
   }
 }

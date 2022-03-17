@@ -1,4 +1,4 @@
-from cohortextractor import codelist_from_csv
+from cohortextractor import codelist_from_csv, combine_codelists
 
 creatinine_clearance_codelist = codelist_from_csv(
     "codelists/user-Louis-creatinine-clearance.csv",
@@ -28,4 +28,45 @@ height_codelist = codelist_from_csv(
     "codelists/opensafely-height-snomed.csv",
     system="snomed",
     column='code'
+)
+
+hypertension_codelist = codelist_from_csv(
+    "codelists/opensafely-hypertension-snomed.csv", 
+    system="snomed",
+    column="id"
+)
+
+diabetes_t1_codelist = codelist_from_csv(
+   "codelists/opensafely-type-1-diabetes.csv", 
+   system="ctv3", 
+   column="CTV3ID"
+)
+
+diabetes_t2_codelist = codelist_from_csv(
+    "codelists/opensafely-type-2-diabetes.csv", 
+    system="ctv3", 
+    column="CTV3ID"
+)
+
+diabetes_unknown_type_codelist = codelist_from_csv(
+    "codelists/opensafely-diabetes-unknown-type.csv", 
+    system="ctv3", 
+    column="CTV3ID"
+)
+
+diabetes_primis_codelist = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-diab.csv",
+    system="snomed",
+    column="code"
+)
+diabetes_resolved_primis_codelist = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-dmres.csv",
+    system="snomed",
+    column="code"
+)
+
+diabetes_any_codelist = combine_codelists(
+    diabetes_t1_codelist,
+    diabetes_t2_codelist,
+    diabetes_unknown_type_codelist
 )

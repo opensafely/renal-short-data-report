@@ -25,6 +25,7 @@ if not (OUTPUT_DIR / "figures").exists():
 
 demographics = ["age_band", "sex", "imd", "region"]
 
+
 def drop_irrelevant_practices(df):
     """Drops irrelevant practices from the given measure table.
     An irrelevant practice has zero events during the study period.
@@ -35,6 +36,7 @@ def drop_irrelevant_practices(df):
     """
     is_relevant = df.groupby("practice").value.any()
     return df[df.practice.isin(is_relevant[is_relevant == True].index)]
+
 
 def compute_deciles(measure_table, groupby_col, values_col, has_outer_percentiles=True):
     """Computes deciles.
@@ -61,6 +63,7 @@ def compute_deciles(measure_table, groupby_col, values_col, has_outer_percentile
     percentiles["percentile"] = percentiles["percentile"].apply(lambda x: int(x * 100))
 
     return percentiles
+
 
 def compute_redact_deciles(df, period_column, count_column, column):
     n_practices = df.groupby(by=["date"])[["practice"]].nunique()
@@ -170,7 +173,6 @@ def deciles_chart(
 
     plt.xticks(sorted(df[period_column].unique()), rotation=90)
 
-    
     ax.legend(
         bbox_to_anchor=(1.1, 0.8),  # arbitrary location in axes
         #  specified as (x0, y0, w, h)
@@ -185,6 +187,7 @@ def deciles_chart(
     plt.tight_layout()
     plt.savefig(filename)
     plt.clf()
+
 
 def redact_small_numbers(df, n, numerator, denominator, rate_column, date_column):
     """
@@ -229,6 +232,7 @@ def redact_small_numbers(df, n, numerator, denominator, rate_column, date_column
         df_list.append(df_subset)
 
     return pd.concat(df_list, axis=0)
+
 
 def plot_measures(
     df,
@@ -276,7 +280,6 @@ def plot_measures(
         else df[column_to_plot].max() * 1.05,
     )
 
-    
     if category:
         plt.legend(
             sorted(df[category].unique()), bbox_to_anchor=(1.04, 1), loc="upper left"
@@ -287,63 +290,57 @@ def plot_measures(
     plt.savefig(f"output/figures/{filename}.jpeg")
     plt.clf()
 
+
 for i in ["cr_cl", "creatinine"]:
-
-    df = pd.read_csv(
-            OUTPUT_DIR / f"measure_{i}_rate.csv", parse_dates=["date"]
-        )
-    df = drop_irrelevant_practices(df)
-
-    df["rate"] = df[f"value"] * 100
-
-    df = df.drop(["value"], axis=1)
-
-    df_deciles = compute_redact_deciles(df, "date", i, "rate")
-
-
-    deciles_chart(
-        df,
-        filename=f"output/figures/plot_{i}.jpeg",
-        period_column="date",
-        column="rate",
-        count_column=i,
-        ylabel="Percentage"
-    )
-
-    # demographic plots
-    for d in demographics:
-        print(d)
-        df = pd.read_csv(
-            OUTPUT_DIR / f"measure_{i}_{d}_rate.csv", parse_dates=["date"]
-        )
-
-        if d == "sex":
-            df = df[df["sex"].isin(["M", "F"])]
-
-        elif d == "imd":
-            df = df[df["imd"] != 0]
-
-        elif d == "age_band":
-            df = df[df["age_band"] != "missing"]
-        
-        elif d == "region":
-            df = df[df["region"].notnull()]  
+    for j in ["population", "at_risk"]:
+        df = pd.read_csv(OUTPUT_DIR / f"measure_{i}_{j}_rate.csv", parse_dates=["date"])
+        df = drop_irrelevant_practices(df)
 
         df["rate"] = df[f"value"] * 100
 
-        df = redact_small_numbers(
-            df, 10, i, "population", "rate", "date"
+        df = df.drop(["value"], axis=1)
+        df = df.replace(np.inf, np.nan)
+
+        df_deciles = compute_redact_deciles(df, "date", i, "rate")
+
+        deciles_chart(
+            df,
+            filename=f"output/figures/plot_{i}_{j}.jpeg",
+            period_column="date",
+            column="rate",
+            count_column=i,
+            ylabel="Percentage",
         )
 
-        plot_measures(
-            df=df,
-            filename=f"plot_{i}_{d}",
-            title=f"{i} by {d}",
-            column_to_plot="rate",
-            y_label="Proportion",
-            as_bar=False,
-            category=d,
-        )
+        # demographic plots
+        for d in demographics:
 
+            df = pd.read_csv(
+                OUTPUT_DIR / f"measure_{i}_{d}_{j}_rate.csv", parse_dates=["date"]
+            )
 
+            if d == "sex":
+                df = df[df["sex"].isin(["M", "F"])]
 
+            elif d == "imd":
+                df = df[df["imd"] != 0]
+
+            elif d == "age_band":
+                df = df[df["age_band"] != "missing"]
+
+            elif d == "region":
+                df = df[df["region"].notnull()]
+
+            df["rate"] = df[f"value"] * 100
+
+            df = redact_small_numbers(df, 10, i, j, "rate", "date")
+
+            plot_measures(
+                df=df,
+                filename=f"plot_{i}_{d}_{j}",
+                title=f"{i} by {d}",
+                column_to_plot="rate",
+                y_label="Proportion",
+                as_bar=False,
+                category=d,
+            )
