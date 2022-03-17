@@ -59,6 +59,12 @@
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/diab/v1/",
       "downloaded_at": "2022-03-17 14:56:52.053162Z",
       "sha": "e7065f7285300aa9e276fc8dc80a5290bb01a26e"
+    },
+    "user-Louis-creatinine-clearance-level.csv": {
+      "id": "user/Louis/creatinine-clearance-level/7fdae772",
+      "url": "https://codelists.opensafely.org/codelist/user/Louis/creatinine-clearance-level/7fdae772/",
+      "downloaded_at": "2022-03-17 17:21:00.176516Z",
+      "sha": "c29bc3814ec211c5d3c3d5578121a4edb1ea723c"
     }
   }
 }
