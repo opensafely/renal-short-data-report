@@ -283,7 +283,8 @@ measures = [
     Measure(
         id=f"weight_before_creatinine_rate",
         numerator="weight_before_creatinine",
-        denominator="population"
+        denominator="population",
+        group_by="population"
     )
 ]
 
