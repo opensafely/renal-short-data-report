@@ -1,8 +1,14 @@
 import pandas as pd
+import numpy as np
 import re
 from pathlib import Path
 
 OUTPUT_DIR = Path("output")
+
+
+def drop_and_round(column):
+    column[column <= 5] = 0
+    return column.apply(lambda x: 5 * round(float(x) / 5))
 
 
 def match_input_files(file: str) -> bool:
@@ -28,16 +34,39 @@ def combine_value_with_operator(df, value_column, operator_column):
     )
 
 
+# counts of each numeric value - operator pair
 value_counts_creatinine = []
 value_counts_cr_cl = []
 
+# counts of numeric values for each code
 codes_creatinine = []
 codes_cr_cl = []
+
+# counts for each operator type
+operators_creatinine = []
+operators_cr_cl = []
+
 
 for file in OUTPUT_DIR.iterdir():
     if match_input_files(file.name):
         df = pd.read_csv(OUTPUT_DIR / file.name)
         date = get_date_input_file(file.name)
+
+        # how many numeric values have a matched operator?
+        num_with_numeric_value_and_operator_creatinine = (
+            df.loc[df["creatinine_numeric_value"].notnull(), :]
+            .groupby("creatinine_operator")[["creatinine"]]
+            .sum()
+        )
+        operators_creatinine.append(num_with_numeric_value_and_operator_creatinine)
+
+        num_with_numeric_value_and_operator_cr_cl = (
+            df.loc[df["cr_cl_numeric_value"].notnull(), :]
+            .groupby("cr_cl_operator")[["cr_cl"]]
+            .sum()
+        )
+        operators_cr_cl.append(num_with_numeric_value_and_operator_cr_cl)
+
         combine_value_with_operator(
             df, "creatinine_numeric_value", "creatinine_operator"
         )
@@ -65,17 +94,34 @@ combined_creatinine_values = pd.concat(value_counts_creatinine)
 creatinine_count = combined_creatinine_values.groupby(
     combined_creatinine_values.index
 ).sum()
+creatinine_count = drop_and_round(creatinine_count)
 creatinine_count.to_csv(OUTPUT_DIR / "creatinine_count.csv")
 
 combined_cr_cl_values = pd.concat(value_counts_cr_cl)
 cr_cl_count = combined_cr_cl_values.groupby(combined_cr_cl_values.index).sum()
+cr_cl_count = drop_and_round(cr_cl_count)
 cr_cl_count.to_csv(OUTPUT_DIR / "cr_cl_count.csv")
 
 cr_cl_codes = pd.concat(codes_cr_cl)
 cr_cl_codes_count = cr_cl_codes.groupby(cr_cl_codes.index).sum()
+cr_cl_codes_count = drop_and_round(cr_cl_codes_count)
 cr_cl_codes_count.to_csv(OUTPUT_DIR / "cr_cl_codes_count.csv")
 
 
 creatinine_codes = pd.concat(codes_creatinine)
 creatinine_codes_count = creatinine_codes.groupby(creatinine_codes.index).sum()
+creatinine_codes_count = drop_and_round(creatinine_codes_count)
 creatinine_codes_count.to_csv(OUTPUT_DIR / "creatinine_codes_count.csv")
+
+
+creatinine_operators = pd.concat(operators_creatinine)
+creatinine_operators_count = creatinine_operators.groupby(
+    creatinine_operators.index
+).sum()
+creatinine_operators["creatinine"] = drop_and_round(creatinine_operators["creatinine"])
+creatinine_operators_count.to_csv(OUTPUT_DIR / "creatinine_operators_count.csv")
+
+cr_cl_operators = pd.concat(operators_cr_cl)
+cr_cl_operators_count = creatinine_operators.groupby(cr_cl_operators.index).sum()
+cr_cl_operators["cr_cl"] = drop_and_round(cr_cl_operators["cr_cl"])
+cr_cl_operators_count.to_csv(OUTPUT_DIR / "cr_cl_operators_count.csv")
