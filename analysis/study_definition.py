@@ -209,6 +209,15 @@ study = StudyDefinition(
             "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
         },
     ),
+    creatinine_count=patients.with_these_clinical_events(
+        codelist=creatinine_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
     creatinine_numeric_value=patients.with_these_clinical_events(
         codelist=creatinine_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
@@ -249,6 +258,15 @@ study = StudyDefinition(
         return_expectations={
             "rate": "universal",
             "category": {"ratios": {"1015981000000103": 0.5, "102811001": 0.5}},
+        },
+    ),
+    cr_cl_count=patients.with_these_clinical_events(
+        codelist=cr_cl_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
         },
     ),
     cr_cl_numeric_value=patients.with_these_clinical_events(
