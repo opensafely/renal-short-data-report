@@ -109,7 +109,7 @@ cr_cl_codes_count.to_csv(OUTPUT_DIR / "cr_cl_codes_count.csv")
 
 
 creatinine_codes = pd.concat(codes_creatinine)
-creatinine_codes_count = creatinine_codes.groupby(creatinine_codes.index, dropna=False).sum()
+creatinine_codes_count = creatinine_codes.replace(np.nan, "missing").groupby(creatinine_codes.index).sum()
 creatinine_codes_count = drop_and_round(creatinine_codes_count)
 creatinine_codes_count.to_csv(OUTPUT_DIR / "creatinine_codes_count.csv")
 
@@ -122,6 +122,6 @@ creatinine_operators["creatinine"] = drop_and_round(creatinine_operators["creati
 creatinine_operators_count.to_csv(OUTPUT_DIR / "creatinine_operators_count.csv")
 
 cr_cl_operators = pd.concat(operators_cr_cl)
-cr_cl_operators_count = creatinine_operators.groupby(cr_cl_operators.index, dropna=False).sum()
+cr_cl_operators_count = creatinine_operators.replace(np.nan, "missing").groupby(cr_cl_operators.index).sum()
 cr_cl_operators["cr_cl"] = drop_and_round(cr_cl_operators["cr_cl"])
 cr_cl_operators_count.to_csv(OUTPUT_DIR / "cr_cl_operators_count.csv")
