@@ -34,9 +34,15 @@ study = StudyDefinition(
         """
         registered AND
         (sex = "M" OR sex = "F") AND
-        (age >= 18 AND age <= 120)
+        (age >= 18 AND age <= 120) AND
+        NOT died
         """,
-        registered=patients.registered_as_of("index_date")
+        registered=patients.registered_as_of("index_date"),
+        died=patients.died_from_any_cause(
+            on_or_before="index_date", 
+            returning='binary_flag', 
+            return_expectations={"incidence": 0.01}
+            ) 
     ),
 
     #population=patients.registered_as_of("index_date")
@@ -91,6 +97,16 @@ study = StudyDefinition(
             "incidence": 0.2
             }
     ),
+
+    eGFR_numeric=patients.with_these_clinical_events(
+        codelist=eGFR_values_codes,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="numeric_value",
+        return_expectations={
+            "float" : {"distribution": "normal", "mean": 70, "stddev" : 30},
+            "incidence": 0.2
+            }
+    ),
     
     eGFR_values_codes=patients.with_these_clinical_events(
         codelist=eGFR_values_codes,
@@ -101,6 +117,25 @@ study = StudyDefinition(
             "incidence" : 0.2
             }
     ),
+
+    eGFR_comparator=patients.comparator_from("eGFR_numeric"
+    ),
+
+ #eGFR categories - what about missing values or values with operators? 
+
+    eGFR_group=patients.categorised_as(
+        {
+            "5" : "eGFR_numeric < 15",
+            "4" : "15 <= eGFR_numeric < 30" ,
+            "3" : "30 <= eGFR_numeric < 60",
+            "2" : "60 <= eGFR_numeric < 90",
+            "1" : "90 <= eGFR_numeric",
+            "0" : "DEFAULT",
+        },
+      return_expectations={
+       "category":{"ratios": {"0" : 0.1, "1": 0.3, "2": 0.3, "3": 0.2, "4" : 0.06, "5" : 0.04 }}
+       },
+   ),
 
   **demographic_variables
     
@@ -202,6 +237,14 @@ measures = [
         id="eGFR_values_count_mean",
         numerator="eGFR_values_count",
         denominator="eGFR_values",
+        small_number_suppression=False
+    ),
+
+     Measure(
+        id="eGFR_groups_dist",
+        numerator="eGFR_values",
+        denominator="population",
+        group_by=["eGFR_values_codes"],
         small_number_suppression=False
     ),
 ]
