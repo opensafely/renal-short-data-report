@@ -7,6 +7,9 @@ from cohortextractor import (
 
 eGFR_tests_codes = codelist_from_csv(
     "codelists/user-ss808-estimated-glomerular-filtration-rate-egfr-recorded-tests.csv",
+    system="snomed",
+    column="code"
+)
 
 eGFR_values_codes = codelist_from_csv(
     "codelists/user-ss808-estimated-glomerular-filtration-rate-egfr-values.csv", 
