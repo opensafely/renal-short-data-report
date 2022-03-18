@@ -52,6 +52,10 @@ for file in OUTPUT_DIR.iterdir():
         df = pd.read_csv(OUTPUT_DIR / file.name)
         date = get_date_input_file(file.name)
 
+        #replace null operator with missing
+        df["creatinine_operator"].fillna("missing", inplace=True)
+        df["cr_cl_operator"].fillna("missing", inplace=True)
+
         # how many numeric values have a matched operator?
         num_with_numeric_value_and_operator_creatinine = (
             df.loc[df["creatinine_numeric_value"].notnull(), :]
