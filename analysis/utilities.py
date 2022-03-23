@@ -26,7 +26,7 @@ CENTER = 10
 
 def drop_and_round(column):
     column[column <= 5] = 0
-    return column.apply(lambda x: 5 * round(float(x) / 5))
+    return column.apply(lambda x: 5 * round(x / 5))
 
 
 def match_input_files(file: str) -> bool:
