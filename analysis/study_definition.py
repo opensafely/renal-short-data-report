@@ -465,14 +465,13 @@ for pop in ["population", "at_risk"]:
         m_crcl = Measure(
             id=f"cr_cl_{d}_{pop}_rate", numerator="cr_cl", denominator=pop, group_by=[d]
         )
-        m_cr = (
-            Measure(
-                id=f"creatinine_{d}_{pop}_rate",
-                numerator="creatinine",
-                denominator=pop,
-                group_by=[d],
-            ),
+        m_cr = Measure(
+            id=f"creatinine_{d}_{pop}_rate",
+            numerator="creatinine",
+            denominator=pop,
+            group_by=[d],
         )
+
         m_egfr = Measure(
             id=f"eGFR_{d}_{pop}_rate", numerator="eGFR", denominator=pop, group_by=[d]
         )

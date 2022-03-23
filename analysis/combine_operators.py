@@ -47,9 +47,9 @@ operators_creatinine = []
 operators_cr_cl = []
 
 
-for file in OUTPUT_DIR.iterdir():
+for file in (OUTPUT_DIR / "joined").iterdir():
     if match_input_files(file.name):
-        df = pd.read_csv(OUTPUT_DIR / file.name)
+        df = pd.read_csv((OUTPUT_DIR / "joined") / file.name)
         date = get_date_input_file(file.name)
 
         #replace null operator with missing

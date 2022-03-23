@@ -17,31 +17,36 @@ actions:
   generate_study_population_ethnicity:
     run: cohortextractor:latest generate_cohort 
       --study-definition study_definition_ethnicity
-      --output-dir=output/measures 
-      --output-format feather
+      --output-dir=output
+      --output-format csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/measures/input_ethnicity.feather
+        cohort: output/input_ethnicity.csv.gz
 
-  join_ethnicity_all_patients:
-    run: python:latest python analysis/join_ethnicity.py --output-dir=output/measures --output-format feather
+  join_cohorts:
+    run: >
+      cohort-joiner:v0.0.6
+        --lhs output/input_20*.csv.gz
+        --rhs output/input_ethnicity.csv.gz
+        --output-dir output/joined
     needs: [generate_study_population, generate_study_population_ethnicity]
     outputs:
       highly_sensitive:
-        cohort: output/measures/input_20*.feather
+        cohort: output/joined/input_20*.csv.gz
+
 
   generate_measures:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
-      --output-dir=output
-    needs: [generate_study_population]
+      --output-dir=output/joined
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        measure_csv: output/measure_*_rate.csv
+        measure_csv: output/joined/measure_*_rate.csv
 
   get_counts:
     run: python:latest python analysis/combine_operators.py
-    needs: [generate_study_population]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv

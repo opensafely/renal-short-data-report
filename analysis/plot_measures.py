@@ -291,9 +291,9 @@ def plot_measures(
     plt.clf()
 
 
-for i in ["cr_cl", "creatinine"]:
+for i in ["cr_cl", "creatinine", "eGFR"]:
     for j in ["population", "at_risk"]:
-        df = pd.read_csv(OUTPUT_DIR / f"measure_{i}_{j}_rate.csv", parse_dates=["date"])
+        df = pd.read_csv(OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"])
         df = drop_irrelevant_practices(df)
 
         df["rate"] = df[f"value"] * 100
@@ -316,7 +316,7 @@ for i in ["cr_cl", "creatinine"]:
         for d in demographics:
 
             df = pd.read_csv(
-                OUTPUT_DIR / f"measure_{i}_{d}_{j}_rate.csv", parse_dates=["date"]
+                OUTPUT_DIR / f"joined/measure_{i}_{d}_{j}_rate.csv", parse_dates=["date"]
             )
 
             if d == "sex":
