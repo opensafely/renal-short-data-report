@@ -4,15 +4,14 @@ from cohortextractor import (
 
 
 demographic_variables = dict(
-     age=patients.age_as_of(
+    age=patients.age_as_of(
         reference_date="index_date",
         return_expectations={
-            "rate" : "universal",
-            "int" : {"distribution" : "population_ages"},
+            "rate": "universal",
+            "int": {"distribution": "population_ages"},
         },
     ),
-
-      # Age band
+    # Age band
     age_band=patients.categorised_as(
         {
             "missing": "DEFAULT",
@@ -40,7 +39,6 @@ demographic_variables = dict(
                 },
             },
         },
-
     ),
     sex=patients.sex(
         return_expectations={
@@ -48,7 +46,6 @@ demographic_variables = dict(
             "category": {"ratios": {"M": 0.49, "F": 0.51}},
         },
     ),
-
     region=patients.registered_practice_as_of(
         "index_date",
         returning="nuts1_region_name",
@@ -68,12 +65,12 @@ demographic_variables = dict(
             },
         },
     ),
-
     practice=patients.registered_practice_as_of(
         "index_date",
         returning="pseudo_id",
         return_expectations={
-            "int": {"distribution": "normal", "mean": 25, "stddev": 5 }, 
-            "incidence": 0.5},
+            "int": {"distribution": "normal", "mean": 25, "stddev": 5},
+            "incidence": 0.5,
+        },
     ),
 )
