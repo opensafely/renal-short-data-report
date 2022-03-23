@@ -26,7 +26,7 @@ CENTER = 10
 
 def drop_and_round(column):
     column[column <= 5] = 0
-    return column.apply(lambda x: 5 * round(float(x) / 5))
+    return column.apply(lambda x: 5 * round(x / 5))
 
 
 def match_input_files(file: str) -> bool:
@@ -315,3 +315,30 @@ def plot_measures(
 
     plt.savefig(f"output/figures/{filename}.jpeg")
     plt.clf()
+
+
+def group_low_values_series(series):
+    
+    suppressed_count = series[series<=5].sum()
+    
+    if suppressed_count == 0:
+        pass
+
+    else:
+        series[series <=5]  = np.nan
+
+        while suppressed_count <=5:
+            suppressed_count += series.min()
+            series[series.idxmin()] = np.nan 
+            
+            
+   
+        series = series[series.notnull()]
+        
+        suppressed_count_series= pd.Series(suppressed_count, index=["Other"])
+       
+        
+        series = pd.concat([series, suppressed_count_series])
+    
+    
+    return series
