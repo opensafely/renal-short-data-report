@@ -1,38 +1,12 @@
 import pandas as pd
 import numpy as np
-import re
-from pathlib import Path
-
-OUTPUT_DIR = Path("output")
-
-
-def drop_and_round(column):
-    column[column <= 5] = 0
-    return column.apply(lambda x: 5 * round(float(x) / 5))
-
-
-def match_input_files(file: str) -> bool:
-    """Checks if file name has format outputted by cohort extractor"""
-    pattern = r"^input_20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\.csv.gz"
-    return True if re.match(pattern, file) else False
-
-
-def get_date_input_file(file: str) -> str:
-    """Gets the date in format YYYY-MM-DD from input file name string"""
-    # check format
-    if not match_input_files(file):
-        raise Exception("Not valid input file format")
-
-    else:
-        date = result = re.search(r"input_(.*)\.csv.gz", file)
-        return date.group(1)
-
-
-def combine_value_with_operator(df, value_column, operator_column):
-    df[f"{value_column}_with_operator"] = df[operator_column].str.cat(
-        df[value_column].astype("str")
-    )
-
+from utilities import (
+    OUTPUT_DIR,
+    drop_and_round,
+    match_input_files,
+    get_date_input_file,
+    combine_value_with_operator,
+)
 
 # counts of each numeric value - operator pair
 value_counts_creatinine = []
@@ -52,7 +26,7 @@ for file in (OUTPUT_DIR / "joined").iterdir():
         df = pd.read_csv((OUTPUT_DIR / "joined") / file.name)
         date = get_date_input_file(file.name)
 
-        #replace null operator with missing
+        # replace null operator with missing
         df["creatinine_operator"].fillna("missing", inplace=True)
         df["cr_cl_operator"].fillna("missing", inplace=True)
 
@@ -113,7 +87,9 @@ cr_cl_codes_count.to_csv(OUTPUT_DIR / "cr_cl_codes_count.csv")
 
 
 creatinine_codes = pd.concat(codes_creatinine)
-creatinine_codes_count = creatinine_codes.replace(np.nan, "missing").groupby(creatinine_codes.index).sum()
+creatinine_codes_count = (
+    creatinine_codes.replace(np.nan, "missing").groupby(creatinine_codes.index).sum()
+)
 creatinine_codes_count = drop_and_round(creatinine_codes_count)
 creatinine_codes_count.to_csv(OUTPUT_DIR / "creatinine_codes_count.csv")
 
@@ -126,6 +102,8 @@ creatinine_operators["creatinine"] = drop_and_round(creatinine_operators["creati
 creatinine_operators_count.to_csv(OUTPUT_DIR / "creatinine_operators_count.csv")
 
 cr_cl_operators = pd.concat(operators_cr_cl)
-cr_cl_operators_count = cr_cl_operators.replace(np.nan, "missing").groupby(cr_cl_operators.index).sum()
+cr_cl_operators_count = (
+    cr_cl_operators.replace(np.nan, "missing").groupby(cr_cl_operators.index).sum()
+)
 cr_cl_operators["cr_cl"] = drop_and_round(cr_cl_operators["cr_cl"])
 cr_cl_operators_count.to_csv(OUTPUT_DIR / "cr_cl_operators_count.csv")
