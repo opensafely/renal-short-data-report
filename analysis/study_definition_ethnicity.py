@@ -3,7 +3,7 @@ from cohortextractor import (
     patients,
 )
 
-from codelists import ethnicity_codes
+from codelists import ethnicity_codelist
 
 study = StudyDefinition(
     default_expectations={

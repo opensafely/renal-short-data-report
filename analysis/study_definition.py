@@ -261,7 +261,7 @@ study = StudyDefinition(
         },
     ),
     cr_cl_count=patients.with_these_clinical_events(
-        codelist=cr_cl_codelist,
+        codelist=creatinine_clearance_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="number_of_matches_in_period",
         return_expectations={
@@ -362,7 +362,7 @@ study = StudyDefinition(
         },
     ),
     eGFR_comparator=patients.comparator_from(
-        "eGFR_numeric",
+        "eGFR_numeric_value",
         return_expectations={
             "rate": "universal",
             "category": {
