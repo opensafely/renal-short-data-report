@@ -2,15 +2,16 @@ from cohortextractor import StudyDefinition, patients, Measure
 
 from codelists import *
 
-demographics = ["age_band", "sex", "region", "imd"]
+demographics = ["age_band", "sex", "region", "imd", "ethnicity"]
 
 study = StudyDefinition(
-    index_date="2020-01-01",
     default_expectations={
-        "date": {"earliest": "1900-01-01", "latest": "today"},
+        "date": {"earliest": "2019-01-01", "latest": "today"},
         "rate": "uniform",
         "incidence": 0.5,
     },
+    # define study index date
+    index_date="2019-01-01",
     population=patients.satisfying(
         """
        registered AND
@@ -121,7 +122,7 @@ study = StudyDefinition(
             },
         },
     ),
-    at_risk = patients.satisfying(
+    at_risk=patients.satisfying(
         """
         (
             diabetes_any AND
@@ -140,91 +141,93 @@ study = StudyDefinition(
 
         (hypertension)
         """,
-        diabetes = patients.with_these_clinical_events(
+        diabetes=patients.with_these_clinical_events(
             codelist=diabetes_any_codelist,
-            on_or_before = "index_date",
+            on_or_before="index_date",
             returning="binary_flag",
             date_format="YYYY-MM-DD",
             include_date_of_match=True,
             return_expectations={
                 "incidence": 0.5,
                 "date": {"earliest": "1900-01-01", "latest": "today"},
-                }
+            },
         ),
-        diabetes_primis = patients.with_these_clinical_events(
+        diabetes_primis=patients.with_these_clinical_events(
             codelist=diabetes_primis_codelist,
-            on_or_before = "index_date",
+            on_or_before="index_date",
             returning="binary_flag",
             date_format="YYYY-MM-DD",
             include_date_of_match=True,
             return_expectations={
                 "incidence": 0.5,
                 "date": {"earliest": "1900-01-01", "latest": "today"},
-                }
+            },
         ),
-        diabetes_any = patients.satisfying(
+        diabetes_any=patients.satisfying(
             """
             diabetes OR diabetes_primis
             """
         ),
-        
-        diabetes_resolved = patients.with_these_clinical_events(
+        diabetes_resolved=patients.with_these_clinical_events(
             codelist=diabetes_resolved_primis_codelist,
-            on_or_before = "index_date",
+            on_or_before="index_date",
             returning="binary_flag",
             date_format="YYYY-MM-DD",
             include_date_of_match=True,
             return_expectations={
                 "incidence": 0.5,
                 "date": {"earliest": "1900-01-01", "latest": "today"},
-                }
+            },
         ),
-        hypertension = patients.with_these_clinical_events(
+        hypertension=patients.with_these_clinical_events(
             codelist=hypertension_codelist,
-            on_or_before = "index_date",
+            on_or_before="index_date",
             returning="binary_flag",
             return_expectations={
                 "incidence": 0.5,
                 "date": {"earliest": "1900-01-01", "latest": "today"},
-                }
+            },
         ),
     ),
-
     creatinine=patients.with_these_clinical_events(
-            codelist=creatinine_codelist,
-            between=["index_date", "last_day_of_month(index_date)"],
-            returning="binary_flag",
-            date_format="YYYY-MM-DD",
-            include_date_of_match=True,
-            return_expectations={
-                "incidence": 0.5,
-                "date": {"earliest": "1900-01-01", "latest": "today"},
-                }
+        codelist=creatinine_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
     ),
     creatinine_code=patients.with_these_clinical_events(
-            codelist=creatinine_codelist,
-            between=["index_date", "last_day_of_month(index_date)"],
-            returning="code",
-            return_expectations={
+        codelist=creatinine_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
             "rate": "universal",
-            "category": {
-                "ratios": {
-                    "1000731000000107": 0.5,
-                    "1000981000000109": 0.5
-                }
-            },
+            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
+        },
+    ),
+    creatinine_count=patients.with_these_clinical_events(
+        codelist=creatinine_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
         },
     ),
     creatinine_numeric_value=patients.with_these_clinical_events(
-            codelist=creatinine_codelist,
-            between=["index_date", "last_day_of_month(index_date)"],
-            returning="numeric_value",
-            return_expectations={
+        codelist=creatinine_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="numeric_value",
+        return_expectations={
             "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
             "incidence": 0.5,
         },
     ),
-    creatinine_operator = patients.comparator_from(
+    creatinine_operator=patients.comparator_from(
         "creatinine_numeric_value",
         return_expectations={
             "rate": "universal",
@@ -242,27 +245,30 @@ study = StudyDefinition(
             "incidence": 0.80,
         },
     ),
-    cr_cl = patients.with_these_clinical_events(
+    cr_cl=patients.with_these_clinical_events(
         codelist=creatinine_clearance_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="binary_flag",
         return_expectations={"incidence": 0.5},
     ),
-    cr_cl_code =patients.with_these_clinical_events(
+    cr_cl_code=patients.with_these_clinical_events(
         codelist=creatinine_clearance_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="code",
         return_expectations={
             "rate": "universal",
-            "category": {
-                "ratios": {
-                    "1015981000000103": 0.5,
-                    "102811001": 0.5
-                }
-            },
+            "category": {"ratios": {"1015981000000103": 0.5, "102811001": 0.5}},
         },
     ),
-
+    cr_cl_count=patients.with_these_clinical_events(
+        codelist=creatinine_clearance_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
     cr_cl_numeric_value=patients.with_these_clinical_events(
         codelist=creatinine_clearance_level_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
@@ -272,7 +278,7 @@ study = StudyDefinition(
             "incidence": 0.5,
         },
     ),
-    cr_cl_operator = patients.comparator_from(
+    cr_cl_operator=patients.comparator_from(
         "cr_cl_numeric_value",
         return_expectations={
             "rate": "universal",
@@ -310,8 +316,7 @@ study = StudyDefinition(
             "float": {"distribution": "normal", "mean": 70.0, "stddev": 10.0},
         },
     ),
-
-    #weight in 6 months before creatinine
+    # weight in 6 months before creatinine
     weight_before_creatinine=patients.with_these_clinical_events(
         weight_codelist,
         between=["creatinine_date - 6 months", "creatinine_date"],
@@ -322,70 +327,153 @@ study = StudyDefinition(
             "incidence": 0.8,
         },
     ),
+    # eGFR values
+    eGFR=patients.with_these_clinical_events(
+        codelist=eGFR_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={"incidence": 0.2},
+    ),
+    eGFR_count=patients.with_these_clinical_events(
+        codelist=eGFR_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
+    eGFR_numeric_value=patients.with_these_clinical_events(
+        codelist=eGFR_level_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 70, "stddev": 30},
+            "incidence": 0.2,
+        },
+    ),
+    eGFR_code=patients.with_these_clinical_events(
+        codelist=eGFR_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"1011481000000105": 0.5, "1011491000000107": 0.5}},
+            "incidence": 0.2,
+        },
+    ),
+    eGFR_comparator=patients.comparator_from(
+        "eGFR_numeric_value",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {  # ~, =, >= , > , < , <=
+                    None: 0.10,
+                    "~": 0.05,
+                    "=": 0.65,
+                    ">=": 0.05,
+                    ">": 0.05,
+                    "<": 0.05,
+                    "<=": 0.05,
+                }
+            },
+            "incidence": 0.80,
+        },
+    ),
+    # eGFR categories - what about missing values or values with operators?
+    eGFR_group=patients.categorised_as(
+        {
+            "5": "eGFR_numeric_value < 15",
+            "4": "15 <= eGFR_numeric_value < 30",
+            "3": "30 <= eGFR_numeric_value < 60",
+            "2": "60 <= eGFR_numeric_value < 90",
+            "1": "90 <= eGFR_numeric_value",
+            "0": "DEFAULT",
+        },
+        return_expectations={
+            "category": {
+                "ratios": {"0": 0.1, "1": 0.3, "2": 0.3, "3": 0.2, "4": 0.06, "5": 0.04}
+            }
+        },
+    ),
 )
+
 
 measures = []
 
 for pop in ["population", "at_risk"]:
     measures.extend(
         [
-        Measure(
-            id=f"cr_cl_{pop}_rate",
-            numerator="cr_cl",
-            denominator=pop,
-            group_by=["practice"]
-        ),
-        Measure(
-            id=f"cr_cl_code_{pop}_rate",
-            numerator="cr_cl",
-            denominator=pop,
-            group_by=["cr_cl_code"]
-        ),
-        Measure(
-            id=f"creatinine_{pop}_rate",
-            numerator="creatinine",
-            denominator=pop,
-            group_by=["practice"]
-        ),
-        Measure(
-            id=f"creatinine_code_{pop}_rate",
-            numerator="creatinine",
-            denominator=pop,
-            group_by=["creatinine_code"]
-        )
-        ] 
+            Measure(
+                id=f"cr_cl_{pop}_rate",
+                numerator="cr_cl",
+                denominator=pop,
+                group_by=["practice"],
+            ),
+            Measure(
+                id=f"cr_cl_code_{pop}_rate",
+                numerator="cr_cl",
+                denominator=pop,
+                group_by=["cr_cl_code"],
+            ),
+            Measure(
+                id=f"creatinine_{pop}_rate",
+                numerator="creatinine",
+                denominator=pop,
+                group_by=["practice"],
+            ),
+            Measure(
+                id=f"creatinine_code_{pop}_rate",
+                numerator="creatinine",
+                denominator=pop,
+                group_by=["creatinine_code"],
+            ),
+            Measure(
+                id=f"eGFR_{pop}_rate",
+                numerator="eGFR",
+                denominator=pop,
+                group_by=["practice"],
+            ),
+            Measure(
+                id=f"eGFR_code_{pop}_rate",
+                numerator="eGFR",
+                denominator=pop,
+                group_by=["eGFR_code"],
+            ),
+        ]
     )
 
     if pop == "population":
-        measures.append(Measure(
+        measures.append(
+            Measure(
                 id=f"weight_before_creatinine_{pop}_rate",
                 numerator="weight_before_creatinine",
                 denominator=pop,
-                group_by=pop
+                group_by=pop,
             )
         )
     else:
-        measures.append(Measure(
+        measures.append(
+            Measure(
                 id=f"weight_before_creatinine_{pop}_rate",
                 numerator="weight_before_creatinine",
                 denominator="population",
-                group_by=pop
+                group_by=pop,
             )
         )
 
-
     for d in demographics:
         m_crcl = Measure(
-            id=f"cr_cl_{d}_{pop}_rate",
-            numerator="cr_cl",
-            denominator=pop,
-            group_by=[d]
+            id=f"cr_cl_{d}_{pop}_rate", numerator="cr_cl", denominator=pop, group_by=[d]
         )
         m_cr = Measure(
             id=f"creatinine_{d}_{pop}_rate",
             numerator="creatinine",
             denominator=pop,
-            group_by=[d]
+            group_by=[d],
         )
 
-        measures.extend([m_crcl, m_cr])
+        m_egfr = Measure(
+            id=f"eGFR_{d}_{pop}_rate", numerator="eGFR", denominator=pop, group_by=[d]
+        )
+
+        measures.extend([m_crcl, m_cr, m_egfr])
