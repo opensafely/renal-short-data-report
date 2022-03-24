@@ -378,23 +378,7 @@ study = StudyDefinition(
             },
             "incidence": 0.80,
         },
-    ),
-    # eGFR categories - what about missing values or values with operators?
-    eGFR_group=patients.categorised_as(
-        {
-            "5": "eGFR_numeric_value < 15",
-            "4": "15 <= eGFR_numeric_value < 30",
-            "3": "30 <= eGFR_numeric_value < 60",
-            "2": "60 <= eGFR_numeric_value < 90",
-            "1": "90 <= eGFR_numeric_value",
-            "0": "DEFAULT",
-        },
-        return_expectations={
-            "category": {
-                "ratios": {"0": 0.1, "1": 0.3, "2": 0.3, "3": 0.2, "4": 0.06, "5": 0.04}
-            }
-        },
-    ),
+    )
 )
 
 
