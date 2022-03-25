@@ -72,13 +72,13 @@ diabetes_any_codelist = combine_codelists(
 )
 
 RRT_codelist = codelist_from_csv(
-    "opensafely-renal-replacement-therapy",
+    "codelists/opensafely-renal-replacement-therapy.csv",
     system="ctv3",
     column="CTV3ID"
 )
 
 dialysis_codelist = codelist_from_csv(
-    "opensafely-dialysis",
+    "codelists/opensafely-dialysis.csv",
     system="ctv3",
     column="CTV3ID",
 )
