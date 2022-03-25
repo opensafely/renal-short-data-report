@@ -6,9 +6,8 @@ from utilities import *
 if not (OUTPUT_DIR / "figures").exists():
     Path.mkdir(OUTPUT_DIR / "figures")
 
-demographics = ["age_band", "sex", "imd", "region"]
 
-for i in ["cr_cl", "creatinine", "eGFR"]:
+for i in ["cr_cl", "creatinine", "eGFR", "RRT", "dialysis"]:
     for j in ["population", "at_risk"]:
         df = pd.read_csv(
             OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
@@ -30,6 +29,12 @@ for i in ["cr_cl", "creatinine", "eGFR"]:
             count_column=i,
             ylabel="Percentage",
         )
+
+        if i in ["RRT", "dialysis"]:
+            demographics = []
+
+        else:
+            demographics = ["age_band", "sex", "imd", "region"]
 
         # demographic plots
         for d in demographics:

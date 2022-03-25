@@ -378,7 +378,7 @@ study = StudyDefinition(
             },
             "incidence": 0.80,
         },
-    )
+    ),
 )
 
 
@@ -423,6 +423,7 @@ for pop in ["population", "at_risk"]:
                 denominator=pop,
                 group_by=["eGFR_code"],
             ),
+           
         ]
     )
 

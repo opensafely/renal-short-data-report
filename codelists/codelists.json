@@ -83,6 +83,18 @@
       "url": "https://codelists.opensafely.org/codelist/user/Louis/creatinine-clearance-level/7fdae772/",
       "downloaded_at": "2022-03-18 17:16:53.425269Z",
       "sha": "c29bc3814ec211c5d3c3d5578121a4edb1ea723c"
+    },
+    "opensafely-renal-replacement-therapy.csv": {
+      "id": "opensafely/renal-replacement-therapy/2020-04-14",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/renal-replacement-therapy/2020-04-14/",
+      "downloaded_at": "2022-03-24 15:16:59.695154Z",
+      "sha": "08e003f1222fe26781288b2eeff22db99780f202"
+    },
+    "opensafely-dialysis.csv": {
+      "id": "opensafely/dialysis/3ce108ac",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/dialysis/3ce108ac/",
+      "downloaded_at": "2022-03-24 15:16:59.890831Z",
+      "sha": "ace47eee209d55a7506e60e7e664f8e75ad9848c"
     }
   }
 }
