@@ -70,3 +70,14 @@ diabetes_resolved_primis_codelist = codelist_from_csv(
 diabetes_any_codelist = combine_codelists(
     diabetes_t1_codelist, diabetes_t2_codelist, diabetes_unknown_type_codelist
 )
+
+RRT_codelist = codelist_from_csv(
+    "opensafely-renal-replacement-therapy",
+    system="ctv3",
+    column="CTV3ID",
+
+dialysis_codelist = codelist_from_csv(
+    "opensafely-dialysis",
+    system="ctv3",
+    column="CTV3ID",
+)

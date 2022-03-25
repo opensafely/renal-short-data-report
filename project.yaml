@@ -25,7 +25,7 @@ actions:
 
   join_cohorts:
     run: >
-      cohort-joiner:v0.0.6
+      cohort-joiner:v0.0.9
         --lhs output/input_20*.csv.gz
         --rhs output/input_ethnicity.csv.gz
         --output-dir output/joined

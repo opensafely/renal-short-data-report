@@ -12,3 +12,5 @@ opensafely/diabetes-unknown-type/2020-06-29
 primis-covid19-vacc-uptake/dmres/v1
 primis-covid19-vacc-uptake/diab/v1
 user/Louis/creatinine-clearance-level/7fdae772
+opensafely/renal-replacement-therapy/2020-04-14
+opensafely/dialysis/3ce108ac
