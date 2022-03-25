@@ -6,7 +6,6 @@ from utilities import *
 if not (OUTPUT_DIR / "figures").exists():
     Path.mkdir(OUTPUT_DIR / "figures")
 
-demographics = ["age_band", "sex", "imd", "region"]
 
 for i in ["cr_cl", "creatinine", "eGFR", "RRT", "dialysis"]:
     for j in ["population", "at_risk"]:
@@ -30,6 +29,12 @@ for i in ["cr_cl", "creatinine", "eGFR", "RRT", "dialysis"]:
             count_column=i,
             ylabel="Percentage",
         )
+
+        if i in ["RRT", "dialysis"]:
+            demographics = []
+
+        else:
+            demographics = ["age_band", "sex", "imd", "region"]
 
         # demographic plots
         for d in demographics:
