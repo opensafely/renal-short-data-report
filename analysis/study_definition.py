@@ -378,7 +378,7 @@ study = StudyDefinition(
             },
             "incidence": 0.80,
         },
-    )
+    ),
 # RRT 
     RRT=patients.with_these_clinical_events(
         codelist=RRT_codelist,
