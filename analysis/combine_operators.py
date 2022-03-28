@@ -121,16 +121,12 @@ drop_and_round(cr_cl_codes_count).to_csv(OUTPUT_DIR / "cr_cl_codes_count.csv")
 
 
 creatinine_codes = pd.concat(codes_creatinine)
-# creatinine_codes_count = (
-#     creatinine_codes.replace(np.nan, "missing").groupby(creatinine_codes.index).sum()
-# )
+creatinine_codes = creatinine_codes.groupby(creatinine_codes.index).sum()
 creatinine_codes = group_low_values_series(creatinine_codes)
 drop_and_round(creatinine_codes).to_csv(OUTPUT_DIR / "creatinine_codes_count.csv")
 
 egfr_codes = pd.concat(codes_egfr)
-# egfr_codes_count = (
-#     egfr_codes.replace(np.nan, "missing").groupby(egfr_codes.index).sum()
-# )
+egfr_codes_count = egfr_codes.groupby(egfr_codes.index).sum()
 egfr_codes = group_low_values_series(egfr_codes)
 drop_and_round(egfr_codes).to_csv(OUTPUT_DIR / "egfr_codes_count.csv")
 
