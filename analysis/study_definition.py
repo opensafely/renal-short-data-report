@@ -270,7 +270,7 @@ study = StudyDefinition(
         },
     ),
     cr_cl_numeric_value=patients.with_these_clinical_events(
-        codelist=creatinine_clearance_level_codelist,
+        codelist=creatinine_clearance_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="numeric_value",
         return_expectations={
@@ -344,7 +344,7 @@ study = StudyDefinition(
         },
     ),
     eGFR_numeric_value=patients.with_these_clinical_events(
-        codelist=eGFR_level_codelist,
+        codelist=eGFR_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="numeric_value",
         return_expectations={
@@ -377,6 +377,62 @@ study = StudyDefinition(
                 }
             },
             "incidence": 0.80,
+        },
+    ),
+
+    # RRT 
+    RRT=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={"incidence": 0.2},
+    ),
+
+    RRT_count=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
+
+    RRT_code=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"14S2.": 0.5, "7A600": 0.5}},
+            "incidence": 0.2,
+        },
+    ),
+
+    # dialysis 
+    dialysis=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={"incidence": 0.2},
+    ),
+
+    dialysis_count=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
+
+    dialysis_code=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"7A602": 0.5, "7A600": 0.5}},
+            "incidence": 0.2,
         },
     ),
 )
@@ -423,6 +479,30 @@ for pop in ["population", "at_risk"]:
                 denominator=pop,
                 group_by=["eGFR_code"],
             ),
+            Measure(
+                id=f"RRT_{pop}_rate",
+                numerator="RRT",
+                denominator=pop,
+                group_by=["practice"],
+            ),
+            Measure(
+                id=f"RRT_code_{pop}_rate",
+                numerator="RRT",
+                denominator=pop,
+                group_by=["RRT_code"],
+            ),
+            Measure(
+                id=f"dialysis_{pop}_rate",
+                numerator="dialysis",
+                denominator=pop,
+                group_by=["practice"],
+            ),
+            Measure(
+                id=f"dialysis_code_{pop}_rate",
+                numerator="dialysis",
+                denominator=pop,
+                group_by=["dialysis_code"],
+            ),
            
         ]
     )
@@ -461,4 +541,12 @@ for pop in ["population", "at_risk"]:
             id=f"eGFR_{d}_{pop}_rate", numerator="eGFR", denominator=pop, group_by=[d]
         )
 
-        measures.extend([m_crcl, m_cr, m_egfr])
+        m_rrt = Measure(
+            id=f"RRT_{d}_{pop}_rate", numerator="RRT", denominator=pop, group_by=[d]
+        )
+
+        m_dialysis = Measure(
+            id=f"dialysis_{d}_{pop}_rate", numerator="dialysis", denominator=pop, group_by=[d]
+        )
+
+        measures.extend([m_crcl, m_cr, m_egfr, m_rrt, m_dialysis])

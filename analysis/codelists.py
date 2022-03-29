@@ -36,6 +36,10 @@ creatinine_codelist = codelist_from_csv(
     "codelists/user-bangzheng-creatinine.csv", system="snomed", column="code"
 )
 
+creatinine_level_codelist = codelist_from_csv(
+    "codelists/user-bangzheng-creatinine.csv", system="snomed", column="code"
+)
+
 weight_codelist = codelist_from_csv(
     "codelists/opensafely-weight-snomed.csv", system="snomed", column="code"
 )

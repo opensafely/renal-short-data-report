@@ -42,6 +42,12 @@
       "downloaded_at": "2022-03-18 17:16:51.450894Z",
       "sha": "eb6442307e5f366e50b8b08bc9e6b4cf2339096a"
     },
+    "user-bangzheng-creatinine-value.csv": {
+      "id": "user/bangzheng/creatinine-value/58285b97",
+      "url": "https://codelists.opensafely.org/codelist/user/bangzheng/creatinine-value/58285b97/",
+      "downloaded_at": "2022-03-29 10:36:07.877569Z",
+      "sha": "8b086a28dbf3af1fee7c44352533f9f99383909a"
+    },
     "opensafely-hypertension-snomed.csv": {
       "id": "opensafely/hypertension-snomed/2020-04-28",
       "url": "https://codelists.opensafely.org/codelist/opensafely/hypertension-snomed/2020-04-28/",
