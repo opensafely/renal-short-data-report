@@ -270,7 +270,7 @@ study = StudyDefinition(
         },
     ),
     cr_cl_numeric_value=patients.with_these_clinical_events(
-        codelist=creatinine_clearance_level_codelist,
+        codelist=creatinine_clearance_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="numeric_value",
         return_expectations={
@@ -344,7 +344,7 @@ study = StudyDefinition(
         },
     ),
     eGFR_numeric_value=patients.with_these_clinical_events(
-        codelist=eGFR_level_codelist,
+        codelist=eGFR_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="numeric_value",
         return_expectations={
