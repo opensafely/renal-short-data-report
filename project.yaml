@@ -87,6 +87,15 @@ actions:
       moderately_sensitive:
         counts: output/figures/plot_*.jpeg
 
+  generate_plots_numeric_values:
+    run: python:latest python analysis/plot_numeric_values.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        counts: output/*dist*.csv
+        figures: output/*dist*.jpeg
+
+
   generate_notebook:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
     needs: [generate_plots, get_counts]
