@@ -15,3 +15,6 @@ primis-covid19-vacc-uptake/diab/v1
 user/Louis/creatinine-clearance-level/7fdae772
 opensafely/renal-replacement-therapy/2020-04-14
 opensafely/dialysis/3ce108ac
+opensafely/chronic-kidney-disease-snomed/2020-04-14/
+primis-covid19-vacc-uptake/ckd15/v1/
+primis-covid19-vacc-uptake/ckd35/v1/

@@ -86,3 +86,22 @@ dialysis_codelist = codelist_from_csv(
     system="ctv3",
     column="CTV3ID",
 )
+
+ckd_codelist = codelist_from_csv(
+    "codelists/opensafely-chronic-kidney-disease-snomed.csv",
+    system="snomed",
+    column="id"
+)
+
+primis_ckd_1_5_codelist = codelist_from_csv(
+    "codelists/primis-covid19-vacc-update-ckd15.csv",
+    system="snomed",
+    column="code"
+)
+
+primis_ckd_3_5_codelist = codelist_from_csv(
+    "codelists/primis-covid19-vacc-update-ckd35.csv",
+    system="snomed",
+    column="code"
+)
+
