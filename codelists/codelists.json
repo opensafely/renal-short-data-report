@@ -101,6 +101,24 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/dialysis/3ce108ac/",
       "downloaded_at": "2022-03-24 15:16:59.890831Z",
       "sha": "ace47eee209d55a7506e60e7e664f8e75ad9848c"
+    },
+    "opensafely-chronic-kidney-disease-snomed.csv": {
+      "id": "opensafely/chronic-kidney-disease-snomed/2020-04-14",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/chronic-kidney-disease-snomed/2020-04-14/",
+      "downloaded_at": "2022-03-31 11:09:00.376987Z",
+      "sha": "5facf34dc24ff71032df5399b43adcd36997d670"
+    },
+    "primis-covid19-vacc-uptake-ckd15.csv": {
+      "id": "primis-covid19-vacc-uptake/ckd15/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/ckd15/v1/",
+      "downloaded_at": "2022-03-31 11:09:00.769272Z",
+      "sha": "88cc1ab0e8fc6e4be88929369a5b492cc402884a"
+    },
+    "primis-covid19-vacc-uptake-ckd35.csv": {
+      "id": "primis-covid19-vacc-uptake/ckd35/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/ckd35/v1/",
+      "downloaded_at": "2022-03-31 11:09:01.090465Z",
+      "sha": "3a32f20ef7b33b9cdda2128754d3f394f28f0165"
     }
   }
 }
