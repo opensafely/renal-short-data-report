@@ -43,7 +43,7 @@ for file in (OUTPUT_DIR / "joined").iterdir():
 
         # how many numeric values have a matched operator?
         num_with_numeric_value_and_operator_creatinine = (
-            df.loc[df["creatinine_numeric_value"].notnull(), :]
+            df.loc[(df["creatinine_numeric_value"].notnull() & df["creatinine_numeric_value"] > 0), :]
             .groupby("creatinine_operator")[["creatinine"]]
             .sum()
         )
@@ -52,7 +52,7 @@ for file in (OUTPUT_DIR / "joined").iterdir():
         )
 
         num_with_numeric_value_and_operator_cr_cl = (
-            df.loc[df["cr_cl_numeric_value"].notnull(), :]
+            df.loc[(df["cr_cl_numeric_value"].notnull() & df["cr_cl_numeric_value"] > 0), :]
             .groupby("cr_cl_operator")[["cr_cl"]]
             .sum()
         )
@@ -61,7 +61,7 @@ for file in (OUTPUT_DIR / "joined").iterdir():
         )
 
         num_with_numeric_value_and_operator_egfr = (
-            df.loc[df["eGFR_numeric_value"].notnull(), :]
+            df.loc[(df["eGFR_numeric_value"].notnull() & df["eGFR_numeric_value"] > 0), :]
             .groupby("eGFR_operator")[["eGFR"]]
             .sum()
         )
