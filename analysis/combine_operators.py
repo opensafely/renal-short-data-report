@@ -101,16 +101,9 @@ for file in (OUTPUT_DIR / "joined").iterdir():
             df.loc[df["eGFR_numeric_value"].notnull(), "eGFR_code"].value_counts()
         )
 
-        codes_creatinine_all.append(
-            df["creatinine_code"].value_counts()
-        )
-        codes_cr_cl_all.append(
-            df[ "cr_cl_code"].value_counts()
-        )
-
-        codes_egfr_all.append(
-            df["eGFR_code"].value_counts()
-        )
+        codes_creatinine_all.append(df["creatinine_code"].value_counts())
+        codes_cr_cl_all.append(df["cr_cl_code"].value_counts())
+        codes_egfr_all.append(df["eGFR_code"].value_counts())
 
 
 combined_creatinine_values = pd.concat(value_counts_creatinine)
@@ -144,9 +137,8 @@ drop_and_round(creatinine_codes).to_csv(OUTPUT_DIR / "creatinine_codes_count.csv
 
 egfr_codes = pd.concat(codes_egfr)
 egfr_codes_count = egfr_codes.groupby(egfr_codes.index).sum()
-egfr_codes = group_low_values_series(egfr_codes)
+egfr_codes = group_low_values_series(egfr_codes_count)
 drop_and_round(egfr_codes).to_csv(OUTPUT_DIR / "egfr_codes_count.csv")
-
 
 
 cr_cl_codes_all = pd.concat(codes_cr_cl_all)
@@ -158,21 +150,18 @@ drop_and_round(cr_cl_codes_count_all).to_csv(OUTPUT_DIR / "cr_cl_codes_count_all
 creatinine_codes_all = pd.concat(codes_creatinine_all)
 creatinine_codes_all = creatinine_codes_all.groupby(creatinine_codes_all.index).sum()
 creatinine_codes_all = group_low_values_series(creatinine_codes_all)
-drop_and_round(creatinine_codes_all).to_csv(OUTPUT_DIR / "creatinine_codes_count_all.csv")
+drop_and_round(creatinine_codes_all).to_csv(
+    OUTPUT_DIR / "creatinine_codes_count_all.csv"
+)
+
 
 egfr_codes_all = pd.concat(codes_egfr_all)
 egfr_codes_count_all = egfr_codes_all.groupby(egfr_codes_all.index).sum()
-egfr_codes_all = group_low_values_series(egfr_codes_all)
+egfr_codes_all = group_low_values_series(egfr_codes_count_all)
 drop_and_round(egfr_codes_all).to_csv(OUTPUT_DIR / "egfr_codes_count_all.csv")
 
 
-
 creatinine_operators = pd.concat(operators_creatinine, axis=1, sort=False).sum(axis=1)
-
-# creatinine_operators_count = creatinine_operators.groupby(
-#     creatinine_operators.index
-# ).sum()
-
 creatinine_operators = group_low_values_series(creatinine_operators)
 drop_and_round(creatinine_operators).to_csv(
     OUTPUT_DIR / "creatinine_operators_count.csv"
@@ -180,17 +169,10 @@ drop_and_round(creatinine_operators).to_csv(
 
 
 cr_cl_operators = pd.concat(operators_cr_cl, axis=1, sort=False).sum(axis=1)
-
-# cr_cl_operators_count = (
-#     cr_cl_operators.replace(np.nan, "missing").groupby(cr_cl_operators.index).sum()
-# )
 cr_cl_operators = group_low_values_series(cr_cl_operators)
 drop_and_round(cr_cl_operators).to_csv(OUTPUT_DIR / "cr_cl_operators_count.csv")
 
 
 egfr_operators = pd.concat(operators_egfr, axis=1, sort=False).sum(axis=1)
-# egfr_operators_count = (
-#     egfr_operators.replace(np.nan, "missing").groupby(egfr_operators.index).sum()
-# )
 egfr_operators = group_low_values_series(egfr_operators)
 drop_and_round(egfr_operators).to_csv(OUTPUT_DIR / "egfr_operators_count.csv")
