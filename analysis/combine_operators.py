@@ -59,7 +59,7 @@ for file in (OUTPUT_DIR / "joined").iterdir():
         operators_cr_cl.append(
             num_with_numeric_value_and_operator_cr_cl.replace(np.nan, "missing")
         )
-
+        
         num_with_numeric_value_and_operator_egfr = (
             df.loc[(df["eGFR_numeric_value"].notnull() & df["eGFR_numeric_value"] > 0), :]
             .groupby("eGFR_operator")[["eGFR"]]
@@ -90,15 +90,15 @@ for file in (OUTPUT_DIR / "joined").iterdir():
         # find codes where attached numeric value
         codes_creatinine.append(
             df.loc[
-                df["creatinine_numeric_value"].notnull(), "creatinine_code"
+                (df["creatinine_numeric_value"].notnull()& df["creatinine_numeric_value"] > 0), "creatinine_code"
             ].value_counts()
         )
         codes_cr_cl.append(
-            df.loc[df["cr_cl_numeric_value"].notnull(), "cr_cl_code"].value_counts()
+            df.loc[(df["cr_cl_numeric_value"].notnull() & df["cr_cl_numeric_value"] > 0), "cr_cl_code"].value_counts()
         )
 
         codes_egfr.append(
-            df.loc[df["eGFR_numeric_value"].notnull(), "eGFR_code"].value_counts()
+            df.loc[(df["eGFR_numeric_value"].notnull()& df["eGFR_numeric_value"] > 0), "eGFR_code"].value_counts()
         )
 
         codes_creatinine_all.append(df["creatinine_code"].value_counts())
