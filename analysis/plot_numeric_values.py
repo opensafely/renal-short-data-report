@@ -24,7 +24,7 @@ numeric_values_cr_cl = np.concatenate(numeric_values_cr_cl)
 numeric_values_egfr = np.concatenate(numeric_values_egfr)
 
 def plot_hist_numeric_value(x, title, filename):
-    counts, bins, bars = plt.hist(x, bins=50)
+    counts, bins, bars = plt.hist(x, bins=10)
     frequency_counts = [int(x) for x in counts]
     pd.Series(frequency_counts, name="Counts").to_csv(f'output/{filename}_frequency.csv')
     plt.ylabel("count")
