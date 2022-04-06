@@ -122,26 +122,23 @@ study = StudyDefinition(
             },
         },
     ),
-    at_risk=patients.satisfying(
+    diabetes=patients.satisfying(
         """
         (
-            diabetes_any AND
+            diabetes_any_primis AND
             (NOT diabetes_resolved)
         ) 
     
         OR
 
         (
-            diabetes_any AND
+            diabetes_any_primis AND
             diabetes_resolved AND
-            (diabetes_resolved_date < diabetes_date) OR (diabetes_resolved_date < diabetes_primis_date)
+            (diabetes_resolved_date < diabetes_any_date) OR (diabetes_resolved_date < diabetes_primis_date)
         )
 
-        OR
-
-        (hypertension)
         """,
-        diabetes=patients.with_these_clinical_events(
+        diabetes_any=patients.with_these_clinical_events(
             codelist=diabetes_any_codelist,
             on_or_before="index_date",
             returning="binary_flag",
@@ -163,9 +160,9 @@ study = StudyDefinition(
                 "date": {"earliest": "1900-01-01", "latest": "today"},
             },
         ),
-        diabetes_any=patients.satisfying(
+        diabetes_any_primis=patients.satisfying(
             """
-            diabetes OR diabetes_primis
+            diabetes_any OR diabetes_primis
             """
         ),
         diabetes_resolved=patients.with_these_clinical_events(
@@ -179,15 +176,24 @@ study = StudyDefinition(
                 "date": {"earliest": "1900-01-01", "latest": "today"},
             },
         ),
-        hypertension=patients.with_these_clinical_events(
-            codelist=hypertension_codelist,
-            on_or_before="index_date",
-            returning="binary_flag",
-            return_expectations={
-                "incidence": 0.5,
-                "date": {"earliest": "1900-01-01", "latest": "today"},
-            },
-        ),
+    ),
+    
+    hypertension=patients.with_these_clinical_events(
+        codelist=hypertension_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    at_risk=patients.satisfying(
+        """
+        diabetes
+        OR
+        hypertension
+        """
     ),
     creatinine=patients.with_these_clinical_events(
         codelist=creatinine_codelist,
@@ -440,7 +446,7 @@ study = StudyDefinition(
 
 measures = []
 
-for pop in ["population", "at_risk"]:
+for pop in ["population", "at_risk", "diabetes", "hypertension"]:
     measures.extend(
         [
             Measure(
