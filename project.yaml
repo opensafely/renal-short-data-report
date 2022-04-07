@@ -103,3 +103,10 @@ actions:
       moderately_sensitive:
         notebook: output/report.html
 
+  
+  generate_eGFR_frequency_plots:
+    run: r:latest analysis/test_frequency.R
+    needs: [join_cohorts, join_cohorts_ckd]
+    outputs:
+      moderately_sensitive:
+        figures: output/months_with_eGFR*.png
