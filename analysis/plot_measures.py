@@ -8,7 +8,7 @@ if not (OUTPUT_DIR / "figures").exists():
 
 
 for i in ["cr_cl", "creatinine", "eGFR", "RRT", "dialysis"]:
-    for j in ["population", "at_risk"]:
+    for j in ["population", "at_risk", "diabetes", "hypertension"]:
         df = pd.read_csv(
             OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
         )
