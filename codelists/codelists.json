@@ -119,6 +119,12 @@
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/ckd35/v1/",
       "downloaded_at": "2022-03-31 11:09:01.090465Z",
       "sha": "3a32f20ef7b33b9cdda2128754d3f394f28f0165"
+    },
+    "opensafely-kidney-transplant.csv": {
+      "id": "opensafely/kidney-transplant/2020-07-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/kidney-transplant/2020-07-15/",
+      "downloaded_at": "2022-04-08 07:14:57.041888Z",
+      "sha": "db6b47d17273b563cb428e4a97a7ba8b6d62afa9"
     }
   }
 }
