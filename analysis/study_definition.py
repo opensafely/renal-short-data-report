@@ -441,6 +441,64 @@ study = StudyDefinition(
             "incidence": 0.2,
         },
     ),
+    ckd=patients.with_these_clinical_events(
+        codelist=ckd_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    ckd_code=patients.with_these_clinical_events(
+        codelist=ckd_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
+        },
+    ),
+    ckd_primis_1_5=patients.with_these_clinical_events(
+        codelist=primis_ckd_1_5_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    ckd_primis_1_5_code=patients.with_these_clinical_events(
+        codelist=primis_ckd_1_5_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
+        },
+    ),
+
+    ckd_primis_3_5=patients.with_these_clinical_events(
+        codelist=primis_ckd_3_5_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    ckd_primis_3_5_code=patients.with_these_clinical_events(
+        codelist=primis_ckd_3_5_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
+        },
+    ),
 )
 
 
@@ -509,6 +567,24 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 denominator=pop,
                 group_by=["dialysis_code"],
             ),
+            Measure(
+                id=f"ckd_{pop}_rate",
+                numerator="ckd",
+                denominator="population",
+                group_by=["practice"]
+            ),
+            Measure(
+                id=f"ckd_primis_3_5_{pop}_rate",
+                numerator="ckd_primis_3_5",
+                denominator="population",
+                group_by=["practice"]
+            ),
+            Measure(
+                id=f"ckd_primis_1_5_{pop}_rate",
+                numerator="ckd_primis_1_5",
+                denominator="population",
+                group_by=["practice"]
+            ),
            
         ]
     )
@@ -555,4 +631,23 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
             id=f"dialysis_{d}_{pop}_rate", numerator="dialysis", denominator=pop, group_by=[d]
         )
 
-        measures.extend([m_crcl, m_cr, m_egfr, m_rrt, m_dialysis])
+        m_ckd = Measure(
+            id=f"ckd_rate",
+            numerator="ckd",
+            denominator="population",
+            group_by=[d]
+            )
+        m_ckd_1_5 = Measure(
+                id=f"ckd_primis_3_5_rate",
+                numerator="ckd_primis_3_5",
+                denominator="population",
+                group_by=[d]
+                )
+        m_ckd_3_5 = Measure(
+                id=f"ckd_primis_1_5_rate",
+                numerator="ckd_primis_1_5",
+                denominator="population",
+                group_by=[d]
+                )
+
+        measures.extend([m_crcl, m_cr, m_egfr, m_rrt, m_dialysis, m_ckd, m_ckd_1_5, m_ckd_3_5])

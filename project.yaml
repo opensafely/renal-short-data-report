@@ -14,15 +14,6 @@ actions:
       highly_sensitive:
         cohort: output/input*.csv.gz
 
-  generate_study_population_ckd:
-    run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_ckd
-      --index-date-range "2019-01-01 to 2022-02-01 by month" 
-      --output-format csv.gz
-    outputs:
-      highly_sensitive:
-        cohort: output/input_ckd*.csv.gz
-
   generate_study_population_ethnicity:
     run: cohortextractor:latest generate_cohort 
       --study-definition study_definition_ethnicity
@@ -43,17 +34,6 @@ actions:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
   
-  join_cohorts_ckd:
-    run: >
-      cohort-joiner:v0.0.9
-        --lhs output/input_ckd_20*.csv.gz
-        --rhs output/input_ethnicity.csv.gz
-        --output-dir output/joined
-    needs: [generate_study_population_ckd, generate_study_population_ethnicity]
-    outputs:
-      highly_sensitive:
-        cohort: output/joined/input_ckd_20*.csv.gz
-
   generate_measures:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
@@ -63,22 +43,12 @@ actions:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
 
-  generate_measures_ckd:
-    run: cohortextractor:latest generate_measures 
-      --study-definition study_definition_ckd
-      --output-dir=output/joined
-    needs: [join_cohorts_ckd]
-    outputs:
-      moderately_sensitive:
-        measure_csv: output/joined/measure*_rate.csv
-
   get_counts:
     run: python:latest python analysis/combine_operators.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         counts: output/*_coun*.csv
-
 
   generate_plots:
     run: python:latest python analysis/plot_measures.py
@@ -106,7 +76,7 @@ actions:
   
   generate_eGFR_frequency_plots:
     run: r:latest analysis/test_frequency.R
-    needs: [join_cohorts, join_cohorts_ckd]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         figures: output/months_with_eGFR*.png
