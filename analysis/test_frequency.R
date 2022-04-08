@@ -20,7 +20,7 @@ data<-lapply(filepaths,read_csv,
                               eGFR = col_logical(),
                               at_risk = col_logical(),
                               diabetes = col_logical(),
-                              hypertension = col_logical()
+                              hypertension = col_logical(),
                               creatinine = col_logical()
                               ))
 
