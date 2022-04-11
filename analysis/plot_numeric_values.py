@@ -63,3 +63,9 @@ def plot_violin_numeric_value(x, title, filename):
 plot_violin_numeric_value(numeric_values_egfr, "eGFR numeric value distribution", "egfr_dist_violin")
 plot_violin_numeric_value(numeric_values_creatinine, "creatinine numeric value distribution", "creatinine_dist_violin")
 plot_violin_numeric_value(numeric_values_cr_cl, "creatinine clearance numeric value distribution", "cr_cl_dist_violin")
+
+# Plots for numeric values >0
+
+plot_violin_numeric_value(numeric_values_egfr[numeric_values_egfr>0], "eGFR numeric value distribution", "egfr_dist_violin")
+plot_violin_numeric_value(numeric_values_creatinine[numeric_values_creatinine>0], "creatinine numeric value distribution", "creatinine_dist_violin")
+plot_violin_numeric_value(numeric_values_cr_cl[numeric_values_cr_cl>0], "creatinine clearance numeric value distribution", "cr_cl_dist_violin")
