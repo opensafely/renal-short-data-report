@@ -62,7 +62,6 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/*dist*.csv
         figures: output/*dist*.jpeg
 
 
