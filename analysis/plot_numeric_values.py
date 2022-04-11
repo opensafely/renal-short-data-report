@@ -46,8 +46,8 @@ plot_boxplot_numeric_value(
 
 def plot_violin_numeric_value(x, title, filename):
     """Plots a violin plot from an array of numeric values. Controls for disclosure by
-    calculating quantiles such that >n values are present in each quantile and using this
-    to generate the plots rather than the raw values. Limits the range of plotted data
+    calculating percentiles and using this to generate the plots rather than the raw values. 
+    This will be sufficient for large the majority of populations. Limits the range of plotted data
     to the top and bottom quantile using `cut=0`.
 
     """
@@ -55,6 +55,8 @@ def plot_violin_numeric_value(x, title, filename):
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=x, q=percentiles)
     figure_output = sns.violinplot(data=percentile_values, cut=0)
+    plt.title(title)
+    plt.ylabel("numeric value")
     plt.savefig(f"output/{filename}.jpeg")
     plt.clf()
 
