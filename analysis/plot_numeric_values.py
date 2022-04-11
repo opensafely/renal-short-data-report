@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 from utilities import OUTPUT_DIR, match_input_files, get_date_input_file
 
@@ -42,3 +43,21 @@ plot_boxplot_numeric_value(
 plot_boxplot_numeric_value(
     numeric_values_egfr, "eGFR numeric value distribution", "egfr_dist"
 )
+
+def plot_violin_numeric_value(x, title, filename):
+    """Plots a violin plot from an array of numeric values. Controls for disclosure by
+    calculating quantiles such that >n values are present in each quantile and using this
+    to generate the plots rather than the raw values. Limits the range of plotted data
+    to the top and bottom quantile using `cut=0`.
+
+    """
+
+    percentiles = np.arange(0.01, 0.99, 0.01)
+    percentile_values = np.quantile(a=x, q=percentiles)
+    figure_output = sns.violinplot(data=percentile_values, cut=0)
+    plt.savefig(f"output/{filename}.jpeg")
+    plt.clf()
+
+plot_violin_numeric_value(numeric_values_egfr, "eGFR numeric value distribution", "egfr_dist_violin")
+plot_violin_numeric_value(numeric_values_creatinine, "creatinine numeric value distribution", "creatinine_dist_violin")
+plot_violin_numeric_value(numeric_values_cr_cl, "creatinine clearance numeric value distribution", "cr_cl_dist_violin")
