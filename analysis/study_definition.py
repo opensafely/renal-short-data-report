@@ -660,7 +660,7 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
             group_by=["practice"]
             ),
     Measure(
-            id=f"renal_status_distribution_{pop}",
+            id=f"renal_status_{pop}_rate",
             numerator="population",
             denominator=pop,
             group_by=["latest_renal_status"]

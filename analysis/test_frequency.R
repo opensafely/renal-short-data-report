@@ -21,7 +21,8 @@ data<-lapply(filepaths,read_csv,
                               at_risk = col_logical(),
                               diabetes = col_logical(),
                               hypertension = col_logical(),
-                              creatinine = col_logical()
+                              creatinine = col_logical(),
+                              latest_renal_status = col_character()
                               ))
 
 ######## first eGFR ##########################################################
@@ -29,7 +30,7 @@ data<-lapply(filepaths,read_csv,
 
 #keep only those with eGFR measurement, and just the required variables
 data1<-lapply(data,subset, eGFR==1, 
-              select=c(patient_id, eGFR, at_risk, diabetes, hypertension))
+              select=c(patient_id, eGFR, at_risk, diabetes, hypertension, latest_renal_status))
 #adding the date as a column
 data2<-mapply(function(x,y) cbind(x, date=y), data1, dates, SIMPLIFY=FALSE)
 #appending into one dataset
@@ -90,13 +91,25 @@ ggsave(
   plot= p.hypertension,
   filename="months_with_eGFR_hypertension.png", path=here::here("output", "figures"))
 
+#renal status
+count.renalstatus<-data3 %>% count(patient_id, year, latest_renal_status)
+p.renalstatus <- count.renalstatus %>%
+  ggplot( aes(x=n)) +
+  geom_histogram( alpha=0.6, position = 'identity', bins=13) +
+  facet_grid(year~latest_renal_status)+
+  ggtitle("Number of months with an eGFR test by renal status")
+#saving
+ggsave(
+  plot= p.renalstatus,
+  filename="months_with_eGFR_renalstatus.png", path=here::here("output", "figures"))
+
 
   #################### now creatinine ###################################################
 
 
   #keep only those with creatinine measurement, and just the required variables
 data1<-lapply(data,subset, creatinine==1, 
-              select=c(patient_id, creatinine, at_risk, diabetes, hypertension))
+              select=c(patient_id, creatinine, at_risk, diabetes, hypertension, latest_renal_status ))
 #adding the date as a column
 data2<-mapply(function(x,y) cbind(x, date=y), data1, dates, SIMPLIFY=FALSE)
 #appending into one dataset
@@ -156,3 +169,15 @@ p.hypertension <- count.hypertension %>%
 ggsave(
   plot= p.hypertension,
   filename="months_with_creat_hypertension.png", path=here::here("output", "figures"))
+
+  #renal status
+count.renalstatus<-data3 %>% count(patient_id, year, latest_renal_status)
+p.renalstatus <- count.renalstatus %>%
+  ggplot( aes(x=n)) +
+  geom_histogram( alpha=0.6, position = 'identity', bins=13) +
+  facet_grid(year~latest_renal_status)+
+  ggtitle("Number of months with a creatinine test by renal status")
+#saving
+ggsave(
+  plot= p.renalstatus,
+  filename="months_with_creat_renalstatus.png", path=here::here("output", "figures"))
