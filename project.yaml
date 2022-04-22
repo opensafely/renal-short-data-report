@@ -14,7 +14,10 @@ actions:
       highly_sensitive:
         cohort: output/input*.csv.gz
 
+<<<<<<< shalini
 
+=======
+>>>>>>> main
   generate_study_population_ethnicity:
     run: cohortextractor:latest generate_cohort 
       --study-definition study_definition_ethnicity
@@ -34,8 +37,12 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
+<<<<<<< shalini
 
 
+=======
+  
+>>>>>>> main
   generate_measures:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
@@ -45,14 +52,16 @@ actions:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
 
+<<<<<<< shalini
 
+=======
+>>>>>>> main
   get_counts:
     run: python:latest python analysis/combine_operators.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         counts: output/*_coun*.csv
-
 
   generate_plots:
     run: python:latest python analysis/plot_measures.py
@@ -66,7 +75,6 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/*dist*.csv
         figures: output/*dist*.jpeg
 
 
