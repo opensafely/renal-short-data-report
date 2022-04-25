@@ -33,7 +33,7 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
-  
+
   generate_measures:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
@@ -42,7 +42,7 @@ actions:
     outputs:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
-
+        
   get_counts:
     run: python:latest python analysis/combine_operators.py
     needs: [join_cohorts]
@@ -73,9 +73,9 @@ actions:
         notebook: output/report.html
 
   
-  generate_eGFR_frequency_plots:
+  generate_frequency_plots:
     run: r:latest analysis/test_frequency.R
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        figures: output/months_with_eGFR*.png
+        figures: output/figures/months_with_*.png

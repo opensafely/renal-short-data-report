@@ -386,65 +386,12 @@ study = StudyDefinition(
         },
     ),
 
-    # RRT 
-    RRT=patients.with_these_clinical_events(
-        codelist=RRT_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        return_expectations={"incidence": 0.2},
-    ),
-
-    RRT_count=patients.with_these_clinical_events(
-        codelist=RRT_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-
-    RRT_code=patients.with_these_clinical_events(
-        codelist=RRT_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "category": {"ratios": {"14S2.": 0.5, "7A600": 0.5}},
-            "incidence": 0.2,
-        },
-    ),
-
-    # dialysis 
-    dialysis=patients.with_these_clinical_events(
-        codelist=dialysis_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        return_expectations={"incidence": 0.2},
-    ),
-
-    dialysis_count=patients.with_these_clinical_events(
-        codelist=dialysis_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-
-    dialysis_code=patients.with_these_clinical_events(
-        codelist=dialysis_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "category": {"ratios": {"7A602": 0.5, "7A600": 0.5}},
-            "incidence": 0.2,
-        },
-    ),
-    ckd=patients.with_these_clinical_events(
+   ckd=patients.with_these_clinical_events(
         codelist=ckd_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
+        on_or_before="index_date",
         returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
         return_expectations={
             "incidence": 0.5,
             "date": {"earliest": "1900-01-01", "latest": "today"},
@@ -453,7 +400,7 @@ study = StudyDefinition(
 
     ckd_code=patients.with_these_clinical_events(
         codelist=ckd_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
+        on_or_before="index_date",
         returning="code",
         return_expectations={
             "rate": "universal",
@@ -462,8 +409,10 @@ study = StudyDefinition(
     ),
     ckd_primis_1_5=patients.with_these_clinical_events(
         codelist=primis_ckd_1_5_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
+        on_or_before="index_date",
         returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
         return_expectations={
             "incidence": 0.5,
             "date": {"earliest": "1900-01-01", "latest": "today"},
@@ -472,7 +421,7 @@ study = StudyDefinition(
 
     ckd_primis_1_5_code=patients.with_these_clinical_events(
         codelist=primis_ckd_1_5_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
+        on_or_before="index_date",
         returning="code",
         return_expectations={
             "rate": "universal",
@@ -482,25 +431,159 @@ study = StudyDefinition(
 
     ckd_primis_3_5=patients.with_these_clinical_events(
         codelist=primis_ckd_3_5_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
+        on_or_before="index_date",
         returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
         return_expectations={
-            "incidence": 0.5,
+            "incidence": 0.2,
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
 
     ckd_primis_3_5_code=patients.with_these_clinical_events(
         codelist=primis_ckd_3_5_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
+        on_or_before="index_date",
         returning="code",
         return_expectations={
             "rate": "universal",
             "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
         },
     ),
-)
 
+ # RRT 
+    RRT=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    RRT_code=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        on_or_before="index_date",
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"14S2.": 0.5, "7A600": 0.5}},
+            "incidence": 0.2,
+        },
+    ),
+
+    # dialysis 
+    #defaults to the lastest match
+    dialysis=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    dialysis_code=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        on_or_before="index_date",
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"7A602": 0.5, "7A600": 0.5}},
+            "incidence": 0.2,
+        },
+    ),
+
+
+
+
+    # kidney_tx 
+    #defaults to the lastest match
+    kidney_tx=patients.with_these_clinical_events(
+        codelist=kidney_tx_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    kidney_tx_code=patients.with_these_clinical_events(
+        codelist=kidney_tx_codelist,
+        on_or_before="index_date",
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"14S2.": 0.5, "7B00.": 0.5}},
+            "incidence": 0.2,
+        },
+    ),
+
+
+    #Picking most recent status
+    #patients are assigned to the first condition they satisfy, so define RRT modalities first
+    latest_renal_status = patients.categorised_as(
+        {
+            "None"      : """
+                        (NOT dialysis) 
+                        AND (NOT kidney_tx) 
+                        AND (NOT RRT)
+                        """,
+            "Dialysis"  : """
+                        dialysis_date=latest_renal_date 
+                        AND
+                        kidney_tx_date!=latest_renal_date
+                        """,
+            "Transplant" : """
+                        kidney_tx_date=latest_renal_date
+                        AND
+                        dialysis_date!=latest_renal_date 
+                        """,
+            "RRT_unknown"  : """
+                        dialysis_date=latest_renal_date 
+                        OR
+                        kidney_tx_date=latest_renal_date
+                        OR
+                        RRT_date=latest_renal_date
+                        """,
+            "CKD3_5"    : """
+                        ckd_primis_3_5_date=latest_renal_date
+                        """,
+            "CKD_unknown" : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        OR
+                        ckd_date=latest_renal_date
+                        """,
+            "Uncategorised" : "DEFAULT"
+        },
+        latest_renal_date=patients.maximum_of(
+            "dialysis_date", "kidney_tx_date", "RRT_date",
+            "ckd_date", "ckd_primis_1_5_date","ckd_primis_3_5_date"
+            ),
+        return_expectations={
+                "rate": "universal",
+                "category": {
+                    "ratios": {
+                        "None": 0.4,
+                        "Dialysis": 0.1,
+                        "Transplant": 0.1,
+                        "RRT_unknown": 0.1,
+                        "CKD3_5": 0.1,
+                        "CKD_unknown": 0.1,
+                        "Uncategorised": 0.1,
+                    }
+                },
+            },
+        )
+   
+
+)
 
 measures = []
 
@@ -543,49 +626,67 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 denominator=pop,
                 group_by=["eGFR_code"],
             ),
-            Measure(
-                id=f"RRT_{pop}_rate",
-                numerator="RRT",
-                denominator=pop,
-                group_by=["practice"],
+         Measure(
+            id=f"ckd_{pop}_rate",
+            numerator="ckd",
+            denominator=pop,
+            group_by=["practice"]
             ),
-            Measure(
-                id=f"RRT_code_{pop}_rate",
-                numerator="RRT",
-                denominator=pop,
-                group_by=["RRT_code"],
+    Measure(
+            id=f"ckd_primis_3_5_{pop}_rate",
+            numerator="ckd_primis_3_5",
+            denominator=pop,
+            group_by=["practice"]
             ),
-            Measure(
-                id=f"dialysis_{pop}_rate",
-                numerator="dialysis",
-                denominator=pop,
-                group_by=["practice"],
+    Measure(
+            id=f"ckd_primis_1_5_{pop}_rate",
+            numerator="ckd_primis_1_5",
+            denominator=pop,
+            group_by=["practice"]
             ),
-            Measure(
-                id=f"dialysis_code_{pop}_rate",
-                numerator="dialysis",
-                denominator=pop,
-                group_by=["dialysis_code"],
+    Measure(
+            id=f"RRT_{pop}_rate",
+            numerator="RRT",
+            denominator=pop,
+            group_by=["practice"]
             ),
-            Measure(
-                id=f"ckd_{pop}_rate",
-                numerator="ckd",
-                denominator="population",
-                group_by=["practice"]
+    Measure(
+            id=f"dialysis_{pop}_rate",
+            numerator="dialysis",
+            denominator=pop,
+            group_by=["practice"]
             ),
-            Measure(
-                id=f"ckd_primis_3_5_{pop}_rate",
-                numerator="ckd_primis_3_5",
-                denominator="population",
-                group_by=["practice"]
+    Measure(
+            id=f"kidney_tx_{pop}_rate",
+            numerator="kidney_tx",
+            denominator=pop,
+            group_by=["practice"]
             ),
-            Measure(
-                id=f"ckd_primis_1_5_{pop}_rate",
-                numerator="ckd_primis_1_5",
-                denominator="population",
-                group_by=["practice"]
+    Measure(
+            id=f"renal_status_{pop}_rate",
+            numerator="population",
+            denominator=pop,
+            group_by=["latest_renal_status"]
             ),
-           
+    Measure(
+        id=f"ckd_{pop}_rate",
+        numerator="ckd",
+        denominator="population",
+        group_by=["practice"]
+    ),
+    Measure(
+        id=f"ckd_primis_3_5_{pop}_rate",
+        numerator="ckd_primis_3_5",
+        denominator="population",
+        group_by=["practice"]
+    ),
+    Measure(
+        id=f"ckd_primis_1_5_{pop}_rate",
+        numerator="ckd_primis_1_5",
+        denominator="population",
+        group_by=["practice"]
+    ),
+    
         ]
     )
 
@@ -631,6 +732,10 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
             id=f"dialysis_{d}_{pop}_rate", numerator="dialysis", denominator=pop, group_by=[d]
         )
 
+        m_kidney_tx = Measure(
+            id=f"kidney_tx_{d}_{pop}_rate", numerator="kidney_tx", denominator=pop, group_by=[d]
+        )
+
         m_ckd = Measure(
             id=f"ckd_rate",
             numerator="ckd",
@@ -650,4 +755,4 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 group_by=[d]
                 )
 
-        measures.extend([m_crcl, m_cr, m_egfr, m_rrt, m_dialysis, m_ckd, m_ckd_1_5, m_ckd_3_5])
+        measures.extend([m_crcl, m_cr, m_egfr, m_rrt, m_dialysis, m_ckd, m_ckd_1_5, m_ckd_3_5, m_kidney_tx])

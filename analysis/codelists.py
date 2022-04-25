@@ -87,6 +87,14 @@ dialysis_codelist = codelist_from_csv(
     column="CTV3ID",
 )
 
+kidney_tx_codelist = codelist_from_csv(
+    "codelists/opensafely-kidney-transplant.csv",
+    system="ctv3",
+    column="CTV3ID",
+)
+
+all_rrt_codes = combine_codelists(RRT_codelist, dialysis_codelist, kidney_tx_codelist)
+
 ckd_codelist = codelist_from_csv(
     "codelists/opensafely-chronic-kidney-disease-snomed.csv",
     system="snomed",
