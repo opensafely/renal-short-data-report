@@ -423,6 +423,15 @@ study = StudyDefinition(
             "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
         },
     ),
+    ckd_primis_stage = patients.with_these_clinical_events(
+        codelist=primis_ckd_1_5_codelist,
+        on_or_before="index_date",
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"1": 0.5, "2": 0.5}},
+        },
+    ),
     # RRT
     RRT=patients.with_these_clinical_events(
         codelist=RRT_codelist,
@@ -514,9 +523,6 @@ study = StudyDefinition(
                         OR
                         RRT_date=latest_renal_date
                         """,
-            "CKD3_5": """
-                        ckd_primis_3_5_date=latest_renal_date
-                        """,
             "CKD_unknown": """
                         ckd_primis_1_5_date=latest_renal_date
                         OR
@@ -530,7 +536,6 @@ study = StudyDefinition(
             "RRT_date",
             "ckd_date",
             "ckd_primis_1_5_date",
-            "ckd_primis_3_5_date",
         ),
         return_expectations={
             "rate": "universal",
@@ -539,8 +544,7 @@ study = StudyDefinition(
                     "None": 0.4,
                     "Dialysis": 0.1,
                     "Transplant": 0.1,
-                    "RRT_unknown": 0.1,
-                    "CKD3_5": 0.1,
+                    "RRT_unknown": 0.2,
                     "CKD_unknown": 0.1,
                     "Uncategorised": 0.1,
                 }
@@ -603,6 +607,12 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 group_by=["practice"],
             ),
             Measure(
+                id=f"ckd_primis_1_5_stage_{pop}_rate",
+                numerator="ckd_primis_1_5",
+                denominator=pop,
+                group_by=["practice", "ckd_primis_stage"],
+            ),
+            Measure(
                 id=f"RRT_{pop}_rate",
                 numerator="RRT",
                 denominator=pop,
@@ -626,18 +636,7 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 denominator=pop,
                 group_by=["latest_renal_status"],
             ),
-            Measure(
-                id=f"ckd_{pop}_rate",
-                numerator="ckd",
-                denominator="population",
-                group_by=["practice"],
-            ),
-            Measure(
-                id=f"ckd_primis_1_5_{pop}_rate",
-                numerator="ckd_primis_1_5",
-                denominator="population",
-                group_by=["practice"],
-            ),
+        
         ]
     )
 
