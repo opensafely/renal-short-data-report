@@ -18,4 +18,5 @@ opensafely/dialysis/3ce108ac
 opensafely/chronic-kidney-disease-snomed/2020-04-14/
 primis-covid19-vacc-uptake/ckd15/v1/
 primis-covid19-vacc-uptake/ckd35/v1/
+user/Louis/ckd-stage/77b93e93/
 opensafely/kidney-transplant/2020-07-15
