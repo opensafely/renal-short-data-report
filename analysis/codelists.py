@@ -107,6 +107,13 @@ primis_ckd_1_5_codelist = codelist_from_csv(
     column="code"
 )
 
+primis_ckd_stage = codelist_from_csv(
+    "codelists/user-Louis-ckd-stage.csv",
+    system="snomed",
+    column="code",
+    category_column="stage"
+)
+
 primis_ckd_3_5_codelist = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-ckd35.csv",
     system="snomed",
