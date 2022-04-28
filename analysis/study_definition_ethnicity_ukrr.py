@@ -10,6 +10,7 @@ study = StudyDefinition(
     default_expectations={
         "date": {"earliest": "1900-01-01", "latest": "today"},
         "rate": "uniform",
+        "incidence": 0.5,
     },
     # End of the study period
     index_date="2021-12-31",
@@ -135,11 +136,11 @@ earliest_renal_status = patients.categorised_as(
                     earliest_dialysis_date!=earliest_renal_date 
                     """,
         "RRT_unknown"  : """
-                    dialysis_date=earliest_renal_date 
+                    earliest_dialysis_date=earliest_renal_date 
                     OR
-                    kidney_tx_date=earliest_renal_date
+                    earliest_kidney_tx_date=earliest_renal_date
                     OR
-                    RRT_date=earliest_renal_date
+                    earliest_RRT_date=earliest_renal_date
                     """,
         "Uncategorised" : "DEFAULT"
     },
