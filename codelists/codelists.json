@@ -125,6 +125,42 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/kidney-transplant/2020-07-15/",
       "downloaded_at": "2022-04-08 07:14:57.041888Z",
       "sha": "db6b47d17273b563cb428e4a97a7ba8b6d62afa9"
+    },
+    "user-viyaasan-kidney-transplant.csv": {
+      "id": "user/viyaasan/kidney-transplant/1a6e58c9",
+      "url": "https://codelists.opensafely.org/codelist/user/viyaasan/kidney-transplant/1a6e58c9/",
+      "downloaded_at": "2022-04-27 15:23:14.816084Z",
+      "sha": "f909df688ea4b858c7ca08929417d623b989e4c0"
+    },
+    "user-viyaasan-kidney-transplant-opcs-4.csv": {
+      "id": "user/viyaasan/kidney-transplant-opcs-4/1fd3d8b5",
+      "url": "https://codelists.opensafely.org/codelist/user/viyaasan/kidney-transplant-opcs-4/1fd3d8b5/",
+      "downloaded_at": "2022-04-27 15:23:14.983132Z",
+      "sha": "141ae0e0f2300ad42aa88c7c68fd2b29ca3ff2a9"
+    },
+    "user-viyaasan-kidney-replacement-therapy.csv": {
+      "id": "user/viyaasan/kidney-replacement-therapy/337dcbfe",
+      "url": "https://codelists.opensafely.org/codelist/user/viyaasan/kidney-replacement-therapy/337dcbfe/",
+      "downloaded_at": "2022-04-27 15:23:15.159026Z",
+      "sha": "c04e670607846c2f097d777d40eca13bb96e08c6"
+    },
+    "user-viyaasan-kidney-replacement-therapy-opcs-4.csv": {
+      "id": "user/viyaasan/kidney-replacement-therapy-opcs-4/38e34bea",
+      "url": "https://codelists.opensafely.org/codelist/user/viyaasan/kidney-replacement-therapy-opcs-4/38e34bea/",
+      "downloaded_at": "2022-04-27 15:23:15.371434Z",
+      "sha": "372d782a21e902336e7e0d63a8047dec2056c546"
+    },
+    "user-viyaasan-dialysis.csv": {
+      "id": "user/viyaasan/dialysis/4c8d3f33",
+      "url": "https://codelists.opensafely.org/codelist/user/viyaasan/dialysis/4c8d3f33/",
+      "downloaded_at": "2022-04-27 15:23:15.579067Z",
+      "sha": "830e3f45718417a1d19c57d40976056581ff75ab"
+    },
+    "user-viyaasan-dialysis-opcs-4.csv": {
+      "id": "user/viyaasan/dialysis-opcs-4/6b023254",
+      "url": "https://codelists.opensafely.org/codelist/user/viyaasan/dialysis-opcs-4/6b023254/",
+      "downloaded_at": "2022-04-27 15:23:15.795620Z",
+      "sha": "5d57d22a92d214f0a08528b18c4641d182fd79b2"
     }
   }
 }

@@ -113,3 +113,41 @@ primis_ckd_3_5_codelist = codelist_from_csv(
     column="code"
 )
 
+#not yet used in study def
+
+RRT_ICD10_codelist = codelist_from_csv(
+    "codelists/user-viyaasan-kidney-replacement-therapy.csv",
+    system="icd10",
+    column="code"
+)
+
+dialysis_ICD10_codelist = codelist_from_csv(
+    "codelists/user-viyaasan-dialysis.csv",
+    system="icd10",
+    column="code",
+)
+
+kidney_tx_ICD10_codelist = codelist_from_csv(
+    "codelists/user-viyaasan-kidney-transplant.csv",
+    system="icd10",
+    column="code",
+)
+
+RRT_OPCS4_codelist = codelist_from_csv(
+    "codelists/user-viyaasan-kidney-replacement-therapy-opcs-4.csv",
+    system="opcs4",
+    column="code"
+)
+
+dialysis_OPCS4_codelist = codelist_from_csv(
+    "codelists/user-viyaasan-dialysis-opcs-4.csv",
+    system="opcs4",
+    column="code",
+)
+
+kidney_tx_OPCS4_codelist = codelist_from_csv(
+    "codelists/user-viyaasan-kidney-transplant-opcs-4.csv",
+    system="opcs4",
+    column="code",
+)
+

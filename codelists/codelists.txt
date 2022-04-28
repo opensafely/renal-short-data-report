@@ -19,3 +19,9 @@ opensafely/chronic-kidney-disease-snomed/2020-04-14/
 primis-covid19-vacc-uptake/ckd15/v1/
 primis-covid19-vacc-uptake/ckd35/v1/
 opensafely/kidney-transplant/2020-07-15
+user/viyaasan/kidney-transplant/1a6e58c9
+user/viyaasan/kidney-transplant-opcs-4/1fd3d8b5
+user/viyaasan/kidney-replacement-therapy/337dcbfe
+user/viyaasan/kidney-replacement-therapy-opcs-4/38e34bea
+user/viyaasan/dialysis/4c8d3f33
+user/viyaasan/dialysis-opcs-4/6b023254

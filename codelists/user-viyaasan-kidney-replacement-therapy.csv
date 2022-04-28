@@ -1,0 +1,16 @@
+code,term
+I770,"Arteriovenous fistula, acquired"
+N165,Renal tubulo-interstitial disorders in transplant rejection T86.-
+N185,"Chronic kidney disease, stage 5"
+T824,Mechanical complication of vascular dialysis catheter
+T861,Kidney transplant failure and rejection
+Y602,During kidney dialysis or other perfusion
+Y612,During kidney dialysis or other perfusion
+Y622,During kidney dialysis or other perfusion
+Y841,Kidney dialysis
+Z49,Care involving dialysis
+Z490,Preparatory care for dialysis
+Z491,Extracorporeal dialysis
+Z492,Other dialysis
+Z940,Kidney transplant status
+Z992,Dependence on renal dialysis
