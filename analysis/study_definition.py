@@ -424,9 +424,9 @@ study = StudyDefinition(
         },
     ),
     ckd_primis_stage = patients.with_these_clinical_events(
-        codelist=primis_ckd_1_5_codelist,
+        codelist=primis_ckd_stage,
         on_or_before="index_date",
-        returning="code",
+        returning="category",
         return_expectations={
             "rate": "universal",
             "category": {"ratios": {"1": 0.5, "2": 0.5}},
@@ -501,7 +501,7 @@ study = StudyDefinition(
 
     latest_renal_date=patients.maximum_of(
     "dialysis_date", "kidney_tx_date", "RRT_date",
-    "ckd_date", "ckd_primis_1_5_date","ckd_primis_3_5_date"
+    "ckd_date", "ckd_primis_1_5_date"
     ),
 
     # Picking most recent status
@@ -512,7 +512,6 @@ study = StudyDefinition(
                         (NOT dialysis) 
                         AND (NOT kidney_tx) 
                         AND (NOT RRT)
-                        AND (NOT ckd_primis_3_5)
                         AND (NOT ckd_primis_1_5)
                         AND (NOT ckd)
                         """,
@@ -533,6 +532,31 @@ study = StudyDefinition(
                         OR
                         RRT_date=latest_renal_date
                         """,
+            "CKD5"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_primis_stage="5"
+                        """,
+            "CKD4"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_primis_stage="4"
+                        """,
+            "CKD3"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_primis_stage="3"
+                        """,
+            "CKD2"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_primis_stage="2"
+                        """,
+            "CKD1"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_primis_stage="1"
+                        """,
             "CKD_unknown": """
                         ckd_primis_1_5_date=latest_renal_date
                         OR
@@ -547,9 +571,14 @@ study = StudyDefinition(
                     "None": 0.4,
                     "Dialysis": 0.1,
                     "Transplant": 0.1,
-                    "RRT_unknown": 0.2,
-                    "CKD_unknown": 0.1,
-                    "Uncategorised": 0.1,
+                    "RRT_unknown": 0.1,
+                    "CKD5": 0.1,
+                    "CKD4": 0.05,
+                    "CKD3": 0.05,
+                    "CKD2": 0.04,
+                    "CKD1": 0.04,
+                    "CKD_unknown": 0.01,
+                    "Uncategorised": 0.01,
                 }
             }
         }
@@ -574,6 +603,12 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 group_by=["cr_cl_code"],
             ),
             Measure(
+                id=f"cr_cl_stage_rate",
+                numerator="cr_cl",
+                denominator="population",
+                group_by=["ckd_primis_stage"],
+            ),            
+            Measure(
                 id=f"creatinine_{pop}_rate",
                 numerator="creatinine",
                 denominator=pop,
@@ -584,6 +619,12 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 numerator="creatinine",
                 denominator=pop,
                 group_by=["creatinine_code"],
+            ),
+            Measure(
+                id=f"creatinine_stage_rate",
+                numerator="creatinine",
+                denominator="population",
+                group_by=["ckd_primis_stage"],
             ),
             Measure(
                 id=f"eGFR_{pop}_rate",
@@ -597,6 +638,12 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 denominator=pop,
                 group_by=["eGFR_code"],
             ),
+            Measure(
+                id=f"eGFR_stage_rate",
+                numerator="eGFR",
+                denominator="population",
+                group_by=["ckd_primis_stage"],
+            ),            
             Measure(
                 id=f"ckd_{pop}_rate",
                 numerator="ckd",
@@ -639,7 +686,12 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 denominator=pop,
                 group_by=["latest_renal_status"],
             ),
-        
+            Measure(
+                id=f"weight_before_creatinine_stage_rate",
+                numerator="weight_before_creatinine",
+                denominator="population",
+                group_by="ckd_primis_stage",
+            )        
         ]
     )
 
