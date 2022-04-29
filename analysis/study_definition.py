@@ -429,6 +429,16 @@ study = StudyDefinition(
         },
     ),
 
+    ckd_stage=patients.with_these_clinical_events(
+        codelist=primis_ckd_1_5_codelist,
+        on_or_before="index_date",
+        returning="category",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"1": 0.4, "2": 0.3, "3": 0.2, "4": 0.06, "5": 0.04}},
+        },
+    ),
+#maybe no longer need this as extracting stage but leave in for now
     ckd_primis_3_5=patients.with_these_clinical_events(
         codelist=primis_ckd_3_5_codelist,
         on_or_before="index_date",
@@ -559,8 +569,30 @@ study = StudyDefinition(
                         OR
                         RRT_date=latest_renal_date
                         """,
-            "CKD3_5"    : """
-                        ckd_primis_3_5_date=latest_renal_date
+            "CKD5"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_stage="5"
+                        """,
+            "CKD4"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_stage="4"
+                        """,
+            "CKD3"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_stage="3"
+                        """,
+            "CKD2"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_stage="2"
+                        """,
+            "CKD1"    : """
+                        ckd_primis_1_5_date=latest_renal_date
+                        AND
+                        ckd_stage="1"
                         """,
             "CKD_unknown" : """
                         ckd_primis_1_5_date=latest_renal_date
@@ -577,9 +609,13 @@ study = StudyDefinition(
                         "Dialysis": 0.1,
                         "Transplant": 0.1,
                         "RRT_unknown": 0.1,
-                        "CKD3_5": 0.1,
-                        "CKD_unknown": 0.1,
-                        "Uncategorised": 0.1,
+                        "CKD5": 0.1,
+                        "CKD4": 0.05,
+                        "CKD3": 0.05,
+                        "CKD2": 0.04,
+                        "CKD1": 0.04,
+                        "CKD_unknown": 0.01,
+                        "Uncategorised": 0.01,
                     }
                 },
             },
@@ -605,6 +641,12 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 numerator="cr_cl",
                 denominator=pop,
                 group_by=["cr_cl_code"],
+            ),
+            Measure(
+                id=f"cr_cl_renal_status_rate",
+                numerator="cr_cl",
+                denominator="population",
+                group_by=["latest_renal_status"],
             ),
             Measure(
                 id=f"creatinine_{pop}_rate",

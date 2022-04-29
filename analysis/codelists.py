@@ -102,9 +102,10 @@ ckd_codelist = codelist_from_csv(
 )
 
 primis_ckd_1_5_codelist = codelist_from_csv(
-    "codelists/primis-covid19-vacc-uptake-ckd15.csv",
+    "local_codelists/primis-covid19-vacc-uptake-ckd15-cat.csv",
     system="snomed",
-    column="code"
+    column="code",
+    category_column="stage"
 )
 
 primis_ckd_3_5_codelist = codelist_from_csv(
