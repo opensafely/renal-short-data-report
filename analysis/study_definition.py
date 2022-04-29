@@ -525,6 +525,10 @@ study = StudyDefinition(
         },
     ),
 
+    latest_renal_date=patients.maximum_of(
+    "dialysis_date", "kidney_tx_date", "RRT_date",
+    "ckd_date", "ckd_primis_1_5_date","ckd_primis_3_5_date"
+    ),
 
     #Picking most recent status
     #patients are assigned to the first condition they satisfy, so define RRT modalities first
@@ -565,10 +569,6 @@ study = StudyDefinition(
                         """,
             "Uncategorised" : "DEFAULT"
         },
-        latest_renal_date=patients.maximum_of(
-            "dialysis_date", "kidney_tx_date", "RRT_date",
-            "ckd_date", "ckd_primis_1_5_date","ckd_primis_3_5_date"
-            ),
         return_expectations={
                 "rate": "universal",
                 "category": {
