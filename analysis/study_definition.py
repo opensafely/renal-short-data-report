@@ -534,6 +534,9 @@ study = StudyDefinition(
                         (NOT dialysis) 
                         AND (NOT kidney_tx) 
                         AND (NOT RRT)
+                        AND (NOT ckd_primis_3_5)
+                        AND (NOT ckd_primis_1_5)
+                        AND (NOT CKD_unknown)
                         """,
             "Dialysis"  : """
                         dialysis_date=latest_renal_date 
