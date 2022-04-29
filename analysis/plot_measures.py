@@ -30,7 +30,7 @@ for i in ["cr_cl", "creatinine", "eGFR", "RRT", "dialysis", "kidney_tx", "ckd", 
             ylabel="Percentage",
         )
 
-        if i in ["RRT", "dialysis", "kidney_tx" "ckd", "ckd_primis_1_5"]:
+        if i in ["RRT", "dialysis", "kidney_tx", "ckd", "ckd_primis_1_5"]:
             demographics = []
 
         else:
