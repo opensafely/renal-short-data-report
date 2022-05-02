@@ -74,7 +74,7 @@ actions:
         notebook: output/report.html
 
   generate_ukrr_report:
-    run: r:latest -e 'rmarkdown::render("analysis/UKRR-report.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-report.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:

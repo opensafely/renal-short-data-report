@@ -12,7 +12,7 @@ library(knitr)
 # Create directory if it doesnt exist
 fs::dir_create(here::here("output", "notebooks"))
 #read in 
-d1<-read.csv(here::here("output", "joined", "ckd", "input_2019-12-01.csv.gz"))
+d1<-read.csv(here::here("output", "joined", "input_2019-12-01.csv.gz"))
 #set up
 ukrr_cohorts<-d1[c("ukrr_2019", "ukrr_2020", "ukrr_2021", "ukrr_inc2020")]
 ukrr_mod<-d1[c("ukrr_2019_mod", "ukrr_2020_mod", "ukrr_2021_mod", "ukrr_inc2020_mod")]
@@ -91,5 +91,4 @@ demogs.t1<-(lapply(demogs, function(y)
 #combine into one table
 demogs.t2<-as.data.frame(do.call(rbind, demogs.t1))
 kable(demogs.t2)
-demogs.t2
 ```
