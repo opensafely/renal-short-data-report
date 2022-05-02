@@ -33,27 +33,32 @@ kable(apply(d1[which(d1$latest_renal_status=="None"),
 
 Checking latest renal status for patients whose last date was dialysis
 ```{r, echo=FALSE}
-kable(d1[which(d1$dialysis_date==d1$latest_renal_date & d1$kidney_tx_date!=d1$latest_renal_date),]%>%
+kable(d1[which(d1$dialysis_date==d1$latest_renal_date & 
+              d1$kidney_tx_date!=d1$latest_renal_date),]%>%
   count(latest_renal_status))
 ```
 Checking latest renal status for patients whose last date was tx
 ```{r, echo=FALSE}
-kable(d1[which(d1$dialysis_date!=d1$latest_renal_date & d1$kidney_tx_date==d1$latest_renal_date),]%>%
+kable(d1[which(d1$dialysis_date!=d1$latest_renal_date & 
+              d1$kidney_tx_date==d1$latest_renal_date),]%>%
   count(latest_renal_status))
 ```
 Checking latest renal status for patients whose last date was RRT but none of the above apply
 ```{r, echo=FALSE}
-kable(d1[with(d1, which(latest_renal_date %in% d1[c("dialysis_date","kidney_tx_date","RRT_date")])),]%>%
+kable(d1[which(d1$dialysis_date==d1$latest_renal_date |
+                d1$kidney_tx_date==d1$latest_renal_date |
+                d1$RRT_date==d1$latest_renal_date),]%>%
   count(latest_renal_status))
 ```
-Checking latest renal status for patients whose last date was dialysis
+Checking latest renal status for patients whose last date was CKD
 ```{r, echo=FALSE}
-kable(d1[which(d1$ckd_primis_1_5_date==d1$latest_renal_dat1e),]%>%
+kable(d1[which(d1$ckd_primis_1_5_date==d1$latest_renal_date),]%>%
   count(latest_renal_status))
 ```
 Checking CKD stages
 ```{r, echo=FALSE}
-d1[with(d1, which(latest_renal_date %in% d1[c("ckd_primis_1_5_date","ckd_date")])),]%>%
+d1[which(d1$latest_renal_date==d1$ckd_primis_1_5_date |
+          d1$latest_renal_date==d1$ckd_date),]%>%
     group_by(latest_renal_status, ckd_primis_stage) %>%
     tally()%>%
     spread(latest_renal_status, n) %>%
