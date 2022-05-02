@@ -73,6 +73,13 @@ actions:
       moderately_sensitive:
         notebook: output/report.html
 
+  generate_ukrr_report:
+    run: r:latest -e 'rmarkdown::render("analysis/UKRR-report.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/ukrr-report.html
+
   
   generate_frequency_plots:
     run: r:latest analysis/test_frequency.R
