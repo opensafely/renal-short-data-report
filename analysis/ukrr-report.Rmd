@@ -1,0 +1,131 @@
+---
+title: "UKRR and OpenSAFELY comparison - patients prevalent to kideny replacement therapy"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+#set up empty list of datasets and demog variables
+dflist<-list()
+years<-c("2019", "2020", "2021")
+demogs<-c("sex", "age_band", "region", "imd", "diabetes", "at_risk", "hypertension")
+for (i in 1:3){
+  #read in dataset
+  df<-read.csv(here::here("output", "joined", "ckd", paste0("input_", years[i],"-12-01.csv.gz")))
+  #set prevalent data flag and modality
+  df$ukrr_prev<-as.vector(t(df[paste0("ukrr_", years[i])]))
+  df$ukrr_mod<-as.vector(t(df[paste0("ukrr_", years[i],"_mod")]))
+  #add variable for dialysis/tx for UKRR
+  df<- df %>%
+    mutate(ukrr_dtx = ifelse(ukrr_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_mod == "Tx", "Transplant", "Not on RRT")))
+  # add variable for dialysis/tx for primary care
+  df<- df %>%
+    mutate(latest_dtx = ifelse(latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_renal_status, "Not on RRT"))
+  # order factor
+  df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
+  df$latest_dtx<-factor(df$latest_dtx, levels=c("Not on RRT", "Dialysis", "Transplant", "RRT_unknown"))
+  # add variable for source
+  df<-df %>%
+    mutate(rrt_source = ifelse(ukrr_prev==1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
+                               ifelse (ukrr_prev==1 & !(latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
+                                    ifelse(ukrr_prev!=1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
+                                           "Neither"))))
+  #put dataset into list
+  dflist[[i]] <- df
+}
+
+```
+
+## Comparison of prevalent patients captured in the UKRR and OpenSAFELY cohorts
+
+### Table 1 - Prevalent patients by year, any modality
+```{r, echo=FALSE, results='asis'}
+#table for numbers
+ntable<-function(x){
+  table(x$ukrr_prev, x$latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+}
+#filter dataset to exclude patients with no RRT in either OS or UKRR as this is what we want to show pct by
+keepRRT<-function(x){
+  filter(x , ukrr_prev==1 | latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+}
+#combine N and % in one table
+mytable <- function(x){
+  m1<-cbind(ntable(x), round(100*prop.table(ntable(keepRRT(x))),1))
+  m2 <- m1[, c(matrix(1:ncol(m1), nrow = 2, byrow = T))]  
+  colnames(m2) <-c("not RRT in PC", "%", "RRT in PC", "%")
+  rownames(m2) <- c("not RRT in UKRR", "RRT in UKRR")
+  m2[1,1]<-paste0("\\(", m2[1,1], ")") #placing first cell in brackets as not really interested in these
+  return(m2)
+}
+#applying to all in list
+list.of.dts<-lapply(dflist, mytable)
+for(i in 1:length(list.of.dts)) {
+  print(kable(x = list.of.dts[[i]], caption=years[i]))
+}
+
+```
+
+### Table 2a - Prevalent patients by year, by modality
+```{r, echo=FALSE, results='asis'}
+#table for numbers
+list.of.dts<-lapply(dflist, function (x) table(x$ukrr_mod, x$latest_renal_status))
+for(i in 1:length(list.of.dts)) {
+  print(kable(x = list.of.dts[[i]], caption=years[i]))
+}
+```
+
+### Table 2b - Agreement between dialysis and tx, excluding people not on KRT in either source
+NB check here that dialysis-transplant split is correct, numbers should match table 2a
+```{r, echo=FALSE, results='asis'}
+#table for numbers
+ntable<-function(x){
+  table(keepRRT(x)$ukrr_dtx, keepRRT(x)$latest_dtx)
+}
+
+#combine N and % in one table
+mytable <- function(x){
+  m1<-cbind(ntable(x), round(100*prop.table(ntable(x)),1))
+  m2 <- m1[, c(matrix(1:ncol(m1), nrow = 2, byrow = T))]  
+  colnames(m2) <-paste0(colnames(m2), rep(c(" n", " %"), 4))
+  return(m2)
+}
+#applying to all in list
+list.of.dts<-lapply(dflist, mytable)
+for(i in 1:length(list.of.dts)) {
+  k<-kable(x = list.of.dts[[i]], caption=years[i])
+  print(add_header_above(k, c("UKRR", "Primary care" = 8)))
+}
+
+```
+
+### Table 3 - Agreement by demographics
+```{r, echo=FALSE, results='asis'}
+dtable<-function(x, y) {
+    y1<-keepRRT(y)
+    m1<-cbind(table(y1[,x],y1$rrt_source),
+              round(100*prop.table(table(y1[,x],y1$rrt_source), margin=1),1))
+    m2 <- m1[, c(matrix(1:ncol(m1), nrow = 2, byrow = T))]  
+    colnames(m2) <-paste0(colnames(m2), rep(c(" n", " %"), 3))
+    return(m2)
+}
+dtable(demogs[1],dflist[[1]])
+
+list.of.dts<-lapply(dflist, function(y) lapply(demogs, function(x) dtable(x, y)))
+
+for(i in 1:length(list.of.dts)) {
+  for(j in 1:length(list.of.dts[[i]])){
+  print(kable(x = list.of.dts[[i]][[j]], caption=paste(years[i], demogs[j])))
+  }
+}
+```
+
