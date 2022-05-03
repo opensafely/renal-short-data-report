@@ -16,7 +16,7 @@ d<-read.csv(here::here("output", "input_2019-12-01.csv.gz"))
 ukrr<-read.csv(here::here("output", "input_ethnicity_ukrr.csv.gz"))
 #redoing join so we get a left join with the UKRR data on the left - the cohort joiner has the monthly file on the left
 #still might not get demogs for all patients as only adults alive and registered at start of December 2019
-d1<-merge(x=ukrr, y=d, by="patient_id", all.x=TRUE))
+d1<-merge(x=ukrr, y=d, by="patient_id", all.x=TRUE)
 
 #set up
 ukrr_cohorts<-d1[c("ukrr_2019", "ukrr_2020", "ukrr_2021", "ukrr_inc2020")]
