@@ -1,0 +1,120 @@
+---
+title: "Data checks for UKRR OS comparison"
+author: "Shalini Santhakumaran"
+date: '2022-04-24'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(knitr)
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+#read in - just doing 2019 as only to check variables are being derived correctly
+d<-read.csv(here::here("output", "input_2019-12-01.csv.gz"))
+ukrr<-read.csv(here::here("output", "input_ethnicity_ukrr.csv.gz"))
+#redoing join so we get a left join with the UKRR data on the left - the cohort joiner has the monthly file on the left
+#still might not get demogs for all patients as only adults alive and registered at start of December 2019
+d1<-merge(x=ukrr, y=d, by="patient_id", all.x=TRUE)
+
+#set up
+ukrr_cohorts<-d1[c("ukrr_2019", "ukrr_2020", "ukrr_2021", "ukrr_inc2020")]
+ukrr_mod<-d1[c("ukrr_2019_mod", "ukrr_2020_mod", "ukrr_2021_mod", "ukrr_inc2020_mod")]
+ukrr_centre<-d1[c("ukrr_2019_centre", "ukrr_2020_centre", "ukrr_2021_centre", "ukrr_inc2020_centre")]
+demogs<-d1[c("sex", "age_band", "region", "imd", "diabetes", "at_risk", "hypertension")]
+demogs <- lapply(demogs, as.factor)
+```
+## Latest renal status
+
+First checking that the latest renal status is being determined correctly in the study definition (relationships defined using patients.categorised_as don't hold, the variables are are just created using dummy data expectations)
+
+Binary flags for primary care codelists where latest_renal_status = "None" (i.e. the patient is classed as never having had any stage of CKD)
+```{r, echo=FALSE}
+kable(apply(d1[which(d1$latest_renal_status=="None"),
+         c("dialysis","kidney_tx","RRT","ckd_primis_1_5")],
+        2,table ))
+```
+
+Checking latest renal status for patients whose last date was dialysis
+```{r, echo=FALSE}
+kable(d1[which(d1$dialysis_date==d1$latest_renal_date & 
+              d1$kidney_tx_date!=d1$latest_renal_date),]%>%
+  count(latest_renal_status))
+```
+Checking latest renal status for patients whose last date was tx
+```{r, echo=FALSE}
+kable(d1[which(d1$dialysis_date!=d1$latest_renal_date & 
+              d1$kidney_tx_date==d1$latest_renal_date),]%>%
+  count(latest_renal_status))
+```
+Checking latest renal status for patients whose last date was RRT but none of the above apply
+```{r, echo=FALSE}
+kable(d1[which(d1$dialysis_date==d1$latest_renal_date |
+                d1$kidney_tx_date==d1$latest_renal_date |
+                d1$RRT_date==d1$latest_renal_date),]%>%
+  count(latest_renal_status))
+```
+Checking latest renal status for patients whose last date was CKD
+```{r, echo=FALSE}
+kable(d1[which(d1$ckd_primis_1_5_date==d1$latest_renal_date),]%>%
+  count(latest_renal_status))
+```
+Checking CKD stages
+```{r, echo=FALSE}
+d1[which(d1$latest_renal_date==d1$ckd_primis_1_5_date |
+          d1$latest_renal_date==d1$ckd_date),]%>%
+    group_by(latest_renal_status, ckd_primis_stage) %>%
+    tally()%>%
+    spread(latest_renal_status, n) %>%
+    kable()
+```
+Checking uncategorised
+```{r, echo=FALSE}
+kable(apply(d1[which(d1$latest_renal_status=="Uncategorised"),
+         c("dialysis","kidney_tx","RRT","ckd_primis_stage")],
+      2,table ))
+```
+Checking demographics
+```{r, echo=FALSE, results='asis'}
+dtable <- function(x){
+    df1<-table(x, d1$latest_renal_status)  #numbers
+    df2<-prop.table(table(x,d1$latest_renal_status), margin=2) #proportions
+    df3<-cbind(df1, df2) #combine
+    colnames(df3)<-c(paste(colnames(df1), "N"), paste(colnames(df2), "%")) #name columns
+    df4 <- df3[, c(matrix(1:ncol(df3), nrow = 2, byrow = T))]  
+    return(df4)
+}
+list.of.dts<-lapply(demogs, dtable)
+for(i in 1:length(list.of.dts)) {
+  print(kable(x = list.of.dts[[i]], caption=paste0(names(demogs)[i], " by latest renal status")))
+}
+```
+
+
+## Checking frequencies of UKRR daa
+Modality by cohort
+```{r,  echo=FALSE}
+mapply(function(x, y) 
+    rbind("N"=table(y[x==1]),
+          "%"=prop.table(table(y[x==1]))) , 
+    ukrr_cohorts, ukrr_mod, SIMPLIFY=FALSE)
+```
+Centre by cohort
+```{r ,  echo=FALSE}
+mapply(function(x, y) 
+    cbind("N"=table(y[x==1]),
+          "%"=prop.table(table(y[x==1]))) , 
+    ukrr_cohorts, ukrr_centre, SIMPLIFY=FALSE)
+```
+Cohort demographics
+```{r, echo=FALSE, results='asis'}
+#tabulate each cohort by each demog
+list.of.dts<-(lapply(demogs, function(y) 
+  as.data.frame(lapply(ukrr_cohorts, function(x) 
+    cbind("N"=table(y[x==1]),
+          "%"=prop.table(table(y[x==1]))) ))))
+for(i in 1:length(list.of.dts)) {
+  print(kable(x = list.of.dts[[i]], caption=paste0(names(demogs)[i], " by UKRR cohort")))
+}
+```
