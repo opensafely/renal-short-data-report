@@ -21,7 +21,7 @@ years<-c("2019", "2020", "2021")
 demogs<-c("sex", "age_band", "region", "imd", "diabetes", "at_risk", "hypertension")
 for (i in 1:3){
   #read in dataset
-  df<-read.csv(here::here("output", "joined", "ckd", paste0("input_", years[i],"-12-01.csv.gz")))
+  df<-read.csv(here::here("output", "joined", paste0("input_", years[i],"-12-01.csv.gz")))
   #set prevalent data flag and modality
   df$ukrr_prev<-as.vector(t(df[paste0("ukrr_", years[i])]))
   df$ukrr_mod<-as.vector(t(df[paste0("ukrr_", years[i],"_mod")]))
