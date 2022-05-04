@@ -23,7 +23,7 @@ for (i in 1:3){
   #read in dataset
   
 #pick up 1st Jan cohort as latest renal status is on or before index date
- df<-read.csv(here::here("output", "joined", paste0("input_", years[i]+1,"-01-01.csv.gz"))) 
+ df<-read.csv(here::here("output", "joined", paste0("input_", as.numeric(years[i])+1,"-01-01.csv.gz"))) 
   
   # FOR RUNNING LOCALLY
   #df<-read.csv(paste0("Z:/My Documents/OS code testing/output/joined/ckd/input_", years[i],"-12-01.csv.gz"))
