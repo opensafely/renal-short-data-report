@@ -45,7 +45,8 @@ for (i in 1:3){
     mutate(rrt_source = ifelse(ukrr_prev==1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
                                ifelse (ukrr_prev==1 & !(latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
                                     ifelse(ukrr_prev!=1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
-                                           "Neither"))))
+                                           "Neither")))) %>%
+    mutate(region = replace(region, region="", "Missing"))
   #put dataset into list
   dflist[[i]] <- df
 }
@@ -54,6 +55,9 @@ for (i in 1:3){
 keepRRT<-function(x){
   filter(x , ukrr_prev==1 | latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
 }
+
+#function to round up to nearest accuracy
+roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
 
 ```
 
@@ -68,7 +72,7 @@ For the UKRR data, patients are classified as part of the prevalent cohort if th
 For the primary care data, patients are classified based on the last recorded code in the dialysis, transplant and RRT codelists.  If both dialysis and transplant codes were recorded on the same day, then the renal status is classed as 'RRT unknown'. If RRT and CKD codes are recorded on the same day, then the renal status is based on the RRT code.
 
 #### Disclosure control
-Cells less than or equal to 5 are shown as <=5 and corresponding percentages blanked. All other numbers are rounded to the nearest 5 and percentages calculated on the rounded number.
+Cells less than or equal to 5 are shown as <=5 and corresponding percentages blanked. All other numbers are rounded up to the nearest 5 and percentages calculated on the rounded number.
 
 #### Links
 [OpenSAFELY dialysis primary care codelist](https://www.opencodelists.org/codelist/opensafely/dialysis/2020-07-16/) <br>
@@ -79,11 +83,11 @@ Cells less than or equal to 5 are shown as <=5 and corresponding percentages bla
 ## Results
 
 #### 1 People prevalent to RRT by data source
-Percentages exclude people not on RRT in either source.
+Percentages are calculated over the whole table,  excluding people not on RRT in either source.
 ```{r, echo=FALSE, results='asis'}
 #table for numbers
 ntable<-function(x){
-  round(table(x$ukrr_prev, x$latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))/5)*5 #round to nearest 5
+  roundup(table(x$ukrr_prev, x$latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown")),5) #round to nearest 5
 }
 
 #combine N and % in one table
@@ -119,7 +123,7 @@ list.of.dts<-lapply(dflist, function (x) x %>%
   spread(latest_renal_status, n, fill=0) %>%
   mutate(ukrr_mod= replace(ukrr_mod, ukrr_mod=="", "Not on RRT")) %>%
   rename(UKRR=ukrr_mod) %>%
-  mutate(across(where(is.numeric), ~ round(.x/5)*5)) %>% 
+  mutate(across(where(is.numeric), ~ roundup(.x,5))) %>% 
   mutate_all(~ifelse(.<=5,"<=5",.)))
 
 for(i in 1:length(list.of.dts)) {
@@ -132,11 +136,11 @@ for(i in 1:length(list.of.dts)) {
 ```
 
 #### 3 - Agreement between dialysis and transplant
-Excludes people not on RRT in either source.
+Percentages are calculated over the whole table,  excluding people not on RRT in either source.
 ```{r, echo=FALSE, results='asis'}
 #table for numbers
 ntable<-function(x){
-  round(table(keepRRT(x)$ukrr_dtx, keepRRT(x)$latest_dtx)/5)*5 #round to nearest 5
+  roundup(table(keepRRT(x)$ukrr_dtx, keepRRT(x)$latest_dtx),5) #round up to nearest 5
 }
 
 #combine N and % in one table
@@ -144,6 +148,8 @@ mytable <- function(x){
   m1<-cbind(ntable(x), round(100*prop.table(ntable(x)),0)) #pct based on rounded numbers
   m2 <- m1[, c(matrix(1:ncol(m1), nrow = 2, byrow = T))]  
   #colnames(m2) <-paste0(colnames(m2), rep(c(" n", " %"), 4))
+  m2[1,1]<-""  # replaceing 0 in first two cells with nothing
+  m2[1,2]<-""
   return(m2)
 }
 #applying to all in list
@@ -163,13 +169,13 @@ for(i in 1:length(list.of.dts)) {
 ```
 
 ### 4 - Agreement by demographics
-Capture of RRT patients in each data source, by demographics. 
+Capture of RRT patients in each data source, by demographics. Percentages are calculated across rows.
 
 ```{r, echo=FALSE, results='asis'}
 dtable<-function(x, y) {
     y1<-keepRRT(y)
     noround.t<-table(y1[,x],y1$rrt_source)
-    round.t<-round(noround.t/5)*5 #rounding to nearest 5
+    round.t<-roundup(noround.t,5) #rounding to nearest 5
     round.t[noround.t<=5] <- 0  #replacing values less than 5 with 0 so they are excluded from %
     prop.t<-round(100*prop.table(round.t, margin=1),0)  #calculate % on rounded table, with <5 excluded
     round.t[noround.t<=5] <- "<=5"  #replacing <5
