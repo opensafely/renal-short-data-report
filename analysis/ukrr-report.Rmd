@@ -46,7 +46,7 @@ for (i in 1:3){
                                ifelse (ukrr_prev==1 & !(latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
                                     ifelse(ukrr_prev!=1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
                                            "Neither")))) %>%
-    mutate(region = replace(region, region="", "Missing"))
+    mutate(region = replace(region, region=="", "Missing"))
   #put dataset into list
   dflist[[i]] <- df
 }
