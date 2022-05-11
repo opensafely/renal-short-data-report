@@ -88,11 +88,11 @@ actions:
         report: output/notebooks/ukrr-report.html
        
   generate_ukrr_discrepancies:
-  run: r:latest -e 'rmarkdown::render("analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  needs: [join_cohorts]
-  outputs:
-    moderately_sensitive:
-      report: output/notebooks/ukrr-discrepancies.html
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/ukrr-discrepancies.html
   
   generate_frequency_plots:
     run: r:latest analysis/test_frequency.R
