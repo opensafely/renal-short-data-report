@@ -153,9 +153,9 @@ plot.df<-mapply( function(x, y)
    x %>%
         filter(rrt_source=="UKRR only" & 
                  (dialysis==1 | kidney_tx==1 | RRT==1)) %>%
-        mutate(days_since_dialysis = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(dialysis_date))) %>%  #time 
-        mutate(days_since_tx = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(kidney_tx_date))) %>%
-        mutate(days_since_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(RRT_date))) %>%
+        mutate(days_since_dialysis = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(dialysis_date, "%Y-%m-%d"))) %>%  #time 
+        mutate(days_since_tx = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(kidney_tx_date, "%Y-%m-%d"))) %>%
+        mutate(days_since_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(RRT_date, "%Y-%m-%d"))) %>%
         mutate(days_since_last_RRT = pmin(days_since_dialysis, days_since_tx, days_since_RRT)),
     dflist, years, SIMPLIFY = FALSE)  
 
@@ -242,7 +242,7 @@ Now looking how long before the prevalent date the RRT event code in primary car
 plot.df<-mapply(function(x,y)
    x %>%
         filter(rrt_source=="PC only" & latest_renal_status!="None") %>%
-        mutate(days_since_last_RRT = as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_renal_date)),
+        mutate(days_since_last_RRT = as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_renal_date, "%Y-%m-%d")),
    dflist, years, SIMPLIFY = FALSE)
 
 mapply(function(z, d) 
