@@ -175,7 +175,7 @@ plot.df<-mapply( function(x, y)
 
 mapply(function(z, d) 
   lapply( c("Dialysis", "Transplant"), function(x) 
-    ggplot(subset(z, ukrr_dtx==x), aes(days_since_last_RRT)) + geom_histogram() +
+    ggplot(subset(z, ukrr_dtx==x), aes(days_since_last_RRT)) + geom_bar(stat = "count") +
       labs(title=paste("Histogram of days since last primary care", x, "code for UKRR", x, "patients", d))  + theme(plot.title = element_text(size = 10, face = "bold"))),
   plot.df, years, SIMPLIFY =FALSE  )
 
@@ -256,7 +256,7 @@ plot.df<-mapply(function(x,y)
 
 mapply(function(z, d) 
   lapply( c("Dialysis", "Transplant"), function(x)  #not doing RRT unknown as so few pts 
-    ggplot(subset(z, latest_renal_status==x), aes(days_since_last_RRT)) + geom_histogram() +
+    ggplot(subset(z, latest_renal_status==x), aes(days_since_last_RRT)) + geom_bar(stat = "count") +
       labs(title=paste("Histogram of days since last RRT code for", x, "patients", d))  + theme(plot.title = element_text(size = 10, face = "bold"))),
   plot.df, years, SIMPLIFY =FALSE  )
 
