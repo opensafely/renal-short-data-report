@@ -269,11 +269,11 @@ codes.table.3<-function(df,status, codelist){
     summarise(n=n(), median=median(days_since_last_RRT)) %>%
     left_join(codelist, by=setNames(names(codelist)[1], "latest_renal_code")) %>%
     mutate(latest_renal_code= replace(latest_renal_code, latest_renal_code %in% c("", NA) , "Missing")) %>%
-      mutate(n,n=ifelse(n<=5,0,n)) %>% #first replace n<=5 with 0
-      mutate(n, n=roundup(n,5)) %>%  #round up to nearest 5
+      mutate(n=ifelse(n<=5,0,n)) %>% #first replace n<=5 with 0
+      mutate(n=roundup(n,5)) %>%  #round up to nearest 5
       mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
         mutate(median = ifelse(n==0, NA, median)) %>%   #then calculate %s, blanking if n is 0
-      mutate(n,n=ifelse(n<=5,"<=5",n)) %>% #now replacing <=5 (which is now 0 anyway) with "<=5"
+      mutate(n=ifelse(n<=5,"<=5",n)) %>% #now replacing <=5 (which is now 0 anyway) with "<=5"
       arrange(desc(n))  #descending sort by n
 }
 
