@@ -134,8 +134,8 @@ codes.table<-function(df,codevar,codelist){
     mutate(n=ifelse(n<=5,0,n)) %>% #first replace n<=5 with 0
     mutate(n=roundup(n,5)) %>% 
     mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n),0))) %>%   #then calculate %s, blanking if n is 0
-    arrange(desc(n))) %>%
-    mutate(n=ifelse(n<=5,"<=5",n))  #now replaceing <=5 (which is now 0 anyway) with "<=5"
+    arrange(desc(n)) %>%
+    mutate(n=ifelse(n<=5,"<=5",n)))  #now replaceing <=5 (which is now 0 anyway) with "<=5"
 }
 
 list.of.dts<-lapply(dflist, function(x) mapply(function(y, z) codes.table(x, y, z), all.code.vars, all.codelists, SIMPLIFY = FALSE))
