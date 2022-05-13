@@ -86,11 +86,11 @@ keepRRT<-function(x){
 roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
 
 #read in codelists so we can tabulate the names
-ckd_codelist<-read.csv(here::here("codelists", "opensafely-chronic-kidney-disease-snomed.csv")) 
-ckd_primis_1_5_codelist<-read.csv(here::here("codelists", "user-Louis-ckd-stage.csv")) 
-dialysis_codelist<-read.csv(here::here("codelists", "opensafely-dialysis.csv")) 
-kidney_tx_codelist<-read.csv(here::here("codelists", "opensafely-kidney-transplant.csv")) 
-RRT_codelist<-read.csv(here::here("codelists", "opensafely-renal-replacement-therapy.csv")) 
+ckd_codelist<-unique(read.csv(here::here("codelists", "opensafely-chronic-kidney-disease-snomed.csv"))[,1:2])
+ckd_primis_1_5_codelist<-unique(read.csv(here::here("codelists", "user-Louis-ckd-stage.csv"))[,1:2])
+dialysis_codelist<-unique(read.csv(here::here("codelists", "opensafely-dialysis.csv"))[,1:2])
+kidney_tx_codelist<-unique(read.csv(here::here("codelists", "opensafely-kidney-transplant.csv"))[,1:2])
+RRT_codelist<-unique(read.csv(here::here("codelists", "opensafely-renal-replacement-therapy.csv"))[,1:2])
 all.codelists<-list(ckd_codelist, ckd_primis_1_5_codelist, dialysis_codelist, kidney_tx_codelist, RRT_codelist )
 all.code.vars<-c("ckd_code", "ckd_primis_1_5_code", "dialysis_code", "kidney_tx_code", "RRT_code")
 
@@ -103,7 +103,8 @@ First looking at at the renal status as defined by the latest primary care code.
 list.of.dts<-lapply(dflist, function (x) 
   x %>%
     filter(rrt_source=="UKRR only") %>%
-    count(latest_renal_status) %>%
+    count(ukrr_dtx, latest_renal_status) %>%
+    spread(latest_renal_status, n, fill=0) %>%
     mutate(across(where(is.numeric)&!c(1), ~ roundup(.x,5))) %>% 
     mutate(across(where(is.numeric)&!c(1),~ifelse(.<=5,"<=5",.)))) 
 
@@ -116,63 +117,68 @@ for(i in 1:length(list.of.dts)) {
 }
 
 ```
-For some people the latest renal code relates to CKD but there is a previous RRT code.  The tables below describe the most recent codes for each OpenSAFELY primary care codelist.
+For some people the latest renal code relates to CKD but there is a previous RRT code.  The tables below describe the most recent codes for each OpenSAFELY primary care codelist, excluding patients with no renal primary care codes at all, and split by UKRR modality (dialysis/transplant).
 ```{r, echo=FALSE, results='asis'}
 #Then the latest codes for CKD, dialysis, transplant and RRT
+#split by modality
+mods<-c("Dialysis", "Transplant")
 codes.table<-function(df,codevar,codelist){
+  lapply(mods, function(mod)
   df %>%
-    filter(rrt_source=="UKRR only" & latest_renal_status!="None") %>%
+    filter(rrt_source=="UKRR only" & latest_renal_status!="None" & ukrr_dtx==mod) %>%
     count(!!as.name(codevar)) %>%
     left_join(codelist, by=setNames(names(codelist)[1], codevar)) %>%
-    mutate(!!codevar:= replace(!!as.name(codevar), !!as.name(codevar)=="", "Missing")) %>%
-    mutate(across(where(is.numeric)&!c(1), ~ roundup(.x,5))) %>% 
-    mutate(across(where(is.numeric)&!c(1),~ifelse(.<=5,"<=5",.)))
+    mutate(!!codevar:= replace(!!as.name(codevar), !!as.name(codevar) %in% c("", NA), "Missing")) %>%
+    mutate(n=ifelse(n<=5,0,n)) %>% #first replace n<=5 with 0
+    mutate(n=roundup(n,5)) %>% 
+    mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n),0))) %>%   #then calculate %s, blanking if n is 0
+    mutate(n=ifelse(n<=5,"<=5",n)) %>% #now replaceing <=5 (which is now 0 anyway) with "<=5"
+    arrange(desc(n)))
 }
 
 list.of.dts<-lapply(dflist, function(x) mapply(function(y, z) codes.table(x, y, z), all.code.vars, all.codelists, SIMPLIFY = FALSE))
 
 for(i in 1:length(list.of.dts)) {
   for(j in 1:length(list.of.dts[[i]])){
-  # names<-unique(colnames(list.of.dts[[i]][[j]])) #save existing colnames
-  #  colnames(list.of.dts[[i]][[j]])<-rep("",length(names)*2) # blank colnames
-   k<- list.of.dts[[i]][[j]]%>%
-          kbl(caption=paste0("Table 1.", i, "." , j, " Frequency of most recent ", all.code.vars[j], "s, ", years[i] ), booktabs=TRUE) %>% 
-          #add_header_above(c(demogs[j], rep(c("n", "%"), length(names)))) %>%
-          #add_header_above(data.frame(c("", names), c(1,rep(2, length(names))))) %>%  #setting colnames as a dataframe 
-          kable_styling()
-  print(k)     
+    for(k in 1:length(mods)){
+      # names<-unique(colnames(list.of.dts[[i]][[j]])) #save existing colnames
+      #  colnames(list.of.dts[[i]][[j]])<-rep("",length(names)*2) # blank colnames
+       k<- list.of.dts[[i]][[j]][[k]]%>%
+              kbl(caption=paste0(
+                "Table 1.", i, "." , j, 
+                " Frequency of most recent ", all.code.vars[j], "s, for people on ", 
+                mods[k], " in the UKRR, ", years[i] ), booktabs=TRUE) %>% 
+              #add_header_above(c(demogs[j], rep(c("n", "%"), length(names)))) %>%
+              #add_header_above(data.frame(c("", names), c(1,rep(2, length(names))))) %>%  #setting colnames as a dataframe 
+              kable_styling()
+      print(k)   
+    }
   }
 }
 
 ```
-For people with a RRT code which predates the latest CKD code, we look at how long it has been since the last RRT code.
+For people on dialysis/tx in the UKRR, with a dialysis/tx code which predates the latest CKD code, we look at how long it has been since the last dialysis/tx code.
 ```{r, echo=FALSE, results='asis'}
 
 # Now plotting the time between last RRT code and prevalent date
 plot.df<-mapply( function(x, y)
    x %>%
         filter(rrt_source=="UKRR only" & 
-                 (dialysis==1 | kidney_tx==1 | RRT==1)) %>%
-        mutate(days_since_dialysis = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(dialysis_date, "%Y-%m-%d"))) %>%  #time 
-        mutate(days_since_tx = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(kidney_tx_date, "%Y-%m-%d"))) %>%
-        mutate(days_since_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(RRT_date, "%Y-%m-%d"))) %>%
-        mutate(days_since_last_RRT = pmin(days_since_dialysis, days_since_tx, days_since_RRT)),
+                 (dialysis==1 | kidney_tx==1)) %>%
+        mutate(days_since_last_RRT = ifelse(ukrr_dtx=="Dialysis" & dialysis==1,
+                                    as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(dialysis_date,"%Y-%m-%d")),
+                                    ifelse(ukrr_dtx=="Transplant" & kidney_tx==1,
+                                           as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(kidney_tx_date, "%Y-%m-%d")),
+                                           NA))),
     dflist, years, SIMPLIFY = FALSE)  
 
 
-timevars<-c("days_since_dialysis", "days_since_tx", "days_since_RRT", "days_since_last_RRT")
-titles<-c(paste("Histogram of days since", 
-              c("last dialysis codelist code", "last transplant codelist code", "last RRT codelist code"), 
-              "and end of"),
-          "Histogram of time between the most recent RRT code (any codelist) and end of")
-
 mapply(function(z, d) 
-  mapply(function(x, y) 
-    ggplot(z, aes_string(x)) + geom_histogram() +
-      labs(title=paste(y, d))  + theme(plot.title = element_text(size = 10, face = "bold")),
-    timevars, titles, SIMPLIFY =FALSE  ), plot.df, years, SIMPLIFY =FALSE  )
+  lapply( c("Dialysis", "Transplant"), function(x) 
+    ggplot(subset(z, ukrr_dtx==x), aes(days_since_last_RRT)) + geom_histogram() +
+      labs(title=paste("Histogram of days since last primary care", x, "code for UKRR", x, "patients", d))  + theme(plot.title = element_text(size = 10, face = "bold"))),
+  plot.df, years, SIMPLIFY =FALSE  )
 
-#May want to show this by code later
 
 ```
 
@@ -197,7 +203,7 @@ for(i in 1:length(list.of.dts)) {
 
 ```
 
-Below we look at what the most recent primary care codes are for these patients, by codelist. The RRT groups is patients where the RRT code did not specify dialysis or transplant.
+Below we look at what the most recent primary care codes are for these patients, by modality The RRT groups is patients where the RRT code did not specify dialysis or transplant.
 ```{r, echo=FALSE, results='asis'}
 
 #Then the latest codes by renal status
@@ -206,9 +212,12 @@ codes.table.2<-function(df,status, codelist){
     filter(rrt_source=="PC only" & latest_renal_status==status) %>%
     count(latest_renal_code) %>%
     left_join(codelist, by=setNames(names(codelist)[1], "latest_renal_code")) %>%
-    mutate(latest_renal_code= replace(latest_renal_code, latest_renal_code=="", "Missing")) %>%
-    mutate(across(where(is.numeric)&!c(1), ~ roundup(.x,5))) %>% 
-    mutate(across(where(is.numeric)&!c(1),~ifelse(.<=5,"<=5",.)))
+    mutate(latest_renal_code= replace(latest_renal_code, latest_renal_code %in% c("", NA) , "Missing")) %>%
+      mutate(n,n=ifelse(n<=5,0,n)) %>% #first replace n<=5 with 0
+      mutate(n, n=roundup(n,5)) %>%  #round up to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+      mutate(n,n=ifelse(n<=5,"<=5",n)) %>% #now replacing <=5 (which is now 0 anyway) with "<=5"
+      arrange(desc(n))  #descending sort by n
 }
 
 list.of.dts<-lapply(dflist, function(x) 
@@ -222,9 +231,9 @@ for(i in 1:length(list.of.dts)) {
   #  colnames(list.of.dts[[i]][[j]])<-rep("",length(names)*2) # blank colnames
    k<- list.of.dts[[i]][[j]]%>%
           kbl(caption=paste0("Table 2.", i, "." , j, 
-                             " Frequency of most recent ", 
+                             " Frequency of most recent code for people on ", 
                              c("Dialysis", "Transplant", "RRT_unknown")[j], 
-                             " codes, ", 
+                             ", ", 
                              years[i] ), booktabs=TRUE) %>% 
           #add_header_above(c(demogs[j], rep(c("n", "%"), length(names)))) %>%
           #add_header_above(data.frame(c("", names), c(1,rep(2, length(names))))) %>%  #setting colnames as a dataframe 
@@ -242,14 +251,36 @@ Now looking how long before the prevalent date the RRT event code in primary car
 plot.df<-mapply(function(x,y)
    x %>%
         filter(rrt_source=="PC only" & latest_renal_status!="None") %>%
-        mutate(days_since_last_RRT = as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_renal_date, "%Y-%m-%d")),
+        mutate(days_since_last_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_renal_date, "%Y-%m-%d"))),
    dflist, years, SIMPLIFY = FALSE)
 
 mapply(function(z, d) 
-  lapply( c("Dialysis", "Transplant", "RRT_unknown"), function(x) 
+  lapply( c("Dialysis", "Transplant"), function(x)  #not doing RRT unknown as so few pts 
     ggplot(subset(z, latest_renal_status==x), aes(days_since_last_RRT)) + geom_histogram() +
       labs(title=paste("Histogram of days since last RRT code for", x, "patients", d))  + theme(plot.title = element_text(size = 10, face = "bold"))),
   plot.df, years, SIMPLIFY =FALSE  )
+
+
+# Looking at median time since code
+codes.table.3<-function(df,status, codelist){
+  df %>%
+    filter(rrt_source=="PC only" & latest_renal_status==status) %>%
+    group_by(latest_renal_code)%>%
+    summarise(n=n(), median=median(days_since_last_RRT)) %>%
+    left_join(codelist, by=setNames(names(codelist)[1], "latest_renal_code")) %>%
+    mutate(latest_renal_code= replace(latest_renal_code, latest_renal_code %in% c("", NA) , "Missing")) %>%
+      mutate(n,n=ifelse(n<=5,0,n)) %>% #first replace n<=5 with 0
+      mutate(n, n=roundup(n,5)) %>%  #round up to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+        mutate(median = ifelse(n==0, NA, median)) %>%   #then calculate %s, blanking if n is 0
+      mutate(n,n=ifelse(n<=5,"<=5",n)) %>% #now replacing <=5 (which is now 0 anyway) with "<=5"
+      arrange(desc(n))  #descending sort by n
+}
+
+list.of.dts<-lapply(plot.df, function(x) 
+  mapply(function(y, z) 
+    codes.table.3(x, y, z), 
+    c("Dialysis", "Transplant"),  all.codelists[3:4], SIMPLIFY=FALSE))
 
 ```
 ## 3 Patients on different modalities (dialysis/transplant)
