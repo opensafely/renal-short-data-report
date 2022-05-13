@@ -282,6 +282,23 @@ list.of.dts<-lapply(plot.df, function(x)
     codes.table.3(x, y, z), 
     c("Dialysis", "Transplant"),  all.codelists[3:4], SIMPLIFY=FALSE))
 
+for(i in 1:length(list.of.dts)) {
+  for(j in 1:length(list.of.dts[[i]])){
+  # names<-unique(colnames(list.of.dts[[i]][[j]])) #save existing colnames
+  #  colnames(list.of.dts[[i]][[j]])<-rep("",length(names)*2) # blank colnames
+   k<- list.of.dts[[i]][[j]]%>%
+          kbl(caption=paste0("Table 3.", i, "." , j, 
+                             " Median time since  ", 
+                             c("Dialysis", "Transplant")[j], 
+                             ", ", 
+                             years[i] ), booktabs=TRUE) %>% 
+          #add_header_above(c(demogs[j], rep(c("n", "%"), length(names)))) %>%
+          #add_header_above(data.frame(c("", names), c(1,rep(2, length(names))))) %>%  #setting colnames as a dataframe 
+          kable_styling()
+  print(k)     
+  }
+}
+
 ```
 ## 3 Patients on different modalities (dialysis/transplant)
 Not done yet
