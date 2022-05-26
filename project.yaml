@@ -63,7 +63,7 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        figures: output/*dist*.jpeg
+        figures: output/*dis*.jpeg
 
 
   generate_notebook:
