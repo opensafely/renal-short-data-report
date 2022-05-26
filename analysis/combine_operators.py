@@ -4,6 +4,7 @@ from variables import tests
 from utilities import (
     OUTPUT_DIR,
     drop_and_round,
+    round_column,
     match_input_files,
     get_date_input_file,
     combine_value_with_operator,
@@ -48,9 +49,14 @@ for file in (OUTPUT_DIR / "joined").iterdir():
                 num_with_numeric_value_and_operator.replace(np.nan, "missing")
             )
 
-            # combine value with operator
+            # combine value with operator (after rounding to nearest int)
+            df[f"{test}_numeric_value"] = round_column(df[f"{test}_numeric_value"], 1)
 
             combine_value_with_operator(df, f"{test}_numeric_value", f"{test}_operator")
+
+            
+
+
             numeric_value_operator_counts[test].append(
                 df[f"{test}_numeric_value_with_operator"].value_counts(sort=True)
             )

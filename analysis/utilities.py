@@ -23,10 +23,12 @@ LOWER_CENTER = 8
 UPPER_CENTER = 9
 CENTER = 10
 
+def round_column(column, base):
+    return column.apply(lambda x: base * round(x / base))
 
-def drop_and_round(column):
-    column[column <= 5] = 0
-    return column.apply(lambda x: 5 * round(x / 5))
+def drop_and_round(column, base=5, threshold=5):
+    column[column <= threshold] = 0
+    return round_column(column, base)
 
 
 def match_input_files(file: str) -> bool:
