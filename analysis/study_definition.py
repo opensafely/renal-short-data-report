@@ -365,7 +365,7 @@ study = StudyDefinition(
             "incidence": 0.2,
         },
     ),
-    eGFR_comparator=patients.comparator_from(
+    eGFR_operator=patients.comparator_from(
         "eGFR_numeric_value",
         return_expectations={
             "rate": "universal",

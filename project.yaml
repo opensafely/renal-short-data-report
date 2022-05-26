@@ -49,7 +49,7 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/*_coun*.csv
+        counts: output/*_count.csv
 
   generate_plots:
     run: python:latest python analysis/plot_measures.py
