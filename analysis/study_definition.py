@@ -249,6 +249,71 @@ study = StudyDefinition(
             "incidence": 0.80,
         },
     ),
+    creatinine_ref_range_lower=patients.reference_range_lower_bound_from(
+        "creatinine_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    creatinine_ref_range_upper=patients.reference_range_upper_bound_from(
+        "creatinine_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    creatinine_numeric_value_oor=patients.categorised_as(
+        {
+            "above": """(creatinine_numeric_value > creatinine_ref_range_upper) AND
+            NOT (
+                (creatinine_operator = '<') OR
+                (creatinine_operator = '<=') OR
+                (creatinine_operator = '~')
+            )""",
+            "below": """(creatinine_numeric_value < creatinine_ref_range_lower) AND
+            NOT (
+                (creatinine_operator = '>') OR
+                (creatinine_operator = '>=') OR
+                (creatinine_operator = '~')
+            )""",
+            "unknown": """(
+            (creatinine_numeric_value > creatinine_ref_range_upper) AND
+             (
+                (creatinine_operator = '<') OR
+                (creatinine_operator = '<=') OR
+                (creatinine_operator = '~')
+            )
+            ) OR
+            (
+            (creatinine_numeric_value < creatinine_ref_range_lower) AND
+            (
+                (creatinine_operator = '>') OR
+                (creatinine_operator = '>=') OR
+                (creatinine_operator = '~')
+            ))
+            OR
+
+            (
+                (
+                    (creatinine_numeric_value > creatinine_ref_range_lower) AND
+                    (creatinine_numeric_value < creatinine_ref_range_upper)
+                ) AND
+
+                NOT (
+                    (creatinine_operator = '=') OR
+                    (creatinine_operator = '')
+                )
+            )
+            """,
+            "in range": "DEFAULT",
+        },
+        return_expectations={
+            "category": {
+                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
+            }
+        },
+    ),
     cr_cl=patients.with_these_clinical_events(
         codelist=creatinine_clearance_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
@@ -300,6 +365,72 @@ study = StudyDefinition(
             "incidence": 0.80,
         },
     ),
+    cr_cl_ref_range_lower=patients.reference_range_lower_bound_from(
+        "cr_cl_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    cr_cl_ref_range_upper=patients.reference_range_upper_bound_from(
+        "cr_cl_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    cr_cl_numeric_value_oor=patients.categorised_as(
+        {
+            "above": """(cr_cl_numeric_value > cr_cl_ref_range_upper) AND
+            NOT (
+                (cr_cl_operator = '<') OR
+                (cr_cl_operator = '<=') OR
+                (cr_cl_operator = '~')
+            )""",
+            "below": """(cr_cl_numeric_value < cr_cl_ref_range_lower) AND
+            NOT (
+                (cr_cl_operator = '>') OR
+                (cr_cl_operator = '>=') OR
+                (cr_cl_operator = '~')
+            )""",
+            "unknown": """(
+            (cr_cl_numeric_value > cr_cl_ref_range_upper) AND
+             (
+                (cr_cl_operator = '<') OR
+                (cr_cl_operator = '<=') OR
+                (cr_cl_operator = '~')
+            )
+            ) OR
+            (
+            (cr_cl_numeric_value < cr_cl_ref_range_lower) AND
+            (
+                (cr_cl_operator = '>') OR
+                (cr_cl_operator = '>=') OR
+                (cr_cl_operator = '~')
+            ))
+            OR
+
+            (
+                (
+                    (cr_cl_numeric_value > cr_cl_ref_range_lower) AND
+                    (cr_cl_numeric_value < cr_cl_ref_range_upper)
+                ) AND
+
+                NOT (
+                    (cr_cl_operator = '=') OR
+                    (cr_cl_operator = '')
+                )
+            )
+            """,
+            "in range": "DEFAULT",
+        },
+        return_expectations={
+            "category": {
+                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
+            }
+        },
+    ),
+
     height=patients.with_these_clinical_events(
         height_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
@@ -383,6 +514,73 @@ study = StudyDefinition(
             "incidence": 0.80,
         },
     ),
+
+    eGFR_ref_range_lower=patients.reference_range_lower_bound_from(
+        "eGFR_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    eGFR_ref_range_upper=patients.reference_range_upper_bound_from(
+        "eGFR_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    eGFR_numeric_value_oor=patients.categorised_as(
+        {
+            "above": """(eGFR_numeric_value > eGFR_ref_range_upper) AND
+            NOT (
+                (eGFR_operator = '<') OR
+                (eGFR_operator = '<=') OR
+                (eGFR_operator = '~')
+            )""",
+            "below": """(eGFR_numeric_value < eGFR_ref_range_lower) AND
+            NOT (
+                (eGFR_operator = '>') OR
+                (eGFR_operator = '>=') OR
+                (eGFR_operator = '~')
+            )""",
+            "unknown": """(
+            (eGFR_numeric_value > eGFR_ref_range_upper) AND
+             (
+                (eGFR_operator = '<') OR
+                (eGFR_operator = '<=') OR
+                (eGFR_operator = '~')
+            )
+            ) OR
+            (
+            (eGFR_numeric_value < eGFR_ref_range_lower) AND
+            (
+                (eGFR_operator = '>') OR
+                (eGFR_operator = '>=') OR
+                (eGFR_operator = '~')
+            ))
+            OR
+
+            (
+                (
+                    (eGFR_numeric_value > eGFR_ref_range_lower) AND
+                    (eGFR_numeric_value < eGFR_ref_range_upper)
+                ) AND
+
+                NOT (
+                    (eGFR_operator = '=') OR
+                    (eGFR_operator = '')
+                )
+            )
+            """,
+            "in range": "DEFAULT",
+        },
+        return_expectations={
+            "category": {
+                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
+            }
+        },
+    ),
+
     ckd=patients.with_these_clinical_events(
         codelist=ckd_codelist,
         on_or_before="index_date",
@@ -423,7 +621,7 @@ study = StudyDefinition(
             "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
         },
     ),
-    ckd_primis_stage = patients.with_these_clinical_events(
+    ckd_primis_stage=patients.with_these_clinical_events(
         codelist=primis_ckd_stage,
         on_or_before="index_date",
         returning="category",
@@ -497,13 +695,9 @@ study = StudyDefinition(
             "incidence": 0.2,
         },
     ),
-
-
     latest_renal_date=patients.maximum_of(
-    "dialysis_date", "kidney_tx_date", "RRT_date",
-    "ckd_date", "ckd_primis_1_5_date"
+        "dialysis_date", "kidney_tx_date", "RRT_date", "ckd_date", "ckd_primis_1_5_date"
     ),
-
     # Picking most recent status
     # patients are assigned to the first condition they satisfy, so define RRT modalities first
     latest_renal_status=patients.categorised_as(
@@ -532,27 +726,27 @@ study = StudyDefinition(
                         OR
                         RRT_date=latest_renal_date
                         """,
-            "CKD5"    : """
+            "CKD5": """
                         ckd_primis_1_5_date=latest_renal_date
                         AND
                         ckd_primis_stage="5"
                         """,
-            "CKD4"    : """
+            "CKD4": """
                         ckd_primis_1_5_date=latest_renal_date
                         AND
                         ckd_primis_stage="4"
                         """,
-            "CKD3"    : """
+            "CKD3": """
                         ckd_primis_1_5_date=latest_renal_date
                         AND
                         ckd_primis_stage="3"
                         """,
-            "CKD2"    : """
+            "CKD2": """
                         ckd_primis_1_5_date=latest_renal_date
                         AND
                         ckd_primis_stage="2"
                         """,
-            "CKD1"    : """
+            "CKD1": """
                         ckd_primis_1_5_date=latest_renal_date
                         AND
                         ckd_primis_stage="1"
@@ -580,8 +774,8 @@ study = StudyDefinition(
                     "CKD_unknown": 0.01,
                     "Uncategorised": 0.01,
                 }
-            }
-        }
+            },
+        },
     ),
 )
 
@@ -607,7 +801,7 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 numerator="cr_cl",
                 denominator="population",
                 group_by=["ckd_primis_stage"],
-            ),            
+            ),
             Measure(
                 id=f"creatinine_{pop}_rate",
                 numerator="creatinine",
@@ -643,7 +837,7 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 numerator="eGFR",
                 denominator="population",
                 group_by=["ckd_primis_stage"],
-            ),            
+            ),
             Measure(
                 id=f"ckd_{pop}_rate",
                 numerator="ckd",
@@ -691,7 +885,7 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 numerator="weight_before_creatinine",
                 denominator="population",
                 group_by="ckd_primis_stage",
-            )        
+            ),
         ]
     )
 
