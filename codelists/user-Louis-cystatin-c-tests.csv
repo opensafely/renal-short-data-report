@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" integrity="sha512-P5MgMn1jBN01asBgU0z60Qk4QxiXo86+wlFahKrsQf37c9cro517WzVSPPV1tDKzhku2iJ2FVgL67wG03SGnNA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" /></noscript>
+<style>
+      html {
+        position: relative;
+        min-height: 100%;
+      }
+
+      body {
+        font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        margin-bottom: 120px;
+      }
+
+      nav.bg-secondary {
+        background-color: #002147 !important;
+      }
+
+      a {
+        color: #0058be;
+        font-weight: 600;
+        text-decoration-skip-ink: auto;
+        text-underline-offset: 1px;
+      }
+
+      a:hover,
+      a:focus {
+        color: #00397a;
+        text-decoration: underline;
+        text-decoration-color: #001936;
+      }
+
+      .home-codelists dd {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .home-codelists dt {
+        font-size: 1.1rem;
+      }
+
+      .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 80px;
+        padding-top: 20px;
+        line-height: 20px;
+        background-color: #f5f5f5;
+      }
+
+      .footer p {
+        margin-bottom: 0;
+      }
+    </style>
+<script src="https://kit.fontawesome.com/7e05304e34.js" crossorigin="anonymous"></script>
+<script>
+      if (document.location.hostname === "www.opencodelists.org") {
+        var script = document.createElement("script");
+        script.defer = true;
+        script.setAttribute("data-domain", "opencodelists.org");
+        script.id = "plausible";
+        script.src = "https://plausible.io/js/plausible.compat.js";
+        document.head.appendChild(script);
+      }
+    </script>
+<title>OpenCodelists</title>
+<link rel="icon" href="/static/favicon.ico">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="manifest" href="/static/manifest.webmanifest">
+</head>
+<body class="d-flex flex-column h-100">
+<nav class="navbar navbar-expand-sm navbar-dark bg-secondary justify-content-between align-items-baseline">
+<div class="mr-auto">
+<a class="navbar-brand" href="/">OpenCodelists</a
+        >
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+</div>
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto">
+<li class="navbar-nav nav-item">
+<a class="nav-link text-white" href="/docs/">Docs</a>
+</li>
+<li class="navbar-nav nav-item">
+<a class="nav-link text-white" href="/accounts/register/">Sign up</a>
+</li>
+<li class="navbar-nav nav-item">
+<a class="nav-link text-white" href="/accounts/login/">Sign in</a>
+</li>
+</ul>
+</div>
+</nav>
+<main role="main" class="flex-shrink-0 container mb-5">
+<div class="mt-4">
+<h3 class="mt-4">cystatin-c tests</h3>
+<p class="text-muted">This version is a draft</p>
+<hr />
+<div id="codelist-builder-container"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js" integrity="sha512-/DXTXr6nQodMUiq+IUJYCt2PPOUjrHJ9wFrqpJ3XkgPNOZVfMok7cRw6CSxyCQxXn6ozlESsSh1/sMCTF1rL/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js" integrity="sha512-wV7Yj1alIZDqZFCUQJy85VN+qvEIly93fIQAN7iqDFCPEucLCeNFz4r35FCo9s6WrpdDQPi80xbljXB8Bjtvcg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+<script id="results-heading" type="application/json">"Showing all matching concepts"</script>
+<script id="searches" type="application/json">[{"term_or_code": "cystatin", "url": "/builder/38132f5e/search/cystatin/", "delete_url": "/builder/38132f5e/search/cystatin/delete/", "active": false}]</script>
+<script id="filter" type="application/json">null</script>
+<script id="tree-tables" type="application/json">[["Disorder", ["45639009"]], ["Observable Entity", ["1027981000000102", "963601000000106"]], ["Procedure", ["444160009", "194461000000105"]], ["Substance", ["408651006"]], ["[inactive] Disorder", ["703220002"]], ["[inactive] Procedure", ["909991000000107"]], ["[inactive] Unknown", ["119461000000105", "114881000000104", "963611000000108", "910001000000108"]]]</script>
+<script id="code-to-term" type="application/json">{"1002561000000109": "Serum cystatin C level", "1011491000000107": "Estimated glomerular filtration rate using cystatin C Chronic Kidney Disease Epidemiology Collaboration equation per 1.73 square metres", "1027981000000102": "Blood cystatin C level", "1107031000000102": "Mass concentration of cystatin C in plasma", "1107041000000106": "Mass concentration of cystatin C in serum", "114881000000104": "Blood cystatin C level", "119461000000105": "Blood cystatin C level", "194461000000105": "Cystatin C measurement", "408650007": "Serum cystatin C measurement", "408651006": "Cystatin C", "412843006": "Blood cystatin C measurement", "444160009": "Calculation of quantitative volume rate of glomerular filtration based on cystatin C concentration in serum or plasma specimen", "45639009": "Hereditary cerebral amyloid angiopathy, Icelandic type", "703220002": "Hereditary cystatin C amyloid angiopathy", "909991000000107": "Measurement of cystatin C in serum specimen", "910001000000108": "Serum cystatin C level ", "963601000000106": "Estimated glomerular filtration rate using cystatin C Chronic Kidney Disease Epidemiology Collaboration equation", "963611000000108": "Estimated glomerular filtration rate using cystatin C per 1.73 square metres "}</script>
+<script id="code-to-status" type="application/json">{"45639009": "-", "119461000000105": "+", "444160009": "-", "1027981000000102": "+", "412843006": "(+)", "963601000000106": "-", "703220002": "-", "909991000000107": "-", "408651006": "-", "1107041000000106": "(+)", "194461000000105": "+", "910001000000108": "+", "963611000000108": "-", "1002561000000109": "(+)", "1011491000000107": "(-)", "1107031000000102": "(+)", "408650007": "(+)", "114881000000104": "+"}</script>
+<script id="all-codes" type="application/json">["45639009", "119461000000105", "444160009", "1027981000000102", "412843006", "963601000000106", "703220002", "909991000000107", "408651006", "1107041000000106", "194461000000105", "910001000000108", "963611000000108", "1002561000000109", "1011491000000107", "1107031000000102", "408650007", "114881000000104"]</script>
+<script id="included-codes" type="application/json">["910001000000108", "119461000000105", "1027981000000102", "194461000000105", "114881000000104"]</script>
+<script id="excluded-codes" type="application/json">["45639009", "444160009", "963611000000108", "963601000000106", "703220002", "909991000000107", "408651006"]</script>
+<script id="parent-map" type="application/json">{"23853001": ["118940003", "246556002"], "41175001": ["312415009"], "724357007": ["363235000", "23853001", "128292002", "128283000", "237869003", "237867001", "11164009"], "299718000": ["246556002", "406122000"], "45639009": ["724357007", "274100004", "78689005"], "364183002": ["364180004"], "114881000000104": ["138875005"], "123946008": ["118234003", "64572001"], "17602002": ["362975008"], "11164009": ["1899006"], "362975008": ["64572001"], "404684003": ["138875005"], "373064003": ["363819003", "373063009"], "1386000": ["118934005", "131148009"], "406122000": ["118254002"], "703220002": ["138875005"], "74040009": ["430925007"], "782964007": ["64572001"], "910001000000108": ["138875005"], "118934005": ["123946008", "406122000"], "78689005": ["128283000", "81308009"], "1027981000000102": ["1032001000000109", "1032021000000100"], "363137000": ["32895009", "362965005"], "128283000": ["118940003", "27624003"], "115668003": ["105590001"], "105590001": ["138875005"], "88878007": ["70354003"], "1011491000000107": ["963601000000106"], "363235000": ["118940003", "363137000"], "230724001": ["62914000", "17602002"], "433441002": ["430925007"], "408650007": ["412843006"], "441900009": ["312413002"], "131148009": ["404684003"], "246556002": ["118234003"], "49601007": ["106063007", "362965005"], "70354003": ["115668003", "415664003"], "118234003": ["404684003"], "362965005": ["123946008"], "119461000000105": ["138875005"], "367601000119103": ["17602002", "32895009"], "62914000": ["49601007"], "128292002": ["49601007", "27624003"], "116189001": ["304380002"], "128927009": ["71388002"], "80274001": ["405004009"], "1899006": ["32895009"], "364179002": ["364178005"], "407312007": ["771387000", "410942007"], "27624003": ["64572001"], "963601000000106": ["857971000000104"], "81308009": ["23853001", "118934005", "299718000"], "412843006": ["785673007", "194461000000105"], "909991000000107": ["138875005"], "857971000000104": ["80274001", "1015971000000100"], "1032021000000100": ["373063009"], "243814003": ["363787002"], "766739005": ["105590001"], "444160009": ["122869004"], "386053000": ["128927009"], "1107031000000102": ["1027981000000102"], "122869004": ["386053000"], "364178005": ["363788007"], "963611000000108": ["138875005"], "415664003": ["299987008"], "312413002": ["105590001"], "194461000000105": ["74040009"], "299987008": ["299979007"], "237867001": ["230724001", "363005004", "367601000119103"], "363819003": ["363787002"], "364711002": ["243814003"], "32895009": ["782964007"], "312415009": ["441900009"], "771387000": ["766739005"], "56871000": ["17602002"], "237869003": ["56871000", "367601000119103"], "1015971000000100": ["364712009"], "71388002": ["138875005"], "299979007": ["11257001", "41175001"], "405004009": ["364183002"], "363788007": ["363787002"], "1107041000000106": ["1002561000000109"], "64572001": ["404684003"], "274100004": ["1386000", "81308009"], "364712009": ["364711002"], "364180004": ["364179002"], "410942007": ["105590001"], "363787002": ["138875005"], "304380002": ["88878007", "407312007"], "1032001000000109": ["373064003"], "118940003": ["362965005"], "301857004": ["118234003"], "785673007": ["433441002"], "363005004": ["49601007", "363137000"], "106063007": ["118234003"], "1002561000000109": ["1027981000000102"], "373063009": ["363787002"], "118254002": ["301857004"], "408651006": ["116189001"], "430925007": ["122869004"], "11257001": ["767307008"], "767307008": ["312415009"]}</script>
+<script id="child-map" type="application/json">{"118940003": ["23853001", "128283000", "363235000"], "312415009": ["41175001", "767307008"], "11164009": ["724357007"], "246556002": ["23853001", "299718000"], "724357007": ["45639009"], "364180004": ["364183002"], "138875005": ["910001000000108", "119461000000105", "105590001", "963611000000108", "363787002", "703220002", "71388002", "909991000000107", "114881000000104", "404684003"], "118234003": ["106063007", "301857004", "246556002", "123946008"], "362975008": ["17602002"], "1899006": ["11164009"], "128283000": ["724357007", "78689005"], "64572001": ["27624003", "782964007", "123946008", "362975008"], "363819003": ["373064003"], "118934005": ["1386000", "81308009"], "118254002": ["406122000"], "430925007": ["433441002", "74040009"], "78689005": ["45639009"], "406122000": ["118934005", "299718000"], "1032021000000100": ["1027981000000102"], "32895009": ["1899006", "363137000", "367601000119103"], "105590001": ["312413002", "766739005", "115668003", "410942007"], "70354003": ["88878007"], "23853001": ["724357007", "81308009"], "963601000000106": ["1011491000000107"], "62914000": ["230724001"], "412843006": ["408650007"], "81308009": ["274100004", "78689005"], "312413002": ["441900009"], "404684003": ["118234003", "131148009", "64572001"], "106063007": ["49601007"], "415664003": ["70354003"], "123946008": ["118934005", "362965005"], "49601007": ["62914000", "363005004", "128292002"], "304380002": ["116189001"], "71388002": ["128927009"], "405004009": ["80274001"], "17602002": ["56871000", "230724001", "367601000119103"], "364178005": ["364179002"], "410942007": ["407312007"], "857971000000104": ["963601000000106"], "299718000": ["81308009"], "785673007": ["412843006"], "1015971000000100": ["857971000000104"], "131148009": ["1386000"], "771387000": ["407312007"], "373063009": ["373064003", "1032021000000100"], "363787002": ["363819003", "373063009", "363788007", "243814003"], "122869004": ["444160009", "430925007"], "128927009": ["386053000"], "1027981000000102": ["1002561000000109", "1107031000000102"], "386053000": ["122869004"], "363788007": ["364178005"], "27624003": ["128292002", "128283000"], "194461000000105": ["412843006"], "299987008": ["415664003"], "115668003": ["70354003"], "74040009": ["194461000000105"], "299979007": ["299987008"], "230724001": ["237867001"], "243814003": ["364711002"], "237869003": ["724357007"], "782964007": ["32895009"], "441900009": ["312415009"], "766739005": ["771387000"], "367601000119103": ["237869003", "237867001"], "1032001000000109": ["1027981000000102"], "362965005": ["118940003", "49601007", "363137000"], "364712009": ["1015971000000100"], "11257001": ["299979007"], "364183002": ["405004009"], "1002561000000109": ["1107041000000106"], "363005004": ["237867001"], "364711002": ["364712009"], "80274001": ["857971000000104"], "41175001": ["299979007"], "274100004": ["45639009"], "364179002": ["364180004"], "407312007": ["304380002"], "363235000": ["724357007"], "373064003": ["1032001000000109"], "433441002": ["785673007"], "363137000": ["363005004", "363235000"], "128292002": ["724357007"], "56871000": ["237869003"], "301857004": ["118254002"], "116189001": ["408651006"], "237867001": ["724357007"], "767307008": ["11257001"], "88878007": ["304380002"], "1386000": ["274100004"]}</script>
+<script id="is-editable" type="application/json">false</script>
+<script id="draft-url" type="application/json">"/builder/38132f5e/"</script>
+<script id="update-url" type="application/json">"/builder/38132f5e/update/"</script>
+<script id="search-url" type="application/json">"/builder/38132f5e/search/"</script>
+<script id="versions" type="application/json">[]</script>
+<script id="metadata" type="application/json">{"coding_system_name": "SNOMED CT", "organisation_name": null, "codelist_full_slug": "user/Louis/cystatin-c-tests", "hash": "38132f5e"}</script>
+<script src="/static/js/builder.bundle.js"></script>
+</main>
+<footer id="footer" class="border-top bg-light mt-auto py-5">
+<div class="container">
+<ul class="list-inline text-center d-flex flex-column flex-md-row justify-content-center mb-0 mb-md-3">
+<li class="list-inline-item mb-3 mb-md-0 mr-0 mr-md-5">
+<a href="/docs/">
+Documentation
+</a>
+</li>
+<li class="list-inline-item mb-3 mb-md-0 mr-0">
+<a href="https://www.opensafely.org/">
+OpenSAFELY
+</a>
+</li>
+</ul>
+<ul class="list-inline text-center d-flex flex-column flex-md-row justify-content-center">
+<li class="list-inline-item mb-3 mb-md-0 mr-0 mr-md-5">
+<a href="https://www.bennett.ox.ac.uk/">
+Bennett Institute for Applied Data Science
+</a>
+</li>
+<li class="list-inline-item mb-3 mb-md-0">
+<a href="https://www.ox.ac.uk/">
+University of Oxford
+</a>
+</li>
+</ul>
+<div class="row">
+<div class="col-12 offset-md-1 col-md-10 offset-lg-2 col-lg-8 text-center mt-3 mb-0 small">
+<p>© University of Oxford for the Bennett Institute for Applied Data Science 2022. This work may be copied freely for non-commercial research and study. If you wish to do any of the other acts restricted by the copyright you should apply in writing to <a href="/cdn-cgi/l/email-protection#5e2a3b3f331e312e3b302d3f383b322770312c39"><span class="__cf_email__" data-cfemail="1a6e7f7b775a756a7f74697b7c7f76633475687d">[email&#160;protected]</span></a>.</p>
+<p>SNOMED Clinical Terms® content © International Health Terminology Standards Development Organisation.</p>
+<p>ICD-10 codes, terms and text © World Health Organization, Third Edition. 2007.</p>
+</div>
+</div>
+</div>
+</footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>
