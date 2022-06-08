@@ -462,6 +462,252 @@ study = StudyDefinition(
             "incidence": 0.8,
         },
     ),
+    # albumin
+    albumin=patients.with_these_clinical_events(
+        codelist=albumin_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    albumin_code=patients.with_these_clinical_events(
+        codelist=albumin_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
+        },
+    ),
+    albumin_count=patients.with_these_clinical_events(
+        codelist=albumin_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
+    albumin_numeric_value=patients.with_these_clinical_events(
+        codelist=albumin_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    albumin_operator=patients.comparator_from(
+        "albumin_numeric_value",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {  # ~, =, >= , > , < , <=
+                    None: 0.10,
+                    "~": 0.05,
+                    "=": 0.65,
+                    ">=": 0.05,
+                    ">": 0.05,
+                    "<": 0.05,
+                    "<=": 0.05,
+                }
+            },
+            "incidence": 0.80,
+        },
+    ),
+    albumin_ref_range_lower=patients.reference_range_lower_bound_from(
+        "albumin_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    albumin_ref_range_upper=patients.reference_range_upper_bound_from(
+        "albumin_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    albumin_numeric_value_oor=patients.categorised_as(
+        {
+            "above": """(albumin_numeric_value > albumin_ref_range_upper) AND
+            NOT (
+                (albumin_operator = '<') OR
+                (albumin_operator = '<=') OR
+                (albumin_operator = '~')
+            )""",
+            "below": """(albumin_numeric_value < albumin_ref_range_lower) AND
+            NOT (
+                (albumin_operator = '>') OR
+                (albumin_operator = '>=') OR
+                (albumin_operator = '~')
+            )""",
+            "unknown": """(
+            (albumin_numeric_value > albumin_ref_range_upper) AND
+             (
+                (albumin_operator = '<') OR
+                (albumin_operator = '<=') OR
+                (albumin_operator = '~')
+            )
+            ) OR
+            (
+            (albumin_numeric_value < albumin_ref_range_lower) AND
+            (
+                (albumin_operator = '>') OR
+                (albumin_operator = '>=') OR
+                (albumin_operator = '~')
+            ))
+            OR
+
+            (
+                (
+                    (albumin_numeric_value > albumin_ref_range_lower) AND
+                    (albumin_numeric_value < albumin_ref_range_upper)
+                ) AND
+
+                NOT (
+                    (albumin_operator = '=') OR
+                    (albumin_operator = '')
+                )
+            )
+            """,
+            "in range": "DEFAULT",
+        },
+        return_expectations={
+            "category": {
+                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
+            }
+        },
+    ),
+
+    # acr
+    acr=patients.with_these_clinical_events(
+        codelist=acr_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    acr_code=patients.with_these_clinical_events(
+        codelist=acr_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
+        },
+    ),
+    acr_count=patients.with_these_clinical_events(
+        codelist=acr_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
+    acr_numeric_value=patients.with_these_clinical_events(
+        codelist=acr_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    acr_operator=patients.comparator_from(
+        "acr_numeric_value",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {  # ~, =, >= , > , < , <=
+                    None: 0.10,
+                    "~": 0.05,
+                    "=": 0.65,
+                    ">=": 0.05,
+                    ">": 0.05,
+                    "<": 0.05,
+                    "<=": 0.05,
+                }
+            },
+            "incidence": 0.80,
+        },
+    ),
+    acr_ref_range_lower=patients.reference_range_lower_bound_from(
+        "acr_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    acr_ref_range_upper=patients.reference_range_upper_bound_from(
+        "acr_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    acr_numeric_value_oor=patients.categorised_as(
+        {
+            "above": """(acr_numeric_value > acr_ref_range_upper) AND
+            NOT (
+                (acr_operator = '<') OR
+                (acr_operator = '<=') OR
+                (acr_operator = '~')
+            )""",
+            "below": """(acr_numeric_value < acr_ref_range_lower) AND
+            NOT (
+                (acr_operator = '>') OR
+                (acr_operator = '>=') OR
+                (acr_operator = '~')
+            )""",
+            "unknown": """(
+            (acr_numeric_value > acr_ref_range_upper) AND
+             (
+                (acr_operator = '<') OR
+                (acr_operator = '<=') OR
+                (acr_operator = '~')
+            )
+            ) OR
+            (
+            (acr_numeric_value < acr_ref_range_lower) AND
+            (
+                (acr_operator = '>') OR
+                (acr_operator = '>=') OR
+                (acr_operator = '~')
+            ))
+            OR
+
+            (
+                (
+                    (acr_numeric_value > acr_ref_range_lower) AND
+                    (acr_numeric_value < acr_ref_range_upper)
+                ) AND
+
+                NOT (
+                    (acr_operator = '=') OR
+                    (acr_operator = '')
+                )
+            )
+            """,
+            "in range": "DEFAULT",
+        },
+        return_expectations={
+            "category": {
+                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
+            }
+        },
+    ),
+
     # eGFR values
     eGFR=patients.with_these_clinical_events(
         codelist=eGFR_codelist,
@@ -580,6 +826,130 @@ study = StudyDefinition(
             }
         },
     ),
+
+    # cystatin-c
+    cystatin_c=patients.with_these_clinical_events(
+        codelist=cystatin_c_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.5,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    cystatin_c_code=patients.with_these_clinical_events(
+        codelist=cystatin_c_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
+        },
+    ),
+    cystatin_c_count=patients.with_these_clinical_events(
+        codelist=cystatin_c_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="number_of_matches_in_period",
+        return_expectations={
+            "int": {"distribution": "poisson", "mean": 2},
+            "incidence": 0.2,
+        },
+    ),
+    cystatin_c_numeric_value=patients.with_these_clinical_events(
+        codelist=cystatin_c_codelist,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    cystatin_c_operator=patients.comparator_from(
+        "cystatin_c_numeric_value",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {  # ~, =, >= , > , < , <=
+                    None: 0.10,
+                    "~": 0.05,
+                    "=": 0.65,
+                    ">=": 0.05,
+                    ">": 0.05,
+                    "<": 0.05,
+                    "<=": 0.05,
+                }
+            },
+            "incidence": 0.80,
+        },
+    ),
+    cystatin_c_ref_range_lower=patients.reference_range_lower_bound_from(
+        "cystatin_c_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    cystatin_c_ref_range_upper=patients.reference_range_upper_bound_from(
+        "cystatin_c_numeric_value",
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+            "incidence": 0.5,
+        },
+    ),
+    cystatin_c_numeric_value_oor=patients.categorised_as(
+        {
+            "above": """(cystatin_c_numeric_value > cystatin_c_ref_range_upper) AND
+            NOT (
+                (cystatin_c = '<') OR
+                (cystatin_c = '<=') OR
+                (cystatin_c = '~')
+            )""",
+            "below": """(cystatin_c_numeric_value < cystatin_c_ref_range_lower) AND
+            NOT (
+                (cystatin_c_operator = '>') OR
+                (cystatin_c_operator = '>=') OR
+                (cystatin_c_operator = '~')
+            )""",
+            "unknown": """(
+            (cystatin_c_numeric_value > cystatin_c_ref_range_upper) AND
+             (
+                (cystatin_c_operator = '<') OR
+                (cystatin_c_operator = '<=') OR
+                (cystatin_c_operator = '~')
+            )
+            ) OR
+            (
+            (cystatin_c_numeric_value < cystatin_c_ref_range_lower) AND
+            (
+                (cystatin_c_operator = '>') OR
+                (cystatin_c_operator = '>=') OR
+                (cystatin_c_operator = '~')
+            ))
+            OR
+
+            (
+                (
+                    (cystatin_c_numeric_value > cystatin_c_ref_range_lower) AND
+                    (cystatin_c_numeric_value < cystatin_c_ref_range_upper)
+                ) AND
+
+                NOT (
+                    (cystatin_c_operator = '=') OR
+                    (cystatin_c_operator = '')
+                )
+            )
+            """,
+            "in range": "DEFAULT",
+        },
+        return_expectations={
+            "category": {
+                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
+            }
+        },
+    ),
+
 
     ckd=patients.with_these_clinical_events(
         codelist=ckd_codelist,
