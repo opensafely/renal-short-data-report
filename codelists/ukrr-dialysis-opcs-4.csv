@@ -1,0 +1,20 @@
+code,term
+X40,Dialysis NEC
+X401,Renal dialysis
+X402,Peritoneal dialysis NEC
+X403,Haemodialysis NEC
+X405,Automated peritoneal dialysis
+X406,Continuous ambulatory peritoneal dialysis
+X408,Other specified compensation for renal failure
+X409,Unspecified compensation for renal failure
+X41,Placement of ambulatory apparatus for compensation for renal failure
+X41,Dialysis Catheter Ambulatory
+X411,Insertion of ambulatory peritoneal dialysis catheter
+X418,Other specified
+X419,Unspecified
+X42,Placement of other apparatus for compensation for renal failure
+X42,Catheterisation Peritoneal Temporary Dialysis
+X421,Insertion of temporary peritoneal dialysis catheter
+X421,Dialysis Peritoneal Temporary Catheter Insertion
+X428,Other specified
+X429,Unspecified

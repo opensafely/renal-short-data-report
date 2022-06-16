@@ -131,6 +131,24 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/kidney-transplant/2020-07-15/",
       "downloaded_at": "2022-04-08 07:14:57.041888Z",
       "sha": "db6b47d17273b563cb428e4a97a7ba8b6d62afa9"
+    },
+    "ukrr-dialysis-opcs-4.csv": {
+      "id": "ukrr/dialysis-opcs-4/505bef04",
+      "url": "https://codelists.opensafely.org/codelist/ukrr/dialysis-opcs-4/505bef04/",
+      "downloaded_at": "2022-06-16 12:39:25.198139Z",
+      "sha": "bf7244d0625246dabfd64334a034e52a8307c42d"
+    },
+    "ukrr-dialysis.csv": {
+      "id": "ukrr/dialysis/66b8a243",
+      "url": "https://codelists.opensafely.org/codelist/ukrr/dialysis/66b8a243/",
+      "downloaded_at": "2022-06-16 12:39:25.514128Z",
+      "sha": "62e982c9884edff2a16c2c9f3963f773d2c3dd95"
+    },
+    "user-viyaasan-kidney-transplant-opcs-4.csv": {
+      "id": "user/viyaasan/kidney-transplant-opcs-4/18d788ae",
+      "url": "https://codelists.opensafely.org/codelist/user/viyaasan/kidney-transplant-opcs-4/18d788ae/",
+      "downloaded_at": "2022-06-16 12:46:09.069135Z",
+      "sha": "fa7f3a5b2e22928038efd8d8795f753a9051625b"
     }
   }
 }

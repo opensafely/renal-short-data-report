@@ -119,4 +119,38 @@ primis_ckd_3_5_codelist = codelist_from_csv(
     system="snomed",
     column="code"
 )
+#just a single code for this one so haven't created a list
+kidney_tx_icd10_codelist=codelist(["Z940"], system="icd10", column="code"
+)
 
+kidney_tx_opcs4_codelist = codelist_from_csv(
+    "codelists/user-viyaasan-kidney-transplant-opcs-4.csv",
+    system="opcs4",
+    column="code"
+)
+
+dialysis_icd10_codelist = codelist_from_csv(
+    "codelists/user-ukrr-dialysis.csv",
+    system="icd10",
+    column="code"
+)
+
+dialysis_opcs4_codelist = codelist_from_csv(
+    "codelists/user-ukrr-dialysis-opcs4.csv",
+    system="opcs4",
+    column="code"
+)
+
+#Combining tx and dialysis codelists into RRT codelist, and adding tx failure code
+RRT_icd10_codelist = combine_codelists(
+    kidney_tx_icd10_codelist,
+    dialysis_icd10_codelist,
+    codelist(["T861"], system="icd10", column="code")
+)
+
+#Same for OPCS4, also PD catheter removal and bilateral nephrectomy
+RRT_opcs4_codelist = combine_codelists(
+    kidney_tx_opcs4_codelist,
+    dialysis_opcs4_codelist,
+    codelist(["M023", "M026", "M027", "X412"], system="opcs4", column="code")
+)
