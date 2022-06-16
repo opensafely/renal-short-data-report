@@ -618,10 +618,10 @@ study = StudyDefinition(
             "rate": "universal",
             "category": {
                 "ratios": {
-                    "None": 0.4,
-                    "Dialysis": 0.2,
-                    "Transplant": 0.2,
-                    "RRT_unknown": 0.2,
+                    "None": 0.39,
+                    "Dialysis": 0.25,
+                    "Transplant": 0.25,
+                    "RRT_unknown": 0.1,
                     "Uncategorised": 0.01,
                 }
             }
