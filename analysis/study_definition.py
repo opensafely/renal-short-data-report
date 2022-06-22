@@ -628,8 +628,7 @@ study = StudyDefinition(
         }
     ),
 
-
-    ### Secondary care codes ####
+### Secondary care codes ####
 
     # outpatients
     #can't retrieve code for outpat appointments
@@ -653,7 +652,8 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    op_dialysis = patients.outpatient_appointment_date(
+
+       op_dialysis = patients.outpatient_appointment_date(
         returning="binary_flag",
         with_these_procedures=dialysis_opcs4_codelist,
         between=["1900-01-01", "index_date"],
@@ -671,7 +671,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    op_RRT = patients.outpatient_appointment_date(
+       op_RRT = patients.outpatient_appointment_date(
         returning="binary_flag",
         with_these_procedures=RRT_opcs4_codelist,
         between=["1900-01-01", "index_date"],
@@ -685,13 +685,14 @@ study = StudyDefinition(
         with_these_procedures=RRT_opcs4_codelist,
         between=["1900-01-01", "index_date"],
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
+
     op_renal = patients.outpatient_appointment_date(
         returning="binary_flag",
-        with_these_treatment_function_codes="361",  #treatment function code for renal services
+        with_these_treatment_function_codes="361", 
         between=["1900-01-01", "index_date"],
         return_expectations={
             "incidence": 0.3,
@@ -700,14 +701,16 @@ study = StudyDefinition(
     op_renal_date = patients.outpatient_appointment_date(
         returning="date",
         date_format="YYYY-MM-DD",
-        with_these_treatment_function_codes="361",  #treatment function code for renal services
+        with_these_treatment_function_codes="361", 
         between=["1900-01-01", "index_date"],
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-   # inpatients
+
+
+  # inpatients
     #consider adding: retrieve primary diagnosis, treatment function code, days in critical care (to indicate acute dialysis)
     ip_kidney_tx_diagnosis = patients.admitted_to_hospital(
         returning="binary_flag",
@@ -719,13 +722,13 @@ study = StudyDefinition(
         },
     ),
     ip_kidney_tx_diagnosis_date = patients.admitted_to_hospital(
-        returning="date",
+        returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_diagnoses=kidney_tx_icd10_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
@@ -733,19 +736,19 @@ study = StudyDefinition(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_procedures=kidney_tx_opcs4_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
             "incidence": 0.3,
         },
     ),
     ip_kidney_tx_procedure_date = patients.admitted_to_hospital(
-        returning="date",
+        returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_procedures=kidney_tx_opcs4_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
@@ -753,19 +756,19 @@ study = StudyDefinition(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_diagnoses=dialysis_icd10_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
             "incidence": 0.3,
         },
     ),
     ip_dialysis_diagnosis_date = patients.admitted_to_hospital(
-        returning="date",
+        returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_diagnoses=dialysis_icd10_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
@@ -773,19 +776,19 @@ study = StudyDefinition(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_procedures=dialysis_opcs4_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
             "incidence": 0.3,
         },
     ),
     ip_dialysis_procedure_date = patients.admitted_to_hospital(
-        returning="date",
+        returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_procedures=dialysis_opcs4_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
@@ -793,19 +796,19 @@ study = StudyDefinition(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_diagnoses=RRT_icd10_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
             "incidence": 0.3,
         },
     ),
     ip_RRT_diagnosis_date = patients.admitted_to_hospital(
-        returning="date",
+        returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_diagnoses=RRT_icd10_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
@@ -813,19 +816,19 @@ study = StudyDefinition(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_procedures=RRT_opcs4_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
             "incidence": 0.3,
         },
     ),  
     ip_RRT_procedure_date = patients.admitted_to_hospital(
-        returning="date",
+        returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_procedures=RRT_opcs4_codelist,
-        on_or_before="index_date"
+        on_or_before="index_date",
         return_expectations={
-            "rate": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),  
@@ -839,17 +842,17 @@ study = StudyDefinition(
         },
     ),
     ip_renal_date=patients.admitted_to_hospital(
-        returning="date",
+        returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_admission_treatment_function_code="361",
         between=["1900-01-01", "index_date"],
         return_expectations={
-            "date": "universal",
+            "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-
+  
     latest_rrt_date_secondary=patients.maximum_of(
         "op_kidney_tx_date", "op_dialysis_date", "op_RRT_date",
         "ip_kidney_tx_diagnosis_date", "ip_kidney_tx_procedure_date",
