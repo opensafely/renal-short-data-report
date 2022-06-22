@@ -66,12 +66,12 @@ actions:
         figures: output/*dis*.jpeg
 
 
-  generate_notebook:
-    run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
-    needs: [generate_plots, get_counts]
-    outputs:
-      moderately_sensitive:
-        notebook: output/report.html
+  # generate_notebook:
+  #   run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
+  #   needs: [generate_plots, get_counts]
+  #   outputs:
+  #     moderately_sensitive:
+  #       notebook: output/report.html
 
   generate_ukrr_checks:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-checks.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
