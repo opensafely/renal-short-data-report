@@ -1,5 +1,38 @@
 from cohortextractor import codelist, codelist_from_csv, combine_codelists
 
+acr_codelist = codelist_from_csv(
+    "codelists/user-Louis-albumin-to-creatinine-ratio-tests.csv",
+    system="snomed",
+    column="code",
+)
+acr_level_codelist = codelist_from_csv(
+    "codelists/user-Louis-albumin-to-creatinine-ratio-tests.csv",
+    system="snomed",
+    column="code",
+)
+albumin_codelist = codelist_from_csv(
+    "codelists/user-Louis-albumin-tests.csv",
+    system="snomed",
+    column="code",
+)
+
+albumin_level_codelist = codelist_from_csv(
+    "codelists/user-Louis-albumin-tests.csv",
+    system="snomed",
+    column="code",
+)
+
+cystatin_c_codelist = codelist_from_csv(
+    "codelists/user-Louis-cystatin-c-tests.csv",
+    system="snomed",
+    column="code",
+)
+
+cystatin_c_level_codelist = codelist_from_csv(
+    "codelists/user-Louis-cystatin-c-tests.csv",
+    system="snomed",
+    column="code",
+)
 
 eGFR_codelist = codelist_from_csv(
     "codelists/user-ss808-estimated-glomerular-filtration-rate-egfr-recorded-tests.csv",

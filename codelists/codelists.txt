@@ -20,6 +20,9 @@ primis-covid19-vacc-uptake/ckd15/v1/
 primis-covid19-vacc-uptake/ckd35/v1/
 user/Louis/ckd-stage/77b93e93/
 opensafely/kidney-transplant/2020-07-15
+user/Louis/cystatin-c-tests/38132f5e
+user/Louis/albumin-tests/5ea9cb5e
+user/Louis/albumin-to-creatinine-ratio-tests/6a3215c8
 ukrr/dialysis-opcs-4/505bef04
 ukrr/dialysis/66b8a243
 user/viyaasan/kidney-transplant-opcs-4/18d788ae/

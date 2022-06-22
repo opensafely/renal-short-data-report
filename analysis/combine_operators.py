@@ -1,34 +1,27 @@
 import pandas as pd
 import numpy as np
+from variables import tests
 from utilities import (
     OUTPUT_DIR,
     drop_and_round,
+    round_column,
     match_input_files,
     get_date_input_file,
     combine_value_with_operator,
     group_low_values_series,
 )
 
-# counts of each numeric value - operator pair
-value_counts_creatinine = []
-value_counts_cr_cl = []
-value_counts_egfr = []
+numeric_value_operator_counts = {}
+numeric_value_counts = {}
+code_counts = {}
+operator_counts = {}
 
-# counts of numeric values for each code
-codes_creatinine = []
-codes_cr_cl = []
-codes_egfr = []
+for test in tests:
+    numeric_value_operator_counts[test] = []
+    numeric_value_counts[test] = []
+    code_counts[test] = []
+    operator_counts[test] = []
 
-# counts of each code
-
-codes_creatinine_all = []
-codes_cr_cl_all = []
-codes_egfr_all = []
-
-# counts for each operator type
-operators_creatinine = []
-operators_cr_cl = []
-operators_egfr = []
 
 for file in (OUTPUT_DIR / "joined").iterdir():
     if match_input_files(file.name):
@@ -36,143 +29,77 @@ for file in (OUTPUT_DIR / "joined").iterdir():
         date = get_date_input_file(file.name)
 
         # replace null operator with missing
-        df["creatinine_operator"].fillna("missing", inplace=True)
-        df["cr_cl_operator"].fillna("missing", inplace=True)
-        df["eGFR"].fillna("missing", inplace=True)
-        df.rename(columns={"eGFR_comparator": "eGFR_operator"}, inplace=True)
+        for test in tests:
+            df[f"{test}_operator"].fillna("missing", inplace=True)
 
-        # how many numeric values have a matched operator?
-        num_with_numeric_value_and_operator_creatinine = (
-            df.loc[(df["creatinine_numeric_value"].notnull() & df["creatinine_numeric_value"] > 0), :]
-            .groupby("creatinine_operator")[["creatinine"]]
-            .sum()
-        )
-        operators_creatinine.append(
-            num_with_numeric_value_and_operator_creatinine.replace(np.nan, "missing")
-        )
+            # how many numeric values have a matched operator?
+            num_with_numeric_value_and_operator = (
+                df.loc[
+                    (
+                        (df[f"{test}_numeric_value"].notnull())
+                        & (df[f"{test}_numeric_value"] > 0)
+                    ),
+                    :,
+                ]
+                .groupby(f"{test}_operator")[[test]]
+                .sum()
+            )
 
-        num_with_numeric_value_and_operator_cr_cl = (
-            df.loc[(df["cr_cl_numeric_value"].notnull() & df["cr_cl_numeric_value"] > 0), :]
-            .groupby("cr_cl_operator")[["cr_cl"]]
-            .sum()
-        )
-        operators_cr_cl.append(
-            num_with_numeric_value_and_operator_cr_cl.replace(np.nan, "missing")
-        )
-        
-        num_with_numeric_value_and_operator_egfr = (
-            df.loc[(df["eGFR_numeric_value"].notnull() & df["eGFR_numeric_value"] > 0), :]
-            .groupby("eGFR_operator")[["eGFR"]]
-            .sum()
-        )
-        operators_egfr.append(
-            num_with_numeric_value_and_operator_egfr.replace(np.nan, "missing")
-        )
+            operator_counts[test].append(
+                num_with_numeric_value_and_operator.replace(np.nan, "missing")
+            )
 
-        combine_value_with_operator(
-            df, "creatinine_numeric_value", "creatinine_operator"
-        )
-        combine_value_with_operator(df, "cr_cl_numeric_value", "cr_cl_operator")
+            # combine value with operator (after rounding to nearest int)
+            df[f"{test}_numeric_value"] = round_column(df[f"{test}_numeric_value"], 1)
 
-        combine_value_with_operator(df, "eGFR_numeric_value", "eGFR_operator")
+            combine_value_with_operator(df, f"{test}_numeric_value", f"{test}_operator")
 
-        value_counts_creatinine.append(
-            df["creatinine_numeric_value_with_operator"].value_counts(sort=True)
-        )
-        value_counts_cr_cl.append(
-            df["cr_cl_numeric_value_with_operator"].value_counts(sort=True)
-        )
-
-        value_counts_egfr.append(
-            df["eGFR_numeric_value_with_operator"].value_counts(sort=True)
-        )
-
-        # find codes where attached numeric value
-        codes_creatinine.append(
-            df.loc[
-                (df["creatinine_numeric_value"].notnull()& df["creatinine_numeric_value"] > 0), "creatinine_code"
-            ].value_counts()
-        )
-        codes_cr_cl.append(
-            df.loc[(df["cr_cl_numeric_value"].notnull() & df["cr_cl_numeric_value"] > 0), "cr_cl_code"].value_counts()
-        )
-
-        codes_egfr.append(
-            df.loc[(df["eGFR_numeric_value"].notnull()& df["eGFR_numeric_value"] > 0), "eGFR_code"].value_counts()
-        )
-
-        codes_creatinine_all.append(df["creatinine_code"].value_counts())
-        codes_cr_cl_all.append(df["cr_cl_code"].value_counts())
-        codes_egfr_all.append(df["eGFR_code"].value_counts())
+            
 
 
-combined_creatinine_values = pd.concat(value_counts_creatinine)
-creatinine_count = combined_creatinine_values.groupby(
-    combined_creatinine_values.index
-).sum()
-creatinine_count = drop_and_round(creatinine_count)
-creatinine_count.to_csv(OUTPUT_DIR / "creatinine_count.csv")
+            numeric_value_operator_counts[test].append(
+                df[f"{test}_numeric_value_with_operator"].value_counts(sort=True)
+            )
 
-combined_cr_cl_values = pd.concat(value_counts_cr_cl)
-cr_cl_count = combined_cr_cl_values.groupby(combined_cr_cl_values.index).sum()
-cr_cl_count = drop_and_round(cr_cl_count)
-cr_cl_count.to_csv(OUTPUT_DIR / "cr_cl_count.csv")
+            # find codes where attached numeric value
+            numeric_value_counts[test].append(
+                df.loc[
+                    (
+                        (df[f"{test}_numeric_value"].notnull())
+                        & (df[f"{test}_numeric_value"] > 0)
+                    ),
+                    f"{test}_code",
+                ].value_counts()
+            )
 
-combined_egfr_values = pd.concat(value_counts_egfr)
-egfr_count = combined_egfr_values.groupby(combined_egfr_values.index).sum()
-egfr_count = drop_and_round(egfr_count)
-egfr_count.to_csv(OUTPUT_DIR / "egfr_count.csv")
-
-
-cr_cl_codes = pd.concat(codes_cr_cl)
-cr_cl_codes_count = cr_cl_codes.groupby(cr_cl_codes.index).sum()
-cr_cl_codes_count = group_low_values_series(cr_cl_codes_count)
-drop_and_round(cr_cl_codes_count).to_csv(OUTPUT_DIR / "cr_cl_codes_count.csv")
+            code_counts[test].append(df[f"{test}_code"].value_counts())
 
 
-creatinine_codes = pd.concat(codes_creatinine)
-creatinine_codes = creatinine_codes.groupby(creatinine_codes.index).sum()
-creatinine_codes = group_low_values_series(creatinine_codes)
-drop_and_round(creatinine_codes).to_csv(OUTPUT_DIR / "creatinine_codes_count.csv")
+for test in tests:
+    # combine numeric value operator counts
+    combined_values = pd.concat(numeric_value_operator_counts[test])
+    test_count = combined_values.groupby(combined_values.index).sum()
+    test_count = drop_and_round(test_count).to_csv(
+        OUTPUT_DIR / f"{test}_numeric_value_operator_count.csv"
+    )
 
-egfr_codes = pd.concat(codes_egfr)
-egfr_codes_count = egfr_codes.groupby(egfr_codes.index).sum()
-egfr_codes = group_low_values_series(egfr_codes_count)
-drop_and_round(egfr_codes).to_csv(OUTPUT_DIR / "egfr_codes_count.csv")
+    # combine numeric value counts
+    test_codes = pd.concat(numeric_value_counts[test])
+    test_codes_count = test_codes.groupby(test_codes.index).sum()
+    test_codes_count = group_low_values_series(test_codes_count)
+    drop_and_round(test_codes_count).to_csv(
+        OUTPUT_DIR / f"{test}_numeric_value_count.csv"
+    )
 
+    # combine code counts
 
-cr_cl_codes_all = pd.concat(codes_cr_cl_all)
-cr_cl_codes_count_all = cr_cl_codes_all.groupby(cr_cl_codes_all.index).sum()
-cr_cl_codes_count_all = group_low_values_series(cr_cl_codes_count_all)
-drop_and_round(cr_cl_codes_count_all).to_csv(OUTPUT_DIR / "cr_cl_codes_count_all.csv")
+    test_codes_all = pd.concat(code_counts[test])
+    test_codes_count_all = test_codes_all.groupby(test_codes_all.index).sum()
+    test_codes_count_all = group_low_values_series(test_codes_count_all)
+    drop_and_round(test_codes_count_all).to_csv(OUTPUT_DIR / f"{test}_codes_count.csv")
 
+    # combine operator counts
 
-creatinine_codes_all = pd.concat(codes_creatinine_all)
-creatinine_codes_all = creatinine_codes_all.groupby(creatinine_codes_all.index).sum()
-creatinine_codes_all = group_low_values_series(creatinine_codes_all)
-drop_and_round(creatinine_codes_all).to_csv(
-    OUTPUT_DIR / "creatinine_codes_count_all.csv"
-)
-
-
-egfr_codes_all = pd.concat(codes_egfr_all)
-egfr_codes_count_all = egfr_codes_all.groupby(egfr_codes_all.index).sum()
-egfr_codes_all = group_low_values_series(egfr_codes_count_all)
-drop_and_round(egfr_codes_all).to_csv(OUTPUT_DIR / "egfr_codes_count_all.csv")
-
-
-creatinine_operators = pd.concat(operators_creatinine, axis=1, sort=False).sum(axis=1)
-creatinine_operators = group_low_values_series(creatinine_operators)
-drop_and_round(creatinine_operators).to_csv(
-    OUTPUT_DIR / "creatinine_operators_count.csv"
-)
-
-
-cr_cl_operators = pd.concat(operators_cr_cl, axis=1, sort=False).sum(axis=1)
-cr_cl_operators = group_low_values_series(cr_cl_operators)
-drop_and_round(cr_cl_operators).to_csv(OUTPUT_DIR / "cr_cl_operators_count.csv")
-
-
-egfr_operators = pd.concat(operators_egfr, axis=1, sort=False).sum(axis=1)
-egfr_operators = group_low_values_series(egfr_operators)
-drop_and_round(egfr_operators).to_csv(OUTPUT_DIR / "egfr_operators_count.csv")
+    test_operators = pd.concat(operator_counts[test], axis=1, sort=False).sum(axis=1)
+    test_operators = group_low_values_series(test_operators)
+    drop_and_round(test_operators).to_csv(OUTPUT_DIR / f"{test}_operators_count.csv")

@@ -49,7 +49,7 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/*_coun*.csv
+        counts: output/*_count.csv
 
   generate_plots:
     run: python:latest python analysis/plot_measures.py
@@ -63,15 +63,15 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        figures: output/*dist*.jpeg
+        figures: output/*dis*.jpeg
 
 
-  generate_notebook:
-    run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
-    needs: [generate_plots, get_counts]
-    outputs:
-      moderately_sensitive:
-        notebook: output/report.html
+  # generate_notebook:
+  #   run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
+  #   needs: [generate_plots, get_counts]
+  #   outputs:
+  #     moderately_sensitive:
+  #       notebook: output/report.html
 
   generate_ukrr_checks:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-checks.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
