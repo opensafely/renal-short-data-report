@@ -1259,7 +1259,7 @@ study = StudyDefinition(
 
     op_renal = patients.outpatient_appointment_date(
         returning="binary_flag",
-        with_these_treatment_function_codes="361", 
+        with_these_treatment_function_codes=codelist(["361"], system=None), 
         between=["1900-01-01", "index_date"],
         return_expectations={
             "incidence": 0.3,
@@ -1268,7 +1268,7 @@ study = StudyDefinition(
     op_renal_date = patients.outpatient_appointment_date(
         returning="date",
         date_format="YYYY-MM-DD",
-        with_these_treatment_function_codes="361", 
+        with_these_treatment_function_codes=codelist(["361"], system=None), 
         between=["1900-01-01", "index_date"],
         return_expectations={
             "rate": "uniform",
