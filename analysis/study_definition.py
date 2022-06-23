@@ -1478,7 +1478,7 @@ study = StudyDefinition(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
-        with_these_diagnoses="N181",
+        with_these_diagnoses=codelist(["N181"], system="icd10"),
         on_or_before="index_date",
         return_expectations={
             "rate": "uniform",
@@ -1489,7 +1489,7 @@ study = StudyDefinition(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
-        with_these_diagnoses="N182",
+        with_these_diagnoses=codelist(["N182"], system="icd10"),
         on_or_before="index_date",
         return_expectations={
             "rate": "uniform",
@@ -1500,7 +1500,7 @@ study = StudyDefinition(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
-        with_these_diagnoses="N183",
+        with_these_diagnoses=codelist(["N183"], system="icd10"),
         on_or_before="index_date",
         return_expectations={
             "rate": "uniform",
@@ -1511,7 +1511,7 @@ study = StudyDefinition(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
-        with_these_diagnoses="N184",
+        with_these_diagnoses=codelist(["N184"], system="icd10"),
         on_or_before="index_date",
         return_expectations={
             "rate": "uniform",
@@ -1522,7 +1522,7 @@ study = StudyDefinition(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
-        with_these_diagnoses="N185",
+        with_these_diagnoses=codelist(["N185"], system="icd10"),
         on_or_before="index_date",
         return_expectations={
             "rate": "uniform",
@@ -1533,7 +1533,7 @@ study = StudyDefinition(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
-        with_these_diagnoses="N18",
+        with_these_diagnoses=codelist(["N18", "N189"], system="icd10"),
         on_or_before="index_date",
         return_expectations={
             "rate": "uniform",
