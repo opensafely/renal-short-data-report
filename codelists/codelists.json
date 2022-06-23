@@ -167,6 +167,12 @@
       "url": "https://codelists.opensafely.org/codelist/user/viyaasan/kidney-transplant-opcs-4/18d788ae/",
       "downloaded_at": "2022-06-22 16:51:37.489555Z",
       "sha": "fa7f3a5b2e22928038efd8d8795f753a9051625b"
+    },
+    "ukrr-chronic-kidney-disease-icd-10.csv": {
+      "id": "ukrr/chronic-kidney-disease-icd-10/652b3b25",
+      "url": "https://codelists.opensafely.org/codelist/ukrr/chronic-kidney-disease-icd-10/652b3b25/",
+      "downloaded_at": "2022-06-23 13:09:55.462097Z",
+      "sha": "475abe4e0883d1480fe1221970e6fc0b9a0a98a1"
     }
   }
 }
