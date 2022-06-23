@@ -1473,6 +1473,126 @@ study = StudyDefinition(
             }
         }
 ),
+#CKD ICD 10 codes
+    ip_ckd1_diagnosis_date = patients.admitted_to_hospital(
+        returning="date_admitted",
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        with_these_diagnoses="N181",
+        on_or_before="index_date",
+        return_expectations={
+            "rate": "uniform",
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    ip_ckd2_diagnosis_date = patients.admitted_to_hospital(
+        returning="date_admitted",
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        with_these_diagnoses="N182",
+        on_or_before="index_date",
+        return_expectations={
+            "rate": "uniform",
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    ip_ckd3_diagnosis_date = patients.admitted_to_hospital(
+        returning="date_admitted",
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        with_these_diagnoses="N183",
+        on_or_before="index_date",
+        return_expectations={
+            "rate": "uniform",
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    ip_ckd4_diagnosis_date = patients.admitted_to_hospital(
+        returning="date_admitted",
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        with_these_diagnoses="N184",
+        on_or_before="index_date",
+        return_expectations={
+            "rate": "uniform",
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    ip_ckd5_diagnosis_date = patients.admitted_to_hospital(
+        returning="date_admitted",
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        with_these_diagnoses="N185",
+        on_or_before="index_date",
+        return_expectations={
+            "rate": "uniform",
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    ip_ckd_unknown_diagnosis_date = patients.admitted_to_hospital(
+        returning="date_admitted",
+        find_last_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        with_these_diagnoses="N18",
+        on_or_before="index_date",
+        return_expectations={
+            "rate": "uniform",
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    latest_ckd_date_secondary=patients.maximum_of(
+        "ip_ckd1_diagnosis_date", "ip_ckd2_diagnosis_date", "ip_ckd3_diagnosis_date",
+        "ip_ckd4_diagnosis_date", "ip_ckd5_diagnosis_date", "ip_ckd_unknown_diagnosis_date"
+    ),
+
+
+   # Picking most recent CKD status from ICD codes
+    # patients are assigned to the first condition they satisfy, so define RRT modalities first
+    latest_ckd_status_secondary=patients.categorised_as(
+        {
+            "RRT": """
+                        latest_rrt_status_secondary != "None"
+                        """,
+            "None": """
+                        latest_ckd_date_secondary=""
+                        """,
+            "CKD5": """
+                        ip_ckd5_diagnosis_date=latest_ckd_date_secondary
+                        """,
+            "CKD4": """
+                        ip_ckd4_diagnosis_date=latest_ckd_date_secondary
+                        """,
+            "CKD3": """
+                        ip_ckd3_diagnosis_date=latest_ckd_date_secondary
+                        """,
+            "CKD2": """
+                        ip_ckd2_diagnosis_date=latest_ckd_date_secondary
+                        """,
+            "CKD1": """
+                        ip_ckd1_diagnosis_date=latest_ckd_date_secondary
+                        """,
+            "CKD_unknown": """
+                        ip_ckd_unknown_diagnosis_date=latest_ckd_date_secondary
+                        """,
+            "Uncategorised": "DEFAULT",
+        },
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "None": 0.3,
+                    "RRT": 0.1,
+                    "CKD5": 0.1,
+                    "CKD4": 0.1,
+                    "CKD3": 0.1,
+                    "CKD2": 0.1,
+                    "CKD1": 0.1,
+                    "CKD_unknown": 0.09,
+                    "Uncategorised": 0.01,
+                }
+            },
+        },
+    ),
 )
 
 measures = []

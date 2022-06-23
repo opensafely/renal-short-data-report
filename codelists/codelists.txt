@@ -26,3 +26,4 @@ user/Louis/albumin-to-creatinine-ratio-tests/6a3215c8
 ukrr/dialysis-opcs-4/505bef04
 ukrr/dialysis/66b8a243
 user/viyaasan/kidney-transplant-opcs-4/18d788ae/
+ukrr/chronic-kidney-disease-icd-10/652b3b25

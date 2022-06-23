@@ -186,3 +186,10 @@ RRT_opcs4_codelist = combine_codelists(
     dialysis_opcs4_codelist,
     codelist(["M023", "M026", "M027", "X412"], system="opcs4")
 )
+
+#CKD ICD codelist to look at pts in UKRR but not in secondary care
+CKD_icd10_codelist = codelist_from_csv(
+    "codelists/ukrr-chronic-kidney-disease-icd-10.csv",
+    system="icd10",
+    column="code"
+)
