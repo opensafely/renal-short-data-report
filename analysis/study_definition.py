@@ -902,9 +902,9 @@ study = StudyDefinition(
         {
             "above": """(cystatin_c_numeric_value > cystatin_c_ref_range_upper) AND
             NOT (
-                (cystatin_c = '<') OR
-                (cystatin_c = '<=') OR
-                (cystatin_c = '~')
+                (cystatin_c_operator = '<') OR
+                (cystatin_c_operator = '<=') OR
+                (cystatin_c_operator = '~')
             )""",
             "below": """(cystatin_c_numeric_value < cystatin_c_ref_range_lower) AND
             NOT (
