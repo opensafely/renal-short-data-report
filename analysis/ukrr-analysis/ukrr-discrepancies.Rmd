@@ -61,7 +61,7 @@ for (i in 1:3){
     mutate(latest_dtx = ifelse(latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_renal_status, "Not on RRT"))
   # add variable for dialysis/tx for primary care, ignoring CKD codes
   df<- df %>%
-    mutate(latest_dtx_nockd = ifelse(latest_RRT_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_RRT_status, "Not on RRT"))
+    mutate(latest_dtx_nockd = ifelse(latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_rrt_status, "Not on RRT"))
   # order factor
   df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
   df$latest_dtx<-factor(df$latest_dtx, levels=c("Not on RRT", "Dialysis", "Transplant", "RRT_unknown"))
@@ -72,9 +72,9 @@ for (i in 1:3){
                                ifelse (ukrr_prev==1 & !(latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
                                     ifelse(ukrr_prev!=1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
                                            "Neither")))) %>%
-    mutate(rrt_source_nockd = ifelse(ukrr_prev==1 & latest_RRT_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
-                               ifelse (ukrr_prev==1 & !(latest_RRT_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
-                                    ifelse(ukrr_prev!=1 & latest_RRT_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
+    mutate(rrt_source_nockd = ifelse(ukrr_prev==1 & latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
+                               ifelse (ukrr_prev==1 & !(latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
+                                    ifelse(ukrr_prev!=1 & latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
                                            "Neither")))) %>%
     mutate(region = replace(region, region=="", "Missing"))
   # pick out latest code
@@ -100,7 +100,7 @@ keepRRT<-function(x){
   filter(x , ukrr_prev==1 | latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
 }
 keepRRT_nockd<-function(x){
-  filter(x , ukrr_prev==1 | latest_RRT_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+  filter(x , ukrr_prev==1 | latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
 }
 
 #function to round up to nearest accuracy
@@ -387,8 +387,8 @@ First looking at at the RRT status as defined by the latest primary care code.
 list.of.dts<-lapply(dflist, function (x) 
   x %>%
     filter(rrt_source_nockd=="UKRR only") %>%
-    count(ukrr_dtx, latest_RRT_status) %>%
-    spread(latest_RRT_status, n, fill=0) %>%
+    count(ukrr_dtx, latest_rrt_status) %>%
+    spread(latest_rrt_status, n, fill=0) %>%
     mutate(across(where(is.numeric)&!c(1), ~ roundup(.x,5))) %>% 
     mutate(across(where(is.numeric)&!c(1),~ifelse(.<=5,"<=5",.)))) 
 
@@ -409,7 +409,7 @@ mods<-c("Dialysis", "Transplant")
 codes.table<-function(df,codevar,codelist){
   lapply(mods, function(mod)
   df %>%
-    filter(rrt_source_nockd=="UKRR only" & latest_RRT_status!="None" & ukrr_dtx==mod) %>%
+    filter(rrt_source_nockd=="UKRR only" & latest_rrt_status!="None" & ukrr_dtx==mod) %>%
     count(!!as.name(codevar)) %>%
     left_join(codelist, by=setNames(names(codelist)[1], codevar)) %>%
     mutate(!!codevar:= replace(!!as.name(codevar), !!as.name(codevar) %in% c("", NA), "Missing")) %>%
@@ -473,7 +473,7 @@ First looking at at the renal status as defined by the latest primary care code.
 list.of.dts<-lapply(dflist, function (x) 
   x %>%
     filter(rrt_source_nockd=="PC only") %>%
-    count(latest_RRT_status) %>%
+    count(latest_rrt_status) %>%
     mutate(across(where(is.numeric)&!c(1), ~ roundup(.x,5))) %>% 
     mutate(across(where(is.numeric)&!c(1),~ifelse(.<=5,"<=5",.))))
 
@@ -493,7 +493,7 @@ Below we look at what the most recent primary care codes are for these patients,
 #Then the latest codes by renal status
 codes.table.2<-function(df,status, codelist){
   df %>%
-    filter(rrt_source_nockd=="PC only" & latest_RRT_status==status) %>%
+    filter(rrt_source_nockd=="PC only" & latest_rrt_status==status) %>%
     count(latest_RRT_code) %>%
     left_join(codelist, by=setNames(names(codelist)[1], "latest_RRT_code")) %>%
     mutate(latest_RRT_code= replace(latest_RRT_code, latest_RRT_code %in% c("", NA) , "Missing")) %>%
@@ -535,12 +535,12 @@ Now looking how long before the prevalent date the RRT event code in primary car
 plot.df<-mapply(function(x,y)
    x %>%
         filter(rrt_source_nockd=="PC only") %>%
-        mutate(days_since_last_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_RRT_date, "%Y-%m-%d"))),
+        mutate(days_since_last_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_rrt_date, "%Y-%m-%d"))),
    dflist, years, SIMPLIFY = FALSE)
 
 mapply(function(z, d) 
   lapply( c("Dialysis", "Transplant"), function(x)  #not doing RRT unknown as so few pts 
-    ggplot(subset(z, latest_RRT_status==x), aes(days_since_last_RRT)) + geom_bar(stat = "count") +
+    ggplot(subset(z, latest_rrt_status==x), aes(days_since_last_RRT)) + geom_bar(stat = "count") +
       labs(title=paste("Histogram of days since last RRT code for", x, "patients", d))  + theme(plot.title = element_text(size = 10, face = "bold"))),
   plot.df, years, SIMPLIFY =FALSE  )
 
@@ -548,7 +548,7 @@ mapply(function(z, d)
 # Looking at median time since code
 codes.table.3<-function(df,status, codelist){
   df %>%
-    filter(rrt_source_nockd=="PC only" & latest_RRT_status==status) %>%
+    filter(rrt_source_nockd=="PC only" & latest_rrt_status==status) %>%
     group_by(latest_RRT_code)%>%
     summarise(n=n(), median=median(days_since_last_RRT)) %>%
     left_join(codelist, by=setNames(names(codelist)[1], "latest_RRT_code")) %>%
@@ -593,14 +593,14 @@ Not done yet
 
 comparison.df<-mapply(function(x,y)
    x %>%
-        mutate(days_since_last_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_RRT_date, "%Y-%m-%d"))),
+        mutate(days_since_last_RRT = as.numeric(as.Date(paste0("1jan",as.numeric(y)+1), "%d%b%Y") - as.Date(latest_rrt_date, "%Y-%m-%d"))),
    dflist, years, SIMPLIFY = FALSE)
 
 
 # Looking at median time since code
 codes.table.4<-function(df,status, codelist){
   df %>%
-    filter(rrt_source_nockd=="Both" & as.character(latest_dtx_nockd)==as.character(ukrr_dtx) & latest_RRT_status==status) %>%
+    filter(rrt_source_nockd=="Both" & as.character(latest_dtx_nockd)==as.character(ukrr_dtx) & latest_rrt_status==status) %>%
     group_by(latest_RRT_code)%>%
     summarise(n=n(), median=median(days_since_last_RRT)) %>%
     left_join(codelist, by=setNames(names(codelist)[1], "latest_RRT_code")) %>%

@@ -39,7 +39,7 @@ for (i in 1:3){
     mutate(latest_dtx = ifelse(latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_renal_status, "Not on RRT"))
   # add variable for dialysis/tx for primary care, ignoring CKD codes
   df<- df %>%
-    mutate(latest_dtx_nockd = ifelse(latest_RRT_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_RRT_status, "Not on RRT"))
+    mutate(latest_dtx_nockd = ifelse(latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_rrt_status, "Not on RRT"))
   # order factor
   df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
   df$latest_dtx<-factor(df$latest_dtx, levels=c("Not on RRT", "Dialysis", "Transplant", "RRT_unknown"))
@@ -50,9 +50,9 @@ for (i in 1:3){
                                ifelse (ukrr_prev==1 & !(latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
                                     ifelse(ukrr_prev!=1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
                                            "Neither")))) %>%
-    mutate(rrt_source_nockd = ifelse(ukrr_prev==1 & latest_RRT_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
-                               ifelse (ukrr_prev==1 & !(latest_RRT_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
-                                    ifelse(ukrr_prev!=1 & latest_RRT_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
+    mutate(rrt_source_nockd = ifelse(ukrr_prev==1 & latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
+                               ifelse (ukrr_prev==1 & !(latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
+                                    ifelse(ukrr_prev!=1 & latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
                                            "Neither")))) %>%
     mutate(region = replace(region, region=="", "Missing"))
   #put dataset into list
@@ -64,7 +64,7 @@ keepRRT<-function(x){
   filter(x , ukrr_prev==1 | latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
 }
 keepRRT_nockd<-function(x){
-  filter(x , ukrr_prev==1 | latest_RRT_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+  filter(x , ukrr_prev==1 | latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
 }
 
 #function to round up to nearest accuracy
@@ -223,7 +223,7 @@ Percentages are calculated over the whole table,  excluding people not on RRT in
 ```{r, echo=FALSE, results='asis'}
 #table for numbers
 ntable<-function(x){
-  roundup(table(x$ukrr_prev, x$latest_RRT_status %in% c("Dialysis", "Transplant", "RRT_unknown")),5) #round to nearest 5
+  roundup(table(x$ukrr_prev, x$latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown")),5) #round to nearest 5
 }
 
 #combine N and % in one table
@@ -255,8 +255,8 @@ Some of the patients not on RRT will be CKD patients in the UKRR data source, bu
 ```{r, echo=FALSE, results='asis'}
 #table for numbers
 list.of.dts<-lapply(dflist, function (x) x %>%
-  count(ukrr_mod, latest_RRT_status) %>%
-  spread(latest_RRT_status, n, fill=0) %>%
+  count(ukrr_mod, latest_rrt_status) %>%
+  spread(latest_rrt_status, n, fill=0) %>%
   mutate(ukrr_mod= replace(ukrr_mod, ukrr_mod=="", "Not on RRT")) %>%
   rename(UKRR=ukrr_mod) %>%
   mutate(across(where(is.numeric), ~ roundup(.x,5))) %>% 
