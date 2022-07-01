@@ -37,14 +37,22 @@ for (i in 1:3){
   # add variable for dialysis/tx for primary care
   df<- df %>%
     mutate(latest_dtx = ifelse(latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_renal_status, "Not on RRT"))
+  # add variable for dialysis/tx for primary care, ignoring CKD codes
+  df<- df %>%
+    mutate(latest_dtx_nockd = ifelse(latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown") , latest_rrt_status, "Not on RRT"))
   # order factor
   df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
   df$latest_dtx<-factor(df$latest_dtx, levels=c("Not on RRT", "Dialysis", "Transplant", "RRT_unknown"))
+  df$latest_dtx_nockd<-factor(df$latest_dtx_nockd, levels=c("Not on RRT", "Dialysis", "Transplant", "RRT_unknown"))
   # add variable for source
   df<-df %>%
     mutate(rrt_source = ifelse(ukrr_prev==1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
                                ifelse (ukrr_prev==1 & !(latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
                                     ifelse(ukrr_prev!=1 & latest_renal_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
+                                           "Neither")))) %>%
+    mutate(rrt_source_nockd = ifelse(ukrr_prev==1 & latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "Both",
+                               ifelse (ukrr_prev==1 & !(latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown")), "UKRR only",
+                                    ifelse(ukrr_prev!=1 & latest_rrt_status %in%  c("Dialysis", "Transplant", "RRT_unknown"), "PC only",
                                            "Neither")))) %>%
     mutate(region = replace(region, region=="", "Missing"))
   #put dataset into list
@@ -54,6 +62,9 @@ for (i in 1:3){
 # function to filter dataset to exclude patients with no RRT in either OS or UKRR as this is what we want to show pct by
 keepRRT<-function(x){
   filter(x , ukrr_prev==1 | latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+}
+keepRRT_nockd<-function(x){
+  filter(x , ukrr_prev==1 | latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
 }
 
 #function to round up to nearest accuracy
@@ -70,6 +81,8 @@ People over 18 years of age, alive and registered to a TPP practice at the end o
 #### Definition if RRT status
 For the UKRR data, patients are classified as part of the prevalent cohort if they are alive and on RRT at the end of the year, as reported by all renal centres in England. The 2021 cohort is based on provisional data from the renal centres and has not been validated. In particular, some patients on acute dialysis may be included. <br>
 For the primary care data, patients are classified based on the last recorded code in the dialysis, transplant and RRT codelists.  If both dialysis and transplant codes were recorded on the same day, then the renal status is classed as 'RRT unknown'. If RRT and CKD codes are recorded on the same day, then the renal status is based on the RRT code.
+Results A - primary care classification is based on the latest renal status including CKD and RRT codes.
+Results B - primary care classification is based on the latest RRT code only.
 
 #### Disclosure control
 Cells less than or equal to 5 are shown as <=5 and corresponding percentages blanked. All other numbers are rounded up to the nearest 5 and percentages calculated on the rounded number.
@@ -80,7 +93,7 @@ Cells less than or equal to 5 are shown as <=5 and corresponding percentages bla
 [OpenSAFELY renal replacement therapy codelist](https://www.opencodelists.org/codelist/opensafely/renal-replacement-therapy/2020-04-14/)<br>
 [GitHub repository for this analysis](https://github.com/opensafely/renal-short-data-report)<br>
 
-## Results
+## Results A
 
 #### 1 People prevalent to RRT by data source
 Percentages are calculated over the whole table,  excluding people not on RRT in either source.
@@ -175,6 +188,129 @@ Capture of RRT patients in each data source, by demographics. Percentages are ca
 dtable<-function(x, y) {
     y1<-keepRRT(y)
     noround.t<-table(y1[,x],y1$rrt_source)
+    round.t<-roundup(noround.t,5) #rounding to nearest 5
+    round.t[noround.t<=5] <- 0  #replacing values less than 5 with 0 so they are excluded from %
+    prop.t<-round(100*prop.table(round.t, margin=1),0)  #calculate % on rounded table, with <5 excluded
+    round.t[noround.t<=5] <- "<=5"  #replacing <5
+    prop.t[noround.t<=5] <- " "  #blanking % less than 5
+    m1<-cbind(round.t, prop.t)
+    m2 <- m1[, c(matrix(1:ncol(m1), nrow = 2, byrow = T))]  
+    #colnames(m2) <-paste0(colnames(m2), rep(c(" n", " %"), 3))
+    return(m2)
+}
+
+list.of.dts<-lapply(dflist, function(y) lapply(demogs, function(x) dtable(x, y)))
+
+for(i in 1:length(list.of.dts)) {
+  for(j in 1:length(list.of.dts[[i]])){
+   names<-unique(colnames(list.of.dts[[i]][[j]])) #save existing colnames
+    colnames(list.of.dts[[i]][[j]])<-rep("",length(names)*2) # blank colnames
+   k<- list.of.dts[[i]][[j]]%>%
+          kbl(caption=paste0("Table 4.", i, "." , j, " Data source for RRT patients, by ", demogs[j], ", ", years[i] ), booktabs=TRUE) %>% 
+          add_header_above(c(demogs[j], rep(c("n", "%"), length(names)))) %>%
+          add_header_above(data.frame(c("", names), c(1,rep(2, length(names))))) %>%  #setting colnames as a dataframe 
+          kable_styling()
+  print(k)     
+  }
+}
+
+```
+
+## Results B
+
+#### 1 People prevalent to RRT by data source
+Percentages are calculated over the whole table,  excluding people not on RRT in either source.
+```{r, echo=FALSE, results='asis'}
+#table for numbers
+ntable<-function(x){
+  roundup(table(x$ukrr_prev, x$latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown")),5) #round to nearest 5
+}
+
+#combine N and % in one table
+mytable <- function(x){
+  m1<-cbind(ntable(x), round(100*prop.table(ntable(keepRRT_nockd(x))),0)) #pcts based on rounded numbers
+  m2 <- m1[, c(matrix(1:ncol(m1), nrow = 2, byrow = T))]  
+  colnames(m2) <-rep("",4)
+  rownames(m2) <- c("not RRT", "RRT")
+  m2[1,1]<-paste0("\\(", m2[1,1], ")") #placing first cell in brackets as not really interested in these
+  m2[1,2]<-"" #and blanking corresponding percentage
+  return(m2)
+}
+#applying to all in list
+list.of.dts<-lapply(dflist, mytable)
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste0("Table 1.",i, " RRT status by data source, ",  years[i]), booktabs=TRUE) %>%
+          add_header_above(c("UKRR", "n", "%", "n", "%")) %>%
+          add_header_above(c("","Not on RRT"=2, "RRT"=2)) %>%
+          add_header_above(c("", "Primary care" = 4)) %>%
+          kable_styling()
+  print(k)
+}
+
+```
+
+#### 2 - Modality by data source
+Some of the patients not on RRT will be CKD patients in the UKRR data source, but that group will be considered separately later.
+```{r, echo=FALSE, results='asis'}
+#table for numbers
+list.of.dts<-lapply(dflist, function (x) x %>%
+  count(ukrr_mod, latest_rrt_status) %>%
+  spread(latest_rrt_status, n, fill=0) %>%
+  mutate(ukrr_mod= replace(ukrr_mod, ukrr_mod=="", "Not on RRT")) %>%
+  rename(UKRR=ukrr_mod) %>%
+  mutate(across(where(is.numeric), ~ roundup(.x,5))) %>% 
+  mutate_all(~ifelse(.<=5,"<=5",.)))
+
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste0("Table 2.",i, " Modality by data source, ",  years[i]), booktabs=TRUE) %>%
+          add_header_above(c("", "Primary care" = ncol(list.of.dts[[i]]) - 1)) %>%
+          kable_styling()
+  print(k)
+}
+```
+
+#### 3 - Agreement between dialysis and transplant
+Percentages are calculated over the whole table,  excluding people not on RRT in either source.
+```{r, echo=FALSE, results='asis'}
+#table for numbers
+ntable<-function(x){
+  roundup(table(keepRRT_nockd(x)$ukrr_dtx, keepRRT_nockd(x)$latest_dtx_nockd),5) #round up to nearest 5
+}
+
+#combine N and % in one table
+mytable <- function(x){
+  m1<-cbind(ntable(x), round(100*prop.table(ntable(x)),0)) #pct based on rounded numbers
+  m2 <- m1[, c(matrix(1:ncol(m1), nrow = 2, byrow = T))]  
+  #colnames(m2) <-paste0(colnames(m2), rep(c(" n", " %"), 4))
+  m2[1,1]<-""  # replaceing 0 in first two cells with nothing
+  m2[1,2]<-""
+  return(m2)
+}
+#applying to all in list
+list.of.dts<-lapply(dflist, mytable)
+for(i in 1:length(list.of.dts)) {
+    names<-unique(colnames(list.of.dts[[i]])) #save existing colnames
+    colnames(list.of.dts[[i]])<-rep("",length(names)*2) # blank colnames
+   k<- list.of.dts[[i]] %>%
+          kbl(caption=paste0("Table 3.",i, " Agreement of dialysis and transplant between data sources, ",  years[i]), booktabs=TRUE) %>% 
+          add_header_above(c("UKRR", rep(c("n", "%"), length(names)))) %>% 
+         add_header_above(data.frame(c("", names), c(1,rep(2, length(names))))) %>%  #setting colnames as a dataframe 
+          add_header_above(c("", "Primary care" =  length(names)*2 )) %>%
+          kable_styling()
+  print(k)
+}
+
+```
+
+### 4 - Agreement by demographics
+Capture of RRT patients in each data source, by demographics. Percentages are calculated across rows.
+
+```{r, echo=FALSE, results='asis'}
+dtable<-function(x, y) {
+    y1<-keepRRT_nockd(y)
+    noround.t<-table(y1[,x],y1$rrt_source_nockd)
     round.t<-roundup(noround.t,5) #rounding to nearest 5
     round.t[noround.t<=5] <- 0  #replacing values less than 5 with 0 so they are excluded from %
     prop.t<-round(100*prop.table(round.t, margin=1),0)  #calculate % on rounded table, with <5 excluded
