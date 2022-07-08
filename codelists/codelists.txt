@@ -1,11 +1,13 @@
 user/ss808/estimated-glomerular-filtration-rate-egfr-recorded-tests/76a6b7b5
 user/ss808/estimated-glomerular-filtration-rate-egfr-values/5d974480
+user/bangzheng/egfr-value-shortlist/1d0e46c5
 primis-covid19-vacc-uptake/eth2001/v1/
 user/Louis/creatinine-clearance/6faa67ae
+user/bangzheng/creatinine-clearance-shortlist/03fed390
 opensafely/weight-snomed/5459abc6/
 opensafely/height-snomed/3b4a3891/
 user/bangzheng/creatinine/7a202b3a
-user/bangzheng/creatinine-value/58285b97
+user/bangzheng/creatinine-value-shortlist/60eb1411
 opensafely/hypertension-snomed/2020-04-28
 opensafely/type-1-diabetes/2020-06-29
 opensafely/type-2-diabetes/2020-06-29
