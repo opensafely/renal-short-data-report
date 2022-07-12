@@ -96,12 +96,12 @@ actions:
       moderately_sensitive:
         report: output/notebooks/ukrr-report.html
        
-  # generate_ukrr_discrepancies:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [join_cohorts]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/ukrr-discrepancies.html
+  generate_ukrr_discrepancies:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/ukrr-discrepancies.html
   
   # generate_kidney_week:
   #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/kidney_week.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
