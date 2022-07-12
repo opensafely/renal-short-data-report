@@ -14,14 +14,14 @@ actions:
       highly_sensitive:
         cohort: output/input*.csv.gz
 
-  generate_study_population_2:
-    run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition 
-      --index-date-range "2021-02-01 to 2022-05-01 by month" 
-      --output-format csv.gz
-    outputs:
-      highly_sensitive:
-        cohort: output/inpu*.csv.gz
+#  generate_study_population_2:
+#    run: cohortextractor:latest generate_cohort 
+#      --study-definition study_definition 
+#      --index-date-range "2021-02-01 to 2022-05-01 by month" 
+#      --output-format csv.gz
+#    outputs:
+#      highly_sensitive:
+#        cohort: output/inpu*.csv.gz
 
   generate_study_population_ethnicity_ukrr:
     run: cohortextractor:latest generate_cohort 
@@ -38,7 +38,7 @@ actions:
         --lhs output/input_20*.csv.gz
         --rhs output/input_ethnicity_ukrr.csv.gz
         --output-dir output/joined
-    needs: [generate_study_population, generate_study_population_2, generate_study_population_ethnicity_ukrr]
+    needs: [generate_study_population, generate_study_population_ethnicity_ukrr]
     outputs:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
@@ -84,7 +84,7 @@ actions:
 
   generate_ukrr_checks:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-checks.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [generate_study_population, generate_study_population_2, generate_study_population_ethnicity_ukrr]
+    needs: [generate_study_population, generate_study_population_ethnicity_ukrr]
     outputs:
       moderately_sensitive:
         report: output/notebooks/ukrr-checks.html
