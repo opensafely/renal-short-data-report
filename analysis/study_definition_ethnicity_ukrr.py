@@ -162,7 +162,8 @@ incident_rrt_status = patients.categorised_as(
  # outpatients
     # tx
     earliest_op_kidney_tx_date = patients.outpatient_appointment_date(
-        returning="find_first_match_in_period",
+        returning="date",
+        find_first_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_procedures=kidney_tx_opcs4_codelist,
         between=["1900-01-01", "index_date"],
@@ -173,7 +174,8 @@ incident_rrt_status = patients.categorised_as(
     ),
     # dialysis
     earliest_op_dialysis_date = patients.outpatient_appointment_date(
-        returning="find_first_match_in_period",
+        returning="date",
+        find_first_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_procedures=dialysis_opcs4_codelist,
         between=["1900-01-01", "index_date"],
@@ -184,7 +186,8 @@ incident_rrt_status = patients.categorised_as(
     ),
     #RRT
     earliest_op_RRT_date = patients.outpatient_appointment_date(
-        returning="find_first_match_in_period",
+        returning="date",
+        find_first_match_in_period=True,
         date_format="YYYY-MM-DD",
         with_these_procedures=RRT_opcs4_codelist,
         between=["1900-01-01", "index_date"],
