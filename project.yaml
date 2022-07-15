@@ -110,9 +110,16 @@ actions:
   #     moderately_sensitive:
   #       report: output/notebooks/kidney_week.html
   
-  generate_frequency_plots:
-    run: r:latest analysis/test_frequency.R
+  generate_ukrr_tables_figures:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        figures: output/figures/months_with_*.png
+        report: output/notebooks/ukrr-tables-figures.html
+  
+ # generate_frequency_plots:
+ #   run: r:latest analysis/test_frequency.R
+ #   needs: [join_cohorts]
+ #   outputs:
+ #     moderately_sensitive:
+ #       figures: output/figures/months_with_*.png
