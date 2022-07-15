@@ -394,13 +394,32 @@ list.of.dts<-lapply(dflist, function (x)
 
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
-          kbl(caption=paste0("Table 1.1",i, " Latest PC RRT status for people on RRT in the UKRR but not PC ",  years[i]), booktabs=TRUE) %>%
+          kbl(caption=paste0("Table 1.1a",i, " Latest PC RRT status for people on RRT in the UKRR but not PC ",  years[i]), booktabs=TRUE) %>%
           #add_header_above(c("", "Primary care" = ncol(list.of.dts[[i]]) - 1)) %>%
           kable_styling()
   print(k)
 }
-
 ```
+Tabulate latest_renal_status just for those whose are on RRT in UKRR only using latest_rrt_status rather than latest_renal_status
+```{r, echo=FALSE, results='asis'}
+#First tabulate the latest RRT status
+list.of.dts<-lapply(dflist, function (x) 
+  x %>%
+    filter(rrt_source_nockd=="UKRR only") %>%
+    count(ukrr_dtx, latest_renal_status) %>%
+    spread(latest_renal_status, n, fill=0) %>%
+    mutate(across(where(is.numeric)&!c(1), ~ roundup(.x,5))) %>% 
+    mutate(across(where(is.numeric)&!c(1),~ifelse(.<=5,"<=5",.)))) 
+
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste0("Table 1.1b",i, " Latest PC renal status for people on RRT in the UKRR but not PC ",  years[i]), booktabs=TRUE) %>%
+          #add_header_above(c("", "Primary care" = ncol(list.of.dts[[i]]) - 1)) %>%
+          kable_styling()
+  print(k)
+}
+```
+
 For some people the latest renal code relates to CKD but there is a previous RRT code.  The tables below describe the most recent codes for each OpenSAFELY primary care codelist, excluding patients with no renal primary care codes at all, and split by UKRR modality (dialysis/transplant).
 ```{r, echo=FALSE, results='asis'}
 #Then the latest codes for CKD, dialysis, transplant and RRT
