@@ -5,6 +5,8 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 
+This document describes the cohorts of patients prevalent to renal replacement therapy (RRT) at 1st January 2020, and incident to renal replacement therapy during 2020 using 3 sources of data: the UK Renal Registry (UKRR), primary care data from TPP practices (PC) and secondary care inpatient and outpatient data (SC).  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #Load libraries
@@ -185,8 +187,8 @@ keepRRT_nockd<-function(x){
 roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
 ```
 
-# Table 1 Chacteristics of the study population
-## Prevalent at 1/1/2020
+# Section 1 Chacteristics of the study population
+##  Prevalent at 1/1/2020, by data source and modality
 ### UKRR
 ```{r, echo=FALSE, results='asis'}
 #create tables
@@ -200,7 +202,7 @@ for(i in 1:length(list.of.dts)) {
   print(k)
 }
 ```
-### Primary care 
+### Primary care
 ```{r, echo=FALSE, results='asis'}
 #create tables
 list.of.dts<-lapply(df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
@@ -230,7 +232,7 @@ for(i in 1:length(list.of.dts)) {
 }
 ```
 
-## Incident in 2020, by modality
+## Incident in 2020, by data source and modality
 ### UKRR
 ```{r, echo=FALSE, results='asis'}
 #create tables
@@ -274,8 +276,51 @@ for(i in 1:length(list.of.dts)) {
 }
 ```
 
-# Table 2 Agreement by demographic characteristics
-## Prevalent 1/1/2020
+# Section 2 Overall agreement  
+
+Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.  
+
+## Prevalent at 1/1/2020, overall and by modality
+### All RRT
+```{r, echo=FALSE, results='asis'}
+roundup(table(df$source_prev_rrt, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Dialysis
+```{r, echo=FALSE, results='asis'}
+roundup(table(df$source_prev_dialysis, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Transplant
+```{r, echo=FALSE, results='asis'}
+roundup(table(df$source_prev_transplant, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+## Incident 2020, overall and by modality
+### All RRT
+```{r, echo=FALSE, results='asis'}
+roundup(table(df$source_inc_rrt, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Dialysis
+```{r, echo=FALSE, results='asis'}
+roundup(table(df$source_inc_dialysis, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Transplant
+```{r, echo=FALSE, results='asis'}
+roundup(table(df$source_inc_transplant, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+
+# Section 3 Agreement by demographic characteristics
+## Prevalent at 1/1/2020, overall and by modality
 ### All RRT
 
 ```{r, echo=FALSE, results='asis'}
@@ -313,7 +358,7 @@ for(i in 1:length(list.of.dts)) {
   print(k)
 }
 ```
-## Incident 2020
+## Incident 2020, overall and by modality
 ### All RRT
 ```{r, echo=FALSE, results='asis'}
 #create tables
@@ -351,50 +396,11 @@ for(i in 1:length(list.of.dts)) {
 }
 ```
 
+# Section 4  - Agreement of modality  
 
-# Figure 2 Numbers for Venn digram, sens and spec
-## Prevalent at 1/1/2020
-### All RRT
-```{r, echo=FALSE, results='asis'}
-roundup(table(df$source_prev_rrt, useNA="ifany"),5) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Dialysis
-```{r, echo=FALSE, results='asis'}
-roundup(table(df$source_prev_dialysis, useNA="ifany"),5) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Transplant
-```{r, echo=FALSE, results='asis'}
-roundup(table(df$source_prev_transplant, useNA="ifany"),5) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-## Incident 2020
-### All RRT
-```{r, echo=FALSE, results='asis'}
-roundup(table(df$source_inc_rrt, useNA="ifany"),5) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Dialysis
-```{r, echo=FALSE, results='asis'}
-roundup(table(df$source_inc_dialysis, useNA="ifany"),5) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Transplant
-```{r, echo=FALSE, results='asis'}
-roundup(table(df$source_inc_transplant, useNA="ifany"),5) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
+Of people who are captured in UKRR and PC/SC, do the modalitie agree?   
 
-# Extra - of people who are captured in UKRR and PC/SC how many are the wrong modality?
-UKRR = "Not on RRT" should be 0.
-## prevalent 1/1/2020
+## Prevalent 1/1/2020
 ### UKRR and PC
 ```{r, echo=FALSE, results='asis'}
 k<-roundup(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$ukrr_dtx,
@@ -438,7 +444,7 @@ print(k2)
 ```
 
 
-# Figure 4 - CKD codes in PC/SC care for people in UKRR and not PC/SC, by modality
+# Section 5 - CKD codes in PC/SC care for people in UKRR and not PC/SC, by modality  
 ## Prevalent 1/1/2020
 ### in UKRR and not PC
 ```{r, echo=FALSE, results='asis'}
