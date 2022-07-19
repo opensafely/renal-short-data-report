@@ -20,7 +20,12 @@ demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "a
 #read in dataset
 #pick up 1st Jan cohort as latest renal status is on or before index date
  df<-read.csv(here::here("output", "joined", "input_2020-01-01.csv.gz")) 
-  
+ 
+ #only keep incident data for 2020 for PC and SC
+df<-df %>%
+  mutate(incident_rrt_status=ifelse(grepl("2020",incident_rrt_date), incident_rrt_status, "" )) %>%
+  mutate(incident_rrt_status_secondary=ifelse(grepl("2020",incident_rrt_date_secondary), incident_rrt_status_secondary, "" ))
+
 #add variable for dialysis/tx for UKRR
 df<- df %>%
   mutate(ukrr_dtx = ifelse(ukrr_2019_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_2019_mod == "Tx", "Transplant", "Not on RRT"))) %>%
@@ -186,7 +191,7 @@ roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
 ```{r, echo=FALSE, results='asis'}
 #create tables
 list.of.dts<-lapply(df[df$ukrr_2019==1, demogs],
-    function(x) addmargins(table(x, df[df$ukrr_2019==1,]$ukrr_dtx, useNA="ifany"), 2))
+    function(x) roundup(addmargins(table(x, df[df$ukrr_2019==1,]$ukrr_dtx, useNA="ifany"), 2),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -199,7 +204,7 @@ for(i in 1:length(list.of.dts)) {
 ```{r, echo=FALSE, results='asis'}
 #create tables
 list.of.dts<-lapply(df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
-       function(x) addmargins(table(x, df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$latest_rrt_status, useNA="ifany"), 2))
+       function(x) roundup(addmargins(table(x, df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$latest_rrt_status, useNA="ifany"), 2),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -213,9 +218,9 @@ for(i in 1:length(list.of.dts)) {
 #create tables
 list.of.dts<-lapply(df[df$latest_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
        function(x) 
-         addmargins(
+         roundup(addmargins(
            table(x, df[df$latest_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$latest_rrt_status_secondary, useNA="ifany")
-           , 2))
+           , 2),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -230,7 +235,7 @@ for(i in 1:length(list.of.dts)) {
 ```{r, echo=FALSE, results='asis'}
 #create tables
 list.of.dts<-lapply(df[df$ukrr_inc2020==1, demogs],
-       function(x) addmargins(table(x, df[df$ukrr_inc2020==1,]$ukrr_dtx_inc, useNA="ifany"), 2))
+       function(x) roundup(addmargins(table(x, df[df$ukrr_inc2020==1,]$ukrr_dtx_inc, useNA="ifany"), 2),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -243,7 +248,7 @@ for(i in 1:length(list.of.dts)) {
 ```{r, echo=FALSE, results='asis'}
 #create tables
 list.of.dts<-lapply(df[df$incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
-       function(x) addmargins(table(x, df[df$incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$incident_rrt_status, useNA="ifany"), 2))
+       function(x) roundup(addmargins(table(x, df[df$incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$incident_rrt_status, useNA="ifany"),2),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -252,13 +257,14 @@ for(i in 1:length(list.of.dts)) {
   print(k)
 }
 ```
+
 ### Secondary care
 ```{r, echo=FALSE, results='asis'}
 #create tables
 list.of.dts<-lapply(df[df$incident_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
-       function(x) addmargins(
+       function(x) roundup(addmargins(
          table(x, df[df$incident_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$incident_rrt_status_secondary, useNA="ifany")
-         , 2))
+         , 2),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -274,7 +280,7 @@ for(i in 1:length(list.of.dts)) {
 
 ```{r, echo=FALSE, results='asis'}
 #create tables
-list.of.dts<-lapply(df[demogs], function(x) table(x, df$source_prev_rrt, useNA="ifany"))
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_prev_rrt, useNA="ifany"),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -286,7 +292,7 @@ for(i in 1:length(list.of.dts)) {
 ### Dialysis
 ```{r, echo=FALSE, results='asis'}
 #create tables
-list.of.dts<-lapply(df[demogs], function(x) table(x, df$source_prev_dialysis, useNA="ifany"))
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_prev_dialysis, useNA="ifany"),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -298,7 +304,7 @@ for(i in 1:length(list.of.dts)) {
 ### Transplant
 ```{r, echo=FALSE, results='asis'}
 #create tables
-list.of.dts<-lapply(df[demogs], function(x) table(x, df$source_prev_transplant, useNA="ifany"))
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_prev_transplant, useNA="ifany"),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -311,7 +317,7 @@ for(i in 1:length(list.of.dts)) {
 ### All RRT
 ```{r, echo=FALSE, results='asis'}
 #create tables
-list.of.dts<-lapply(df[demogs], function(x) table(x, df$source_inc_rrt, useNA="ifany"))
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_inc_rrt, useNA="ifany"),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -323,7 +329,7 @@ for(i in 1:length(list.of.dts)) {
 ### Dialysis
 ```{r, echo=FALSE, results='asis'}
 #create tables
-list.of.dts<-lapply(df[demogs], function(x) table(x, df$source_inc_dialysis, useNA="ifany"))
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_inc_dialysis, useNA="ifany"),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -335,7 +341,7 @@ for(i in 1:length(list.of.dts)) {
 ### Transplant
 ```{r, echo=FALSE, results='asis'}
 #create tables
-list.of.dts<-lapply(df[demogs], function(x) table(x, df$source_inc_transplant, useNA="ifany"))
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_inc_transplant, useNA="ifany"),5))
 #printing
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
@@ -350,79 +356,85 @@ for(i in 1:length(list.of.dts)) {
 ## Prevalent at 1/1/2020
 ### All RRT
 ```{r, echo=FALSE, results='asis'}
-table(df$source_prev_rrt, useNA="ifany") %>%
+roundup(table(df$source_prev_rrt, useNA="ifany"),5) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
 ### Dialysis
 ```{r, echo=FALSE, results='asis'}
-table(df$source_prev_dialysis, useNA="ifany") %>%
+roundup(table(df$source_prev_dialysis, useNA="ifany"),5) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
 ### Transplant
 ```{r, echo=FALSE, results='asis'}
-table(df$source_prev_transplant, useNA="ifany") %>%
+roundup(table(df$source_prev_transplant, useNA="ifany"),5) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
 ## Incident 2020
 ### All RRT
 ```{r, echo=FALSE, results='asis'}
-table(df$source_inc_rrt, useNA="ifany") %>%
+roundup(table(df$source_inc_rrt, useNA="ifany"),5) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
 ### Dialysis
 ```{r, echo=FALSE, results='asis'}
-table(df$source_inc_dialysis, useNA="ifany") %>%
+roundup(table(df$source_inc_dialysis, useNA="ifany"),5) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
 ### Transplant
 ```{r, echo=FALSE, results='asis'}
-table(df$source_inc_transplant, useNA="ifany") %>%
+roundup(table(df$source_inc_transplant, useNA="ifany"),5) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
 
-# Extra - how many are the wrong modality?
-##prevalent 1/1/2020
+# Extra - of people who are captured in UKRR and PC/SC how many are the wrong modality?
+UKRR = "Not on RRT" should be 0.
+## prevalent 1/1/2020
 ### UKRR and PC
 ```{r, echo=FALSE, results='asis'}
-table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status) %>%
+k<-roundup(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status),5)
+k2<-k%>%
   kbl() %>%
   add_header_above(c("UKRR", "Primary care" = 3)) %>%
   kable_styling()
+print(k2)
 ```
 ### UKRR and SC
 ```{r, echo=FALSE, results='asis'}
-k<-table(df[df$source_prev_rrt %in% c("US", "UPS"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("US", "UPS"),]$incident_rrt_status_secondary) 
+k<-roundup(table(df[df$source_prev_rrt %in% c("US", "UPS"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("US", "UPS"),]$incident_rrt_status_secondary),5) 
 k2<-k%>%
   kbl() %>%
   add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
   kable_styling()
+print(k2)
 ```
 ## incident 2020
 ### UKRR and PC
 ```{r, echo=FALSE, results='asis'}
-k<-table(df[df$source_inc_rrt %in% c("UP", "UPS"),]$ukrr_dtx,
-      df[df$source_inc_rrt %in% c("UP", "UPS"),]$incident_rrt_status)  
+k<-roundup(table(df[df$source_inc_rrt %in% c("UP", "UPS"),]$ukrr_dtx_inc,
+      df[df$source_inc_rrt %in% c("UP", "UPS"),]$incident_rrt_status),5)  
 k2<-k%>%
   kbl() %>%
   add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
   kable_styling()
+print(k2)
 ```
 ### UKRR and SC
 ```{r, echo=FALSE, results='asis'}
-k<-table(df[df$source_inc_rrt %in% c("US", "UPS"),]$ukrr_dtx,
-      df[df$source_inc_rrt %in% c("US", "UPS"),]$incident_rrt_status_secondary)  
+k<-roundup(table(df[df$source_inc_rrt %in% c("US", "UPS"),]$ukrr_dtx_inc,
+      df[df$source_inc_rrt %in% c("US", "UPS"),]$incident_rrt_status_secondary),5)  
 k2<-k%>%
   kbl() %>%
   add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
   kable_styling()
+print(k2)
 ```
 
 
@@ -430,41 +442,45 @@ k2<-k%>%
 ## Prevalent 1/1/2020
 ### in UKRR and not PC
 ```{r, echo=FALSE, results='asis'}
-k<-table(df[df$source_prev_rrt %in% c("US", "U"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("US", "U"),]$latest_renal_status)  
+k<-roundup(table(df[df$source_prev_rrt %in% c("US", "U"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("US", "U"),]$latest_renal_status, exclude="Not on RRT")  ,5)
 k2<-k%>%
   kbl() %>%
   add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
   kable_styling()
+print(k2)
 ```
 ### in UKRR and not SC
 ```{r, echo=FALSE, results='asis'}
-k<-table(df[df$source_prev_rrt %in% c("UP", "U"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary) 
+k<-roundup(table(df[df$source_prev_rrt %in% c("UP", "U"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary) ,5)
 k2<-k%>%
   kbl() %>%
   add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
   kable_styling()
+print(k2)
 ```
 ## Incident 2020
+These might not make much sense as they could have been incident before or after 2020 in PC/SC.
 ### in UKRR and not PC
 ```{r, echo=FALSE, results='asis'}
-k<-table(df[df$source_inc_rrt %in% c("US", "U"),]$ukrr_dtx,
-      df[df$source_inc_rrt %in% c("US", "U"),]$latest_renal_status)
+k<-roundup(table(df[df$source_inc_rrt %in% c("US", "U"),]$ukrr_dtx_inc,
+      df[df$source_inc_rrt %in% c("US", "U"),]$latest_renal_status),5)
 k2<-k%>%
   kbl() %>%
   add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
   kable_styling()
+print(k2)
 ```
 ### in UKRR and not SC
 ```{r, echo=FALSE, results='asis'}
-k<-table(df[df$source_inc_rrt %in% c("UP", "U"),]$ukrr_dtx,
-      df[df$source_inc_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary) 
+k<-roundup(table(df[df$source_inc_rrt %in% c("UP", "U"),]$ukrr_dtx_inc,
+      df[df$source_inc_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary),5) 
 k2<-k %>%
   kbl() %>%
   add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
   kable_styling()
-print(k)
+print(k2)
 ```
 
        
