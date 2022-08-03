@@ -47,10 +47,10 @@ eGFR_numeric_value_codelist = codelist_from_csv(
 )
 
 ethnicity_codelist = codelist_from_csv(
-    "codelists/primis-covid19-vacc-uptake-eth2001.csv",
+    "codelists/opensafely-ethnicity-snomed-0removed.csv",
     system="snomed",
-    column="code",
-    category_column="grouping_6_id",
+    column="snomedcode",
+    category_column="Grouping_6",
 )
 
 creatinine_clearance_codelist = codelist_from_csv(

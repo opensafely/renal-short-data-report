@@ -1,7 +1,7 @@
 user/ss808/estimated-glomerular-filtration-rate-egfr-recorded-tests/76a6b7b5
 user/ss808/estimated-glomerular-filtration-rate-egfr-values/5d974480
 user/bangzheng/egfr-value-shortlist/1d0e46c5
-primis-covid19-vacc-uptake/eth2001/v1/
+opensafely/ethnicity-snomed-0removed/2e641f61
 user/Louis/creatinine-clearance/6faa67ae
 user/bangzheng/creatinine-clearance-shortlist/03fed390
 opensafely/weight-snomed/5459abc6/
