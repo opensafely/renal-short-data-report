@@ -40,8 +40,8 @@ eGFR_codelist = codelist_from_csv(
     column="code",
 )
 
-eGFR_level_codelist = codelist_from_csv(
-    "codelists/user-ss808-estimated-glomerular-filtration-rate-egfr-values.csv",
+eGFR_numeric_value_codelist = codelist_from_csv(
+    "codelists/user-bangzheng-egfr-value-shortlist.csv",
     system="snomed",
     column="code",
 )
@@ -59,8 +59,8 @@ creatinine_clearance_codelist = codelist_from_csv(
     column="code",
 )
 
-creatinine_clearance_level_codelist = codelist_from_csv(
-    "codelists/user-Louis-creatinine-clearance-level.csv",
+creatinine_clearance_numeric_value_codelist = codelist_from_csv(
+    "codelists/user-bangzheng-creatinine-clearance-shortlist.csv",
     system="snomed",
     column="code",
 )
@@ -69,8 +69,8 @@ creatinine_codelist = codelist_from_csv(
     "codelists/user-bangzheng-creatinine.csv", system="snomed", column="code"
 )
 
-creatinine_level_codelist = codelist_from_csv(
-    "codelists/user-bangzheng-creatinine.csv", system="snomed", column="code"
+creatinine_numeric_value_codelist = codelist_from_csv(
+    "codelists/user-bangzheng-creatinine-value-shortlist.csv", system="snomed", column="code"
 )
 
 weight_codelist = codelist_from_csv(
