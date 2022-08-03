@@ -223,7 +223,7 @@ study = StudyDefinition(
         },
     ),
     creatinine_numeric_value=patients.with_these_clinical_events(
-        codelist=creatinine_codelist,
+        codelist=creatinine_numeric_value_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="numeric_value",
         return_expectations={
@@ -339,7 +339,7 @@ study = StudyDefinition(
         },
     ),
     cr_cl_numeric_value=patients.with_these_clinical_events(
-        codelist=creatinine_clearance_codelist,
+        codelist=creatinine_clearance_numeric_value_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="numeric_value",
         return_expectations={
@@ -725,7 +725,7 @@ study = StudyDefinition(
         },
     ),
     eGFR_numeric_value=patients.with_these_clinical_events(
-        codelist=eGFR_codelist,
+        codelist=eGFR_numeric_value_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="numeric_value",
         return_expectations={
