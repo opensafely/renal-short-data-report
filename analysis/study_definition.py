@@ -3,6 +3,123 @@ from cohortextractor import StudyDefinition, patients, Measure
 from codelists import *
 
 demographics = ["age_band", "sex", "region", "imd", "ethnicity"]
+path_tests = ["creatinine", "cr_cl", "albumin", "acr", "cystatin", "eGFR"]
+
+codelists = {"creatinine": creatinine_codelist,
+"cr_cl": creatinine_clearance_codelist,
+"albumin": albumin_codelist,
+"acr": acr_codelist,
+"eGFR": eGFR_codelist,
+"cystatin": cystatin_c_codelist}
+
+codelists_numeric = {"creatinine": creatinine_numeric_value_codelist,
+"cr_cl": creatinine_clearance_numeric_value_codelist,
+"albumin": albumin_level_codelist,
+"acr": acr_level_codelist,
+"eGFR": eGFR_numeric_value_codelist,
+"cystatin": cystatin_c_level_codelist}
+
+
+def create_path_variables(path_tests):
+    def make_variable(test):
+        return {
+            f"{test}": patients.with_these_clinical_events(
+                codelist=codelists[test],
+                between=["index_date", "last_day_of_month(index_date)"],
+                returning="binary_flag",
+                date_format="YYYY-MM-DD",
+                include_date_of_match=True,
+                return_expectations={
+                    "incidence": 0.5,
+                    "date": {"earliest": "1900-01-01", "latest": "today"},
+                },
+            ),
+            f"{test}_code": patients.with_these_clinical_events(
+                codelist=codelists[test],
+                between=["index_date", "last_day_of_month(index_date)"],
+                returning="code",
+                return_expectations={
+                    "rate": "universal",
+                    "category": {
+                        "ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}
+                    },
+                },
+            ),
+            f"{test}_count": patients.with_these_clinical_events(
+                codelist=codelists[test],
+                between=["index_date", "last_day_of_month(index_date)"],
+                returning="number_of_matches_in_period",
+                return_expectations={
+                    "int": {"distribution": "poisson", "mean": 2},
+                    "incidence": 0.2,
+                },
+            ),
+            f"{test}_numeric_value": patients.with_these_clinical_events(
+                codelist=codelists_numeric[test],
+                between=["index_date", "last_day_of_month(index_date)"],
+                returning="numeric_value",
+                return_expectations={
+                    "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+                    "incidence": 0.5,
+                },
+            ),
+            f"{test}_operator": patients.comparator_from(
+                f"{test}_numeric_value",
+                return_expectations={
+                    "rate": "universal",
+                    "category": {
+                        "ratios": {  # ~, =, >= , > , < , <=
+                            None: 0.10,
+                            "~": 0.05,
+                            "=": 0.65,
+                            ">=": 0.05,
+                            ">": 0.05,
+                            "<": 0.05,
+                            "<=": 0.05,
+                        }
+                    },
+                    "incidence": 0.80,
+                },
+            ),
+            f"{test}_ref_range_lower": patients.reference_range_lower_bound_from(
+                "creatinine_numeric_value",
+                return_expectations={
+                    "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+                    "incidence": 0.5,
+                },
+            ),
+            f"{test}_ref_range_upper": patients.reference_range_upper_bound_from(
+                "creatinine_numeric_value",
+                return_expectations={
+                    "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
+                    "incidence": 0.5,
+                },
+            ),
+            f"{test}_numeric_value_oor": patients.categorised_as(
+                {
+                    "above": f"({test}_numeric_value > {test}_ref_range_upper) AND NOT (({test}_operator = '<') OR ({test}_operator = '<=') OR ({test}_operator = '~'))",
+                    "below": f"({test}_numeric_value < {test}_ref_range_lower) AND NOT (({test}_operator = '>') OR ({test}_operator = '>=') OR ({test}_operator = '~'))",
+                    "unknown": f"(({test}_numeric_value > {test}_ref_range_upper) AND (({test}_operator = '<') OR ({test}_operator = '<=') OR ({test}_operator = '~'))) OR (({test}_numeric_value < {test}_ref_range_lower) AND (({test}_operator = '>') OR ({test}_operator = '>=') OR ({test}_operator = '~'))) OR ((({test}_numeric_value > {test}_ref_range_lower) AND ({test}_numeric_value < {test}_ref_range_upper)) AND NOT (({test}_operator = '=') OR ({test}_operator = '')))",
+                    "in range": "DEFAULT",
+                },
+                return_expectations={
+                    "category": {
+                        "ratios": {
+                            "above": 0.2,
+                            "below": 0.2,
+                            "unknown": 0.1,
+                            "in range": 0.5,
+                        }
+                    }
+                },
+            ),
+        }
+
+    variables = {}
+    for test in path_tests:
+        variables.update(make_variable(test))
+    return variables
+
 
 study = StudyDefinition(
     default_expectations={
@@ -193,244 +310,7 @@ study = StudyDefinition(
         hypertension
         """
     ),
-    creatinine=patients.with_these_clinical_events(
-        codelist=creatinine_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        date_format="YYYY-MM-DD",
-        include_date_of_match=True,
-        return_expectations={
-            "incidence": 0.5,
-            "date": {"earliest": "1900-01-01", "latest": "today"},
-        },
-    ),
-    creatinine_code=patients.with_these_clinical_events(
-        codelist=creatinine_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
-        },
-    ),
-    creatinine_count=patients.with_these_clinical_events(
-        codelist=creatinine_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-    creatinine_numeric_value=patients.with_these_clinical_events(
-        codelist=creatinine_numeric_value_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    creatinine_operator=patients.comparator_from(
-        "creatinine_numeric_value",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {  # ~, =, >= , > , < , <=
-                    None: 0.10,
-                    "~": 0.05,
-                    "=": 0.65,
-                    ">=": 0.05,
-                    ">": 0.05,
-                    "<": 0.05,
-                    "<=": 0.05,
-                }
-            },
-            "incidence": 0.80,
-        },
-    ),
-    creatinine_ref_range_lower=patients.reference_range_lower_bound_from(
-        "creatinine_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    creatinine_ref_range_upper=patients.reference_range_upper_bound_from(
-        "creatinine_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    creatinine_numeric_value_oor=patients.categorised_as(
-        {
-            "above": """(creatinine_numeric_value > creatinine_ref_range_upper) AND
-            NOT (
-                (creatinine_operator = '<') OR
-                (creatinine_operator = '<=') OR
-                (creatinine_operator = '~')
-            )""",
-            "below": """(creatinine_numeric_value < creatinine_ref_range_lower) AND
-            NOT (
-                (creatinine_operator = '>') OR
-                (creatinine_operator = '>=') OR
-                (creatinine_operator = '~')
-            )""",
-            "unknown": """(
-            (creatinine_numeric_value > creatinine_ref_range_upper) AND
-             (
-                (creatinine_operator = '<') OR
-                (creatinine_operator = '<=') OR
-                (creatinine_operator = '~')
-            )
-            ) OR
-            (
-            (creatinine_numeric_value < creatinine_ref_range_lower) AND
-            (
-                (creatinine_operator = '>') OR
-                (creatinine_operator = '>=') OR
-                (creatinine_operator = '~')
-            ))
-            OR
-
-            (
-                (
-                    (creatinine_numeric_value > creatinine_ref_range_lower) AND
-                    (creatinine_numeric_value < creatinine_ref_range_upper)
-                ) AND
-
-                NOT (
-                    (creatinine_operator = '=') OR
-                    (creatinine_operator = '')
-                )
-            )
-            """,
-            "in range": "DEFAULT",
-        },
-        return_expectations={
-            "category": {
-                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
-            }
-        },
-    ),
-    cr_cl=patients.with_these_clinical_events(
-        codelist=creatinine_clearance_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        return_expectations={"incidence": 0.5},
-    ),
-    cr_cl_code=patients.with_these_clinical_events(
-        codelist=creatinine_clearance_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": {"1015981000000103": 0.5, "102811001": 0.5}},
-        },
-    ),
-    cr_cl_count=patients.with_these_clinical_events(
-        codelist=creatinine_clearance_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-    cr_cl_numeric_value=patients.with_these_clinical_events(
-        codelist=creatinine_clearance_numeric_value_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    cr_cl_operator=patients.comparator_from(
-        "cr_cl_numeric_value",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {  # ~, =, >= , > , < , <=
-                    None: 0.10,
-                    "~": 0.05,
-                    "=": 0.65,
-                    ">=": 0.05,
-                    ">": 0.05,
-                    "<": 0.05,
-                    "<=": 0.05,
-                }
-            },
-            "incidence": 0.80,
-        },
-    ),
-    cr_cl_ref_range_lower=patients.reference_range_lower_bound_from(
-        "cr_cl_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    cr_cl_ref_range_upper=patients.reference_range_upper_bound_from(
-        "cr_cl_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    cr_cl_numeric_value_oor=patients.categorised_as(
-        {
-            "above": """(cr_cl_numeric_value > cr_cl_ref_range_upper) AND
-            NOT (
-                (cr_cl_operator = '<') OR
-                (cr_cl_operator = '<=') OR
-                (cr_cl_operator = '~')
-            )""",
-            "below": """(cr_cl_numeric_value < cr_cl_ref_range_lower) AND
-            NOT (
-                (cr_cl_operator = '>') OR
-                (cr_cl_operator = '>=') OR
-                (cr_cl_operator = '~')
-            )""",
-            "unknown": """(
-            (cr_cl_numeric_value > cr_cl_ref_range_upper) AND
-             (
-                (cr_cl_operator = '<') OR
-                (cr_cl_operator = '<=') OR
-                (cr_cl_operator = '~')
-            )
-            ) OR
-            (
-            (cr_cl_numeric_value < cr_cl_ref_range_lower) AND
-            (
-                (cr_cl_operator = '>') OR
-                (cr_cl_operator = '>=') OR
-                (cr_cl_operator = '~')
-            ))
-            OR
-
-            (
-                (
-                    (cr_cl_numeric_value > cr_cl_ref_range_lower) AND
-                    (cr_cl_numeric_value < cr_cl_ref_range_upper)
-                ) AND
-
-                NOT (
-                    (cr_cl_operator = '=') OR
-                    (cr_cl_operator = '')
-                )
-            )
-            """,
-            "in range": "DEFAULT",
-        },
-        return_expectations={
-            "category": {
-                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
-            }
-        },
-    ),
-
+    **create_path_variables(path_tests),
     height=patients.with_these_clinical_events(
         height_codelist,
         between=["index_date", "last_day_of_month(index_date)"],
@@ -462,495 +342,7 @@ study = StudyDefinition(
             "incidence": 0.8,
         },
     ),
-    # albumin
-    albumin=patients.with_these_clinical_events(
-        codelist=albumin_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        date_format="YYYY-MM-DD",
-        include_date_of_match=True,
-        return_expectations={
-            "incidence": 0.5,
-            "date": {"earliest": "1900-01-01", "latest": "today"},
-        },
-    ),
-    albumin_code=patients.with_these_clinical_events(
-        codelist=albumin_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
-        },
-    ),
-    albumin_count=patients.with_these_clinical_events(
-        codelist=albumin_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-    albumin_numeric_value=patients.with_these_clinical_events(
-        codelist=albumin_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    albumin_operator=patients.comparator_from(
-        "albumin_numeric_value",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {  # ~, =, >= , > , < , <=
-                    None: 0.10,
-                    "~": 0.05,
-                    "=": 0.65,
-                    ">=": 0.05,
-                    ">": 0.05,
-                    "<": 0.05,
-                    "<=": 0.05,
-                }
-            },
-            "incidence": 0.80,
-        },
-    ),
-    albumin_ref_range_lower=patients.reference_range_lower_bound_from(
-        "albumin_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    albumin_ref_range_upper=patients.reference_range_upper_bound_from(
-        "albumin_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    albumin_numeric_value_oor=patients.categorised_as(
-        {
-            "above": """(albumin_numeric_value > albumin_ref_range_upper) AND
-            NOT (
-                (albumin_operator = '<') OR
-                (albumin_operator = '<=') OR
-                (albumin_operator = '~')
-            )""",
-            "below": """(albumin_numeric_value < albumin_ref_range_lower) AND
-            NOT (
-                (albumin_operator = '>') OR
-                (albumin_operator = '>=') OR
-                (albumin_operator = '~')
-            )""",
-            "unknown": """(
-            (albumin_numeric_value > albumin_ref_range_upper) AND
-             (
-                (albumin_operator = '<') OR
-                (albumin_operator = '<=') OR
-                (albumin_operator = '~')
-            )
-            ) OR
-            (
-            (albumin_numeric_value < albumin_ref_range_lower) AND
-            (
-                (albumin_operator = '>') OR
-                (albumin_operator = '>=') OR
-                (albumin_operator = '~')
-            ))
-            OR
-
-            (
-                (
-                    (albumin_numeric_value > albumin_ref_range_lower) AND
-                    (albumin_numeric_value < albumin_ref_range_upper)
-                ) AND
-
-                NOT (
-                    (albumin_operator = '=') OR
-                    (albumin_operator = '')
-                )
-            )
-            """,
-            "in range": "DEFAULT",
-        },
-        return_expectations={
-            "category": {
-                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
-            }
-        },
-    ),
-
-    # acr
-    acr=patients.with_these_clinical_events(
-        codelist=acr_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        date_format="YYYY-MM-DD",
-        include_date_of_match=True,
-        return_expectations={
-            "incidence": 0.5,
-            "date": {"earliest": "1900-01-01", "latest": "today"},
-        },
-    ),
-    acr_code=patients.with_these_clinical_events(
-        codelist=acr_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
-        },
-    ),
-    acr_count=patients.with_these_clinical_events(
-        codelist=acr_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-    acr_numeric_value=patients.with_these_clinical_events(
-        codelist=acr_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    acr_operator=patients.comparator_from(
-        "acr_numeric_value",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {  # ~, =, >= , > , < , <=
-                    None: 0.10,
-                    "~": 0.05,
-                    "=": 0.65,
-                    ">=": 0.05,
-                    ">": 0.05,
-                    "<": 0.05,
-                    "<=": 0.05,
-                }
-            },
-            "incidence": 0.80,
-        },
-    ),
-    acr_ref_range_lower=patients.reference_range_lower_bound_from(
-        "acr_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    acr_ref_range_upper=patients.reference_range_upper_bound_from(
-        "acr_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    acr_numeric_value_oor=patients.categorised_as(
-        {
-            "above": """(acr_numeric_value > acr_ref_range_upper) AND
-            NOT (
-                (acr_operator = '<') OR
-                (acr_operator = '<=') OR
-                (acr_operator = '~')
-            )""",
-            "below": """(acr_numeric_value < acr_ref_range_lower) AND
-            NOT (
-                (acr_operator = '>') OR
-                (acr_operator = '>=') OR
-                (acr_operator = '~')
-            )""",
-            "unknown": """(
-            (acr_numeric_value > acr_ref_range_upper) AND
-             (
-                (acr_operator = '<') OR
-                (acr_operator = '<=') OR
-                (acr_operator = '~')
-            )
-            ) OR
-            (
-            (acr_numeric_value < acr_ref_range_lower) AND
-            (
-                (acr_operator = '>') OR
-                (acr_operator = '>=') OR
-                (acr_operator = '~')
-            ))
-            OR
-
-            (
-                (
-                    (acr_numeric_value > acr_ref_range_lower) AND
-                    (acr_numeric_value < acr_ref_range_upper)
-                ) AND
-
-                NOT (
-                    (acr_operator = '=') OR
-                    (acr_operator = '')
-                )
-            )
-            """,
-            "in range": "DEFAULT",
-        },
-        return_expectations={
-            "category": {
-                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
-            }
-        },
-    ),
-
-    # eGFR values
-    eGFR=patients.with_these_clinical_events(
-        codelist=eGFR_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        return_expectations={"incidence": 0.2},
-    ),
-    eGFR_count=patients.with_these_clinical_events(
-        codelist=eGFR_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-    eGFR_numeric_value=patients.with_these_clinical_events(
-        codelist=eGFR_numeric_value_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 70, "stddev": 30},
-            "incidence": 0.2,
-        },
-    ),
-    eGFR_code=patients.with_these_clinical_events(
-        codelist=eGFR_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "category": {"ratios": {"1011481000000105": 0.5, "1011491000000107": 0.5}},
-            "incidence": 0.2,
-        },
-    ),
-    eGFR_operator=patients.comparator_from(
-        "eGFR_numeric_value",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {  # ~, =, >= , > , < , <=
-                    None: 0.10,
-                    "~": 0.05,
-                    "=": 0.65,
-                    ">=": 0.05,
-                    ">": 0.05,
-                    "<": 0.05,
-                    "<=": 0.05,
-                }
-            },
-            "incidence": 0.80,
-        },
-    ),
-
-    eGFR_ref_range_lower=patients.reference_range_lower_bound_from(
-        "eGFR_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    eGFR_ref_range_upper=patients.reference_range_upper_bound_from(
-        "eGFR_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    eGFR_numeric_value_oor=patients.categorised_as(
-        {
-            "above": """(eGFR_numeric_value > eGFR_ref_range_upper) AND
-            NOT (
-                (eGFR_operator = '<') OR
-                (eGFR_operator = '<=') OR
-                (eGFR_operator = '~')
-            )""",
-            "below": """(eGFR_numeric_value < eGFR_ref_range_lower) AND
-            NOT (
-                (eGFR_operator = '>') OR
-                (eGFR_operator = '>=') OR
-                (eGFR_operator = '~')
-            )""",
-            "unknown": """(
-            (eGFR_numeric_value > eGFR_ref_range_upper) AND
-             (
-                (eGFR_operator = '<') OR
-                (eGFR_operator = '<=') OR
-                (eGFR_operator = '~')
-            )
-            ) OR
-            (
-            (eGFR_numeric_value < eGFR_ref_range_lower) AND
-            (
-                (eGFR_operator = '>') OR
-                (eGFR_operator = '>=') OR
-                (eGFR_operator = '~')
-            ))
-            OR
-
-            (
-                (
-                    (eGFR_numeric_value > eGFR_ref_range_lower) AND
-                    (eGFR_numeric_value < eGFR_ref_range_upper)
-                ) AND
-
-                NOT (
-                    (eGFR_operator = '=') OR
-                    (eGFR_operator = '')
-                )
-            )
-            """,
-            "in range": "DEFAULT",
-        },
-        return_expectations={
-            "category": {
-                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
-            }
-        },
-    ),
-
-    # cystatin-c
-    cystatin_c=patients.with_these_clinical_events(
-        codelist=cystatin_c_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="binary_flag",
-        date_format="YYYY-MM-DD",
-        include_date_of_match=True,
-        return_expectations={
-            "incidence": 0.5,
-            "date": {"earliest": "1900-01-01", "latest": "today"},
-        },
-    ),
-    cystatin_c_code=patients.with_these_clinical_events(
-        codelist=cystatin_c_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="code",
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}},
-        },
-    ),
-    cystatin_c_count=patients.with_these_clinical_events(
-        codelist=cystatin_c_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="number_of_matches_in_period",
-        return_expectations={
-            "int": {"distribution": "poisson", "mean": 2},
-            "incidence": 0.2,
-        },
-    ),
-    cystatin_c_numeric_value=patients.with_these_clinical_events(
-        codelist=cystatin_c_codelist,
-        between=["index_date", "last_day_of_month(index_date)"],
-        returning="numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    cystatin_c_operator=patients.comparator_from(
-        "cystatin_c_numeric_value",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {  # ~, =, >= , > , < , <=
-                    None: 0.10,
-                    "~": 0.05,
-                    "=": 0.65,
-                    ">=": 0.05,
-                    ">": 0.05,
-                    "<": 0.05,
-                    "<=": 0.05,
-                }
-            },
-            "incidence": 0.80,
-        },
-    ),
-    cystatin_c_ref_range_lower=patients.reference_range_lower_bound_from(
-        "cystatin_c_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    cystatin_c_ref_range_upper=patients.reference_range_upper_bound_from(
-        "cystatin_c_numeric_value",
-        return_expectations={
-            "float": {"distribution": "normal", "mean": 45.0, "stddev": 20},
-            "incidence": 0.5,
-        },
-    ),
-    cystatin_c_numeric_value_oor=patients.categorised_as(
-        {
-            "above": """(cystatin_c_numeric_value > cystatin_c_ref_range_upper) AND
-            NOT (
-                (cystatin_c_operator = '<') OR
-                (cystatin_c_operator = '<=') OR
-                (cystatin_c_operator = '~')
-            )""",
-            "below": """(cystatin_c_numeric_value < cystatin_c_ref_range_lower) AND
-            NOT (
-                (cystatin_c_operator = '>') OR
-                (cystatin_c_operator = '>=') OR
-                (cystatin_c_operator = '~')
-            )""",
-            "unknown": """(
-            (cystatin_c_numeric_value > cystatin_c_ref_range_upper) AND
-             (
-                (cystatin_c_operator = '<') OR
-                (cystatin_c_operator = '<=') OR
-                (cystatin_c_operator = '~')
-            )
-            ) OR
-            (
-            (cystatin_c_numeric_value < cystatin_c_ref_range_lower) AND
-            (
-                (cystatin_c_operator = '>') OR
-                (cystatin_c_operator = '>=') OR
-                (cystatin_c_operator = '~')
-            ))
-            OR
-
-            (
-                (
-                    (cystatin_c_numeric_value > cystatin_c_ref_range_lower) AND
-                    (cystatin_c_numeric_value < cystatin_c_ref_range_upper)
-                ) AND
-
-                NOT (
-                    (cystatin_c_operator = '=') OR
-                    (cystatin_c_operator = '')
-                )
-            )
-            """,
-            "in range": "DEFAULT",
-        },
-        return_expectations={
-            "category": {
-                "ratios": {"above": 0.2, "below": 0.2, "unknown": 0.1, "in range": 0.5}
-            }
-        },
-    ),
-
-
+   
     ckd=patients.with_these_clinical_events(
         codelist=ckd_codelist,
         on_or_before="index_date",
@@ -1068,13 +460,7 @@ study = StudyDefinition(
     latest_renal_date=patients.maximum_of(
         "dialysis_date", "kidney_tx_date", "RRT_date", "ckd_date", "ckd_primis_1_5_date"
     ),
-
-
-    latest_rrt_date=patients.maximum_of(
-    "dialysis_date", "kidney_tx_date", "RRT_date"
-    ),
-
-
+    latest_rrt_date=patients.maximum_of("dialysis_date", "kidney_tx_date", "RRT_date"),
     # Picking most recent status
     # patients are assigned to the first condition they satisfy, so define RRT modalities first
     latest_renal_status=patients.categorised_as(
@@ -1154,10 +540,9 @@ study = StudyDefinition(
             },
         },
     ),
-
     latest_rrt_status=patients.categorised_as(
         {
-            "None":     """
+            "None": """
                         (NOT dialysis) 
                         AND (NOT kidney_tx) 
                         AND (NOT RRT)
@@ -1191,17 +576,15 @@ study = StudyDefinition(
                     "RRT_unknown": 0.1,
                     "Uncategorised": 0.01,
                 }
-            }
-        }
+            },
+        },
     ),
-
-### Secondary care codes ####
-
+    ### Secondary care codes ####
     # outpatients
-    #can't retrieve code for outpat appointments
-    #can't look for diagnoses, only procedures
-    #can also look for nephrology appointments
-    op_kidney_tx = patients.outpatient_appointment_date(
+    # can't retrieve code for outpat appointments
+    # can't look for diagnoses, only procedures
+    # can also look for nephrology appointments
+    op_kidney_tx=patients.outpatient_appointment_date(
         returning="binary_flag",
         with_these_procedures=kidney_tx_opcs4_codelist,
         between=["1900-01-01", "index_date"],
@@ -1209,7 +592,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    op_kidney_tx_date = patients.outpatient_appointment_date(
+    op_kidney_tx_date=patients.outpatient_appointment_date(
         returning="date",
         date_format="YYYY-MM-DD",
         with_these_procedures=kidney_tx_opcs4_codelist,
@@ -1219,8 +602,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-
-       op_dialysis = patients.outpatient_appointment_date(
+    op_dialysis=patients.outpatient_appointment_date(
         returning="binary_flag",
         with_these_procedures=dialysis_opcs4_codelist,
         between=["1900-01-01", "index_date"],
@@ -1228,7 +610,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    op_dialysis_date = patients.outpatient_appointment_date(
+    op_dialysis_date=patients.outpatient_appointment_date(
         returning="date",
         date_format="YYYY-MM-DD",
         with_these_procedures=dialysis_opcs4_codelist,
@@ -1238,7 +620,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-       op_RRT = patients.outpatient_appointment_date(
+    op_RRT=patients.outpatient_appointment_date(
         returning="binary_flag",
         with_these_procedures=RRT_opcs4_codelist,
         between=["1900-01-01", "index_date"],
@@ -1246,7 +628,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    op_RRT_date = patients.outpatient_appointment_date(
+    op_RRT_date=patients.outpatient_appointment_date(
         returning="date",
         date_format="YYYY-MM-DD",
         with_these_procedures=RRT_opcs4_codelist,
@@ -1256,30 +638,27 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-
-    op_renal = patients.outpatient_appointment_date(
+    op_renal=patients.outpatient_appointment_date(
         returning="binary_flag",
-        with_these_treatment_function_codes=codelist(["361"], system=None), 
+        with_these_treatment_function_codes=codelist(["361"], system=None),
         between=["1900-01-01", "index_date"],
         return_expectations={
             "incidence": 0.3,
         },
     ),
-    op_renal_date = patients.outpatient_appointment_date(
+    op_renal_date=patients.outpatient_appointment_date(
         returning="date",
         date_format="YYYY-MM-DD",
-        with_these_treatment_function_codes=codelist(["361"], system=None), 
+        with_these_treatment_function_codes=codelist(["361"], system=None),
         between=["1900-01-01", "index_date"],
         return_expectations={
             "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-
-
-  # inpatients
-    #consider adding: retrieve primary diagnosis, treatment function code, days in critical care (to indicate acute dialysis)
-    ip_kidney_tx_diagnosis = patients.admitted_to_hospital(
+    # inpatients
+    # consider adding: retrieve primary diagnosis, treatment function code, days in critical care (to indicate acute dialysis)
+    ip_kidney_tx_diagnosis=patients.admitted_to_hospital(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_diagnoses=kidney_tx_icd10_codelist,
@@ -1288,7 +667,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    ip_kidney_tx_diagnosis_date = patients.admitted_to_hospital(
+    ip_kidney_tx_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1299,7 +678,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_kidney_tx_procedure = patients.admitted_to_hospital(
+    ip_kidney_tx_procedure=patients.admitted_to_hospital(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_procedures=kidney_tx_opcs4_codelist,
@@ -1308,7 +687,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    ip_kidney_tx_procedure_date = patients.admitted_to_hospital(
+    ip_kidney_tx_procedure_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1319,7 +698,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_dialysis_diagnosis = patients.admitted_to_hospital(
+    ip_dialysis_diagnosis=patients.admitted_to_hospital(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_diagnoses=dialysis_icd10_codelist,
@@ -1328,7 +707,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    ip_dialysis_diagnosis_date = patients.admitted_to_hospital(
+    ip_dialysis_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1339,7 +718,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_dialysis_procedure = patients.admitted_to_hospital(
+    ip_dialysis_procedure=patients.admitted_to_hospital(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_procedures=dialysis_opcs4_codelist,
@@ -1348,7 +727,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    ip_dialysis_procedure_date = patients.admitted_to_hospital(
+    ip_dialysis_procedure_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1359,7 +738,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_RRT_diagnosis = patients.admitted_to_hospital(
+    ip_RRT_diagnosis=patients.admitted_to_hospital(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_diagnoses=RRT_icd10_codelist,
@@ -1368,7 +747,7 @@ study = StudyDefinition(
             "incidence": 0.3,
         },
     ),
-    ip_RRT_diagnosis_date = patients.admitted_to_hospital(
+    ip_RRT_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1379,7 +758,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_RRT_procedure = patients.admitted_to_hospital(
+    ip_RRT_procedure=patients.admitted_to_hospital(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_procedures=RRT_opcs4_codelist,
@@ -1387,8 +766,8 @@ study = StudyDefinition(
         return_expectations={
             "incidence": 0.3,
         },
-    ),  
-    ip_RRT_procedure_date = patients.admitted_to_hospital(
+    ),
+    ip_RRT_procedure_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1398,7 +777,7 @@ study = StudyDefinition(
             "rate": "uniform",
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
-    ),  
+    ),
     ip_renal=patients.admitted_to_hospital(
         returning="binary_flag",
         find_last_match_in_period=True,
@@ -1419,18 +798,21 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-  
     latest_rrt_date_secondary=patients.maximum_of(
-        "op_kidney_tx_date", "op_dialysis_date", "op_RRT_date",
-        "ip_kidney_tx_diagnosis_date", "ip_kidney_tx_procedure_date",
-        "ip_dialysis_diagnosis_date", "ip_dialysis_procedure_date",
-        "ip_RRT_diagnosis_date", "ip_RRT_procedure_date"
+        "op_kidney_tx_date",
+        "op_dialysis_date",
+        "op_RRT_date",
+        "ip_kidney_tx_diagnosis_date",
+        "ip_kidney_tx_procedure_date",
+        "ip_dialysis_diagnosis_date",
+        "ip_dialysis_procedure_date",
+        "ip_RRT_diagnosis_date",
+        "ip_RRT_procedure_date",
     ),
-
-#categorised as will assign patients to the first condition they satisfy, so subsequent conditions only apply to patients not already categorised. 
+    # categorised as will assign patients to the first condition they satisfy, so subsequent conditions only apply to patients not already categorised.
     latest_rrt_status_secondary=patients.categorised_as(
         {
-            "None":     """
+            "None": """
                         (NOT op_kidney_tx) 
                         AND (NOT op_dialysis) 
                         AND (NOT op_RRT)
@@ -1470,11 +852,11 @@ study = StudyDefinition(
                     "RRT_unknown": 0.1,
                     "Uncategorised": 0.01,
                 }
-            }
-        }
-),
-#CKD ICD 10 codes
-    ip_ckd1_diagnosis_date = patients.admitted_to_hospital(
+            },
+        },
+    ),
+    # CKD ICD 10 codes
+    ip_ckd1_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1485,7 +867,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_ckd2_diagnosis_date = patients.admitted_to_hospital(
+    ip_ckd2_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1496,7 +878,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_ckd3_diagnosis_date = patients.admitted_to_hospital(
+    ip_ckd3_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1507,7 +889,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_ckd4_diagnosis_date = patients.admitted_to_hospital(
+    ip_ckd4_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1518,7 +900,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_ckd5_diagnosis_date = patients.admitted_to_hospital(
+    ip_ckd5_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1529,7 +911,7 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    ip_ckd_unknown_diagnosis_date = patients.admitted_to_hospital(
+    ip_ckd_unknown_diagnosis_date=patients.admitted_to_hospital(
         returning="date_admitted",
         find_last_match_in_period=True,
         date_format="YYYY-MM-DD",
@@ -1541,12 +923,14 @@ study = StudyDefinition(
         },
     ),
     latest_ckd_date_secondary=patients.maximum_of(
-        "ip_ckd1_diagnosis_date", "ip_ckd2_diagnosis_date", "ip_ckd3_diagnosis_date",
-        "ip_ckd4_diagnosis_date", "ip_ckd5_diagnosis_date", "ip_ckd_unknown_diagnosis_date"
+        "ip_ckd1_diagnosis_date",
+        "ip_ckd2_diagnosis_date",
+        "ip_ckd3_diagnosis_date",
+        "ip_ckd4_diagnosis_date",
+        "ip_ckd5_diagnosis_date",
+        "ip_ckd_unknown_diagnosis_date",
     ),
-
-
-   # Picking most recent CKD status from ICD codes
+    # Picking most recent CKD status from ICD codes
     # patients are assigned to the first condition they satisfy, so define RRT modalities first
     latest_ckd_status_secondary=patients.categorised_as(
         {
