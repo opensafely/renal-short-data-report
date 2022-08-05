@@ -6,4 +6,7 @@ codes = "G2 Hypertensive disease G20 Essential hypertension G200 Malignant essen
 pattern = "(?:[a-z]|[A-Z])+[0-9]\S*"
 
 matches = re.findall(pattern, codes)
-pd.Series(matches, name="read_code").to_csv("analysis/at_risk_of_ckd_read_codes.csv")
+
+matches = [f"{match:.<5}" for match in matches]
+
+pd.Series(matches, name="read_code").to_csv("analysis/at_risk_of_ckd_read_codes.csv", index=False)
