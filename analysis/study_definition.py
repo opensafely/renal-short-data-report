@@ -3,21 +3,19 @@ from cohortextractor import StudyDefinition, patients, Measure
 from codelists import *
 
 demographics = ["age_band", "sex", "region", "imd", "ethnicity"]
-path_tests = ["creatinine", "cr_cl", "albumin", "acr", "cystatin", "eGFR"]
+path_tests = ["creatinine", "cr_cl", "albumin", "acr", "eGFR"]
 
 codelists = {"creatinine": creatinine_codelist,
 "cr_cl": creatinine_clearance_codelist,
 "albumin": albumin_codelist,
 "acr": acr_codelist,
-"eGFR": eGFR_codelist,
-"cystatin": cystatin_c_codelist}
+"eGFR": eGFR_codelist,}
 
 codelists_numeric = {"creatinine": creatinine_numeric_value_codelist,
 "cr_cl": creatinine_clearance_numeric_value_codelist,
 "albumin": albumin_level_codelist,
 "acr": acr_level_codelist,
-"eGFR": eGFR_numeric_value_codelist,
-"cystatin": cystatin_c_level_codelist}
+"eGFR": eGFR_numeric_value_codelist,}
 
 
 def create_path_variables(path_tests):
