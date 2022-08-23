@@ -130,7 +130,7 @@ primis_ckd_1_5_codelist = codelist_from_csv(
 )
 
 primis_ckd_stage = codelist_from_csv(
-    "codelists/user-Louis-ckd-stage.csv",
+    "codelists/ukrr-ckd-stages.csv",
     system="snomed",
     column="code",
     category_column="stage",
