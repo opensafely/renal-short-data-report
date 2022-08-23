@@ -167,6 +167,12 @@
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/dmres/v1/",
       "downloaded_at": "2022-06-22 16:51:24.650052Z",
       "sha": "57682a6345da78472609f01f1ca065ace27fcb43"
+    },
+    "user-Louis-ckd-stage.csv": {
+      "id": "user/Louis/ckd-stage/77b93e93",
+      "url": "https://codelists.opensafely.org/codelist/user/Louis/ckd-stage/77b93e93/",
+      "downloaded_at": "2022-08-23 16:14:21.092819Z",
+      "sha": "c5be45339cd50ef9fa91186273707e17ded06d0d"
     }
   }
 }

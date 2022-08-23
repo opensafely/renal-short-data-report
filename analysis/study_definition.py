@@ -3,7 +3,7 @@ from cohortextractor import StudyDefinition, patients, Measure
 from codelists import *
 
 demographics = ["age_band", "sex", "region", "imd", "ethnicity"]
-path_tests = ["creatinine", "cr_cl", "albumin", "acr",, "eGFR"]
+path_tests = ["creatinine", "cr_cl", "albumin", "acr", "eGFR"]
 
 codelists = {"creatinine": creatinine_codelist,
 "cr_cl": creatinine_clearance_codelist,
