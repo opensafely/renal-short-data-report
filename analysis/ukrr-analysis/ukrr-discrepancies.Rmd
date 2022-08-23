@@ -108,7 +108,7 @@ roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
 
 #read in codelists so we can tabulate the names
 ckd_codelist<-unique(read.csv(here::here("codelists", "opensafely-chronic-kidney-disease-snomed.csv"))[,1:2])
-ckd_primis_1_5_codelist<-unique(read.csv(here::here("codelists", "user-Louis-ckd-stage.csv"))[,1:2])
+ckd_primis_1_5_codelist<-unique(read.csv(here::here("codelists", "ukrr-ckd-stages.csv"))[,1:2])
 dialysis_codelist<-unique(read.csv(here::here("codelists", "opensafely-dialysis.csv"))[,1:2])
 kidney_tx_codelist<-unique(read.csv(here::here("codelists", "opensafely-kidney-transplant.csv"))[,1:2])
 RRT_codelist<-unique(read.csv(here::here("codelists", "opensafely-renal-replacement-therapy.csv"))[,1:2])
