@@ -5,6 +5,7 @@ ukrr/albumincreatinine-ratio-acr-tests-level/0a183511/
 ukrr/chronic-kidney-disease-icd-10/652b3b25
 ukrr/ckd-stages/77b93e93/
 ukrr/creatinine-clearance-tests/73bb81d1/
+ukrr/creatinine-clearance-tests-level/77939a9f/
 ukrr/creatinine-tests/57f94ea6/
 ukrr/creatinine-tests-level/3ee9db71/
 ukrr/dialysis-opcs-4/505bef04

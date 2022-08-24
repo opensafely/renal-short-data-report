@@ -13,7 +13,7 @@ codelist_dict = {
 
 codelist_dict_numeric = {
     "creatinine": "codelists/ukrr-creatinine-tests-level.csv",
-    "cr_cl": "codelists/ukrr-creatinine-clearance-tests.csv", #to change
+    "cr_cl": "codelists/ukrr-creatinine-clearance-tests-level.csv",
     "albumin": "codelists/ukrr-albumin-tests-level.csv",
     "acr": "codelists/ukrr-albumincreatinine-ratio-acr-tests-level.csv",
     "eGFR": "codelists/ukrr-egfr-tests-level.csv"

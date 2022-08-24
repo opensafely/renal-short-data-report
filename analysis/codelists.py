@@ -29,7 +29,7 @@ creatinine_clearance_codelist = codelist_from_csv(
 )
 
 creatinine_clearance_numeric_value_codelist = codelist_from_csv(
-    "codelists/ukrr-creatinine-clearance-tests.csv",
+    "codelists/ukrr-creatinine-clearance-tests-level.csv",
     system="snomed",
     column="code",
 )
