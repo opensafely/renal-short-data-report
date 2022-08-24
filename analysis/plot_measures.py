@@ -7,8 +7,8 @@ if not (OUTPUT_DIR / "figures").exists():
     Path.mkdir(OUTPUT_DIR / "figures")
 
 
-for i in ["cr_cl", "creatinine", "eGFR", "RRT", "dialysis", "kidney_tx", "ckd", "ckd_primis_1_5"]:
-    for j in ["population", "at_risk", "diabetes", "hypertension"]:
+for i in ["cr_cl", "creatinine", "eGFR", "albumin", "acr", "RRT", "dialysis", "kidney_tx", "ckd", "ckd_primis_1_5"]:
+    for j in ["population", "at_risk"]:
         df = pd.read_csv(
             OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
         )

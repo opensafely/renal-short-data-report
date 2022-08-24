@@ -5,17 +5,21 @@ from codelists import *
 demographics = ["age_band", "sex", "region", "imd", "ethnicity"]
 path_tests = ["creatinine", "cr_cl", "albumin", "acr", "eGFR"]
 
-codelists = {"creatinine": creatinine_codelist,
-"cr_cl": creatinine_clearance_codelist,
-"albumin": albumin_codelist,
-"acr": acr_codelist,
-"eGFR": eGFR_codelist,}
+codelists = {
+    "creatinine": creatinine_codelist,
+    "cr_cl": creatinine_clearance_codelist,
+    "albumin": albumin_codelist,
+    "acr": acr_codelist,
+    "eGFR": eGFR_codelist,
+}
 
-codelists_numeric = {"creatinine": creatinine_numeric_value_codelist,
-"cr_cl": creatinine_clearance_numeric_value_codelist,
-"albumin": albumin_level_codelist,
-"acr": acr_level_codelist,
-"eGFR": eGFR_numeric_value_codelist,}
+codelists_numeric = {
+    "creatinine": creatinine_numeric_value_codelist,
+    "cr_cl": creatinine_clearance_numeric_value_codelist,
+    "albumin": albumin_level_codelist,
+    "acr": acr_level_codelist,
+    "eGFR": eGFR_numeric_value_codelist,
+}
 
 
 def create_path_variables(path_tests):
@@ -340,7 +344,6 @@ study = StudyDefinition(
             "incidence": 0.8,
         },
     ),
-   
     ckd=patients.with_these_clinical_events(
         codelist=ckd_codelist,
         on_or_before="index_date",
@@ -979,63 +982,76 @@ study = StudyDefinition(
 
 measures = []
 
-for pop in ["population", "at_risk", "diabetes", "hypertension"]:
+for pop in ["population", "at_risk"]:
+    for test in path_tests:
+
+        measures.extend(
+            [
+                Measure(
+                    id=f"{test}_{pop}_rate",
+                    numerator=test,
+                    denominator=pop,
+                    group_by=["practice"],
+                ),
+                Measure(
+                    id=f"{test}_code_{pop}_rate",
+                    numerator=test,
+                    denominator=pop,
+                    group_by=[f"{test}_code"],
+                ),
+                Measure(
+                    id=f"{test}_stage{pop}_rate",
+                    numerator=test,
+                    denominator=pop,
+                    group_by=["ckd_primis_stage"],
+                ),
+            ]
+        )
+
+        for d in demographics:
+
+            m_dem = Measure(
+                id=f"{test}_{d}_{pop}_rate",
+                numerator=test,
+                denominator=pop,
+                group_by=[d],
+            )
+
+            measures.extend([m_dem])
+
+    for d in demographics:
+        m_rrt = Measure(
+            id=f"RRT_{d}_{pop}_rate", numerator="RRT", denominator=pop, group_by=[d]
+        )
+
+        m_dialysis = Measure(
+            id=f"dialysis_{d}_{pop}_rate",
+            numerator="dialysis",
+            denominator=pop,
+            group_by=[d],
+        )
+
+        m_kidney_tx = Measure(
+            id=f"kidney_tx_{d}_{pop}_rate",
+            numerator="kidney_tx",
+            denominator=pop,
+            group_by=[d],
+        )
+
+        m_ckd = Measure(
+            id=f"ckd_rate", numerator="ckd", denominator="population", group_by=[d]
+        )
+        m_ckd_1_5 = Measure(
+            id=f"ckd_primis_1_5_rate",
+            numerator="ckd_primis_1_5",
+            denominator="population",
+            group_by=[d],
+        )
+
+    measures.extend([m_rrt, m_dialysis, m_ckd, m_ckd_1_5, m_kidney_tx])
+
     measures.extend(
         [
-            Measure(
-                id=f"cr_cl_{pop}_rate",
-                numerator="cr_cl",
-                denominator=pop,
-                group_by=["practice"],
-            ),
-            Measure(
-                id=f"cr_cl_code_{pop}_rate",
-                numerator="cr_cl",
-                denominator=pop,
-                group_by=["cr_cl_code"],
-            ),
-            Measure(
-                id=f"cr_cl_stage_rate",
-                numerator="cr_cl",
-                denominator="population",
-                group_by=["ckd_primis_stage"],
-            ),
-            Measure(
-                id=f"creatinine_{pop}_rate",
-                numerator="creatinine",
-                denominator=pop,
-                group_by=["practice"],
-            ),
-            Measure(
-                id=f"creatinine_code_{pop}_rate",
-                numerator="creatinine",
-                denominator=pop,
-                group_by=["creatinine_code"],
-            ),
-            Measure(
-                id=f"creatinine_stage_rate",
-                numerator="creatinine",
-                denominator="population",
-                group_by=["ckd_primis_stage"],
-            ),
-            Measure(
-                id=f"eGFR_{pop}_rate",
-                numerator="eGFR",
-                denominator=pop,
-                group_by=["practice"],
-            ),
-            Measure(
-                id=f"eGFR_code_{pop}_rate",
-                numerator="eGFR",
-                denominator=pop,
-                group_by=["eGFR_code"],
-            ),
-            Measure(
-                id=f"eGFR_stage_rate",
-                numerator="eGFR",
-                denominator="population",
-                group_by=["ckd_primis_stage"],
-            ),
             Measure(
                 id=f"ckd_{pop}_rate",
                 numerator="ckd",
@@ -1104,51 +1120,4 @@ for pop in ["population", "at_risk", "diabetes", "hypertension"]:
                 denominator="population",
                 group_by=pop,
             )
-        )
-
-    for d in demographics:
-        m_crcl = Measure(
-            id=f"cr_cl_{d}_{pop}_rate", numerator="cr_cl", denominator=pop, group_by=[d]
-        )
-        m_cr = Measure(
-            id=f"creatinine_{d}_{pop}_rate",
-            numerator="creatinine",
-            denominator=pop,
-            group_by=[d],
-        )
-
-        m_egfr = Measure(
-            id=f"eGFR_{d}_{pop}_rate", numerator="eGFR", denominator=pop, group_by=[d]
-        )
-
-        m_rrt = Measure(
-            id=f"RRT_{d}_{pop}_rate", numerator="RRT", denominator=pop, group_by=[d]
-        )
-
-        m_dialysis = Measure(
-            id=f"dialysis_{d}_{pop}_rate",
-            numerator="dialysis",
-            denominator=pop,
-            group_by=[d],
-        )
-
-        m_kidney_tx = Measure(
-            id=f"kidney_tx_{d}_{pop}_rate",
-            numerator="kidney_tx",
-            denominator=pop,
-            group_by=[d],
-        )
-
-        m_ckd = Measure(
-            id=f"ckd_rate", numerator="ckd", denominator="population", group_by=[d]
-        )
-        m_ckd_1_5 = Measure(
-            id=f"ckd_primis_1_5_rate",
-            numerator="ckd_primis_1_5",
-            denominator="population",
-            group_by=[d],
-        )
-
-        measures.extend(
-            [m_crcl, m_cr, m_egfr, m_rrt, m_dialysis, m_ckd, m_ckd_1_5, m_kidney_tx]
         )
