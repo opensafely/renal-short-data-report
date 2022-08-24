@@ -10,18 +10,15 @@ def loop_over_proc_codes(code_list):
 
     def make_variable(code):
         return {
-            f"op_proc_{code}": (
-                patients.outpatient_appointment_date(
+            f"op_proc_{code}": patients.outpatient_appointment_date(
                     returning="binary_flag",
                     with_these_procedures=codelist([code], system="opcs4"),
                     between=["index_date - 3 months", "index_date"],
                     return_expectations={
                         "incidence": 0.3,
                     },
-                )
-            ),
-            f"ip_proc_{code}": (
-                patients.admitted_to_hospital(
+                ),
+            f"ip_proc_{code}": patients.admitted_to_hospital(
                     returning="binary_flag",
                     find_last_match_in_period=True,
                     with_these_procedures=codelist([code], system="opcs4"),
@@ -29,20 +26,17 @@ def loop_over_proc_codes(code_list):
                     return_expectations={
                         "incidence": 0.3,
                     },
-                )
-            ),
-          f"ip_proc_cc_{code}": (
-                patients.admitted_to_hospital(
-                    returning="days_in_critical_care",
-                    find_last_match_in_period=True,
-                    with_these_procedures=codelist([code], system="opcs4"),
-                    between=["index_date - 3 months", "index_date"],
-                    return_expectations={
-                        "int" : {"distribution": "poisson", "mean": 5}, 
-                        "incidence" : 0.3
-                        },
-                )
-            )
+                ),
+#          f"ip_proc_cc_{code}": patients.admitted_to_hospital(
+#                    returning="days_in_critical_care",
+#                    find_last_match_in_period=True,
+#                    with_these_procedures=codelist([code], system="opcs4"),
+#                    between=["index_date - 3 months", "index_date"],
+#                    return_expectations={
+#                        "int" : {"distribution": "poisson", "mean": 5}, 
+#                        "incidence" : 0.3,
+#                        },
+#                ),
         }
 
     variables = {}
@@ -54,29 +48,25 @@ def loop_over_diag_codes(code_list):
 
     def make_variable(code):
         return {
-            f"ip_diag_{code}": (
-                patients.admitted_to_hospital(
+            f"ip_diag_{code}": patients.admitted_to_hospital(
                     returning="binary_flag",
                     find_last_match_in_period=True,
-                    with_these_procedures=codelist([code], system="icd10"),
+                    with_these_diagnoses=codelist([code], system="icd10"),
                     between=["index_date - 3 months", "index_date"],
                     return_expectations={
                         "incidence": 0.3,
                     },
-                )
-            )
-            f"ip_diag_cc_{code}": (
-                patients.admitted_to_hospital(
-                    returning="days_in_critical_care",
-                    find_last_match_in_period=True,
-                    with_these_procedures=codelist([code], system="icd10"),
-                    between=["index_date - 3 months", "index_date"],
-                    return_expectations={
-                        "int" : {"distribution": "poisson", "mean": 5}, 
-                        "incidence" : 0.3
-                        },
-                )
-            )
+                ),
+ #           f"ip_diag_cc_{code}": patients.admitted_to_hospital(
+ #                   returning="days_in_critical_care",
+ #                   find_last_match_in_period=True,
+ #                   with_these_diagnoses=codelist([code], system="icd10"),
+ #                   between=["index_date - 3 months", "index_date"],
+ #                   return_expectations={
+ #                       "int" : {"distribution": "poisson", "mean": 5}, 
+ #                       "incidence" : 0.3,
+ #                       },
+ #               ),
         }
 
     variables = {}
