@@ -1,0 +1,281 @@
+---
+title: "Data for tables and figures - paeds only"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+This document describes the cohorts of paediatric patients prevalent to renal replacement therapy (RRT) at 1st January 2020 using 3 sources of data: the UK Renal Registry (UKRR), primary care data from TPP practices (PC) and secondary care inpatient and outpatient data (SC).  
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+demogs<-c("age_band", "sex", "ethnicity", "imd", "region")
+
+#read in dataset
+#pick up 1st Jan cohort as latest renal status is on or before index date
+ df<-read.csv(here::here("output", "input_paeds.csv.gz")) 
+ 
+
+#add variable for dialysis/tx for UKRR
+df<- df %>%
+  mutate(ukrr_dtx = ifelse(ukrr_2019_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_2019_mod == "Tx", "Transplant", "Not on RRT"))) %>%
+  mutate(region = replace(region, region=="", "Missing"))
+# order factor
+df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
+
+# add variable for source
+df <- df %>%
+  mutate(source_prev_rrt = case_when(ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "UPS",
+                                      ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "PS",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "US",
+                                     ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "UP",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "U",
+                                     ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "P",
+                                     ukrr_2019!=1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "S")) %>%
+  mutate(source_prev_dialysis = case_when(ukrr_dtx=="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "UPS",
+                                      ukrr_dtx!="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "PS",
+                                     ukrr_dtx=="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "US",
+                                     ukrr_dtx=="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "UP",
+                                     ukrr_dtx=="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "U",
+                                     ukrr_dtx!="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "P",
+                                     ukrr_dtx!="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "S")) %>%  
+    mutate(source_prev_transplant = case_when(ukrr_dtx=="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      latest_rrt_status_secondary =="Transplant" ~ "UPS",
+                                      ukrr_dtx!="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      latest_rrt_status_secondary =="Transplant" ~ "PS",
+                                     ukrr_dtx=="Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      latest_rrt_status_secondary =="Transplant" ~ "US",
+                                     ukrr_dtx=="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "UP",
+                                     ukrr_dtx == "Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "U",
+                                     ukrr_dtx!="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "P",
+                                     ukrr_dtx!="Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      latest_rrt_status_secondary =="Transplant" ~ "S")) 
+  
+# order factor
+source_levels<-c("UPS", "UP", "US", "PS", "U", "P", "S")
+df$source_prev_rrt<-factor(df$source_prev_rrt, levels=source_levels)
+df$source_prev_dialysis<-factor(df$source_prev_dialysis, levels=source_levels)
+df$source_prev_transplant<-factor(df$source_prev_transplant, levels=source_levels)
+
+
+# function to filter dataset to exclude patients with no RRT in either OS or UKRR as this is what we want to show pct by
+keepRRT<-function(x){
+  filter(x , ukrr_prev==1 | latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+}
+keepRRT_nockd<-function(x){
+  filter(x , ukrr_prev==1 | latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+}
+
+#function to round up to nearest accuracy
+roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
+```
+
+# Section 1 Chacteristics of the study population
+##  Prevalent at 1/1/2020, by data source and modality
+### UKRR
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+list.of.dts<-lapply(df[df$ukrr_2019==1, demogs],
+    function(x) addmargins(roundup(table(x, df[df$ukrr_2019==1,]$ukrr_dtx, useNA="ifany"), 5),2))
+#printing
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste("Prevalent UKRR", demogs[i]), booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+}
+```
+### Primary care
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+list.of.dts<-lapply(df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
+       function(x) addmargins(roundup(table(x, df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$latest_rrt_status, useNA="ifany"), 5),2))
+#printing
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste("Prevalent primary care", demogs[i]), booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+}
+```
+### Secondary care
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+list.of.dts<-lapply(df[df$latest_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
+       function(x) 
+         addmargins(roundup(
+           table(x, df[df$latest_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$latest_rrt_status_secondary, useNA="ifany")
+           , 5),2))
+#printing
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste("Prevalent secondary care", demogs[i]), booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+}
+```
+
+
+# Section 2 Overall agreement  
+
+Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.  
+
+## Prevalent at 1/1/2020, overall and by modality
+### All RRT
+```{r, echo=FALSE, results='asis', error=TRUE}
+roundup(table(df$source_prev_rrt, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Dialysis
+```{r, echo=FALSE, results='asis', error=TRUE}
+roundup(table(df$source_prev_dialysis, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Transplant
+```{r, echo=FALSE, results='asis', error=TRUE}
+roundup(table(df$source_prev_transplant, useNA="ifany"),5) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+
+
+# Section 3 Agreement by demographic characteristics
+## Prevalent at 1/1/2020, overall and by modality
+### All RRT
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_prev_rrt, useNA="ifany"),5))
+#printing
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste("Prevalent, all RRT", demogs[i]), booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+}
+```
+### Dialysis
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_prev_dialysis, useNA="ifany"),5))
+#printing
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste("Prevalent dialysis", demogs[i]), booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+}
+```
+### Transplant
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+list.of.dts<-lapply(df[demogs], function(x) roundup(table(x, df$source_prev_transplant, useNA="ifany"),5))
+#printing
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste("Prevalent transplant", demogs[i]), booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+}
+```
+
+
+# Section 4  - Agreement of modality  
+
+Of people who are captured in UKRR and PC/SC, do the modalitie agree?   
+
+## Prevalent 1/1/2020
+### UKRR and PC
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-roundup(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status),5)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("UKRR", "Primary care" = 3)) %>%
+  kable_styling()
+print(k2)
+```
+### UKRR and SC
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-roundup(table(df[df$source_prev_rrt %in% c("US", "UPS"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("US", "UPS"),]$incident_rrt_status_secondary),5) 
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
+
+# Section 5 - CKD codes in PC/SC care for people in UKRR and not PC/SC, by modality  
+## Prevalent 1/1/2020
+### in UKRR and not PC
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-roundup(table(df[df$source_prev_rrt %in% c("US", "U"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("US", "U"),]$latest_renal_status, exclude="Not on RRT")  ,5)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+### in UKRR and not SC
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-roundup(table(df[df$source_prev_rrt %in% c("UP", "U"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary) ,5)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
+
