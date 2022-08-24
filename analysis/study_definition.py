@@ -1065,10 +1065,34 @@ for pop in ["population", "at_risk"]:
                 group_by=["practice"],
             ),
             Measure(
-                id=f"ckd_primis_1_5_stage_{pop}_rate",
+                id=f"ckd_primis_1_5_stage_{pop}_practice_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
                 group_by=["practice", "ckd_primis_stage"],
+            ),
+            Measure(
+                id=f"ckd_primis_1_5_stage_{pop}_rate",
+                numerator="ckd_primis_1_5",
+                denominator=pop,
+                group_by=["ckd_primis_stage"],
+            ),
+            Measure(
+                id=f"ckd_primis_1_5_stage_{pop}_ethnicity_rate",
+                numerator="ckd_primis_1_5",
+                denominator=pop,
+                group_by=["ethnicity"],
+            ),
+            Measure(
+                id=f"ckd_primis_1_5_stage_{pop}_age_rate",
+                numerator="ckd_primis_1_5",
+                denominator=pop,
+                group_by=["age_band"],
+            ),
+            Measure(
+                id=f"ckd_primis_1_5_stage_{pop}_sex_rate",
+                numerator="ckd_primis_1_5",
+                denominator=pop,
+                group_by=["sex"],
             ),
             Measure(
                 id=f"RRT_{pop}_rate",

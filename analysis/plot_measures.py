@@ -7,7 +7,18 @@ if not (OUTPUT_DIR / "figures").exists():
     Path.mkdir(OUTPUT_DIR / "figures")
 
 
-for i in ["cr_cl", "creatinine", "eGFR", "albumin", "acr", "RRT", "dialysis", "kidney_tx", "ckd", "ckd_primis_1_5"]:
+for i in [
+    "cr_cl",
+    "creatinine",
+    "eGFR",
+    "albumin",
+    "acr",
+    "RRT",
+    "dialysis",
+    "kidney_tx",
+    "ckd",
+    "ckd_primis_1_5",
+]:
     for j in ["population", "at_risk"]:
         df = pd.read_csv(
             OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
@@ -69,3 +80,58 @@ for i in ["cr_cl", "creatinine", "eGFR", "albumin", "acr", "RRT", "dialysis", "k
                 as_bar=False,
                 category=d,
             )
+
+
+# ckd by stage
+
+df_ckd_stage = pd.read_csv(
+    OUTPUT_DIR / f"joined/measure_ckd_primis_1_5_stage_population_rate.csv",
+    parse_dates=["date"],
+)
+df_ckd_stage["rate"] = df_ckd_stage[f"value"] * 100
+
+df_ckd_stage = df_ckd_stage.drop(["value"], axis=1)
+
+df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
+
+
+df_ckd_stage = redact_small_numbers(
+    df_ckd_stage, 10,"ckd_primis_1_5", "population", "rate", "date"
+)
+
+plot_measures(
+    df=df_ckd_stage,
+    filename=f"plot_ckd_stage",
+    title=f"CKD stage",
+    column_to_plot="rate",
+    y_label="Proportion",
+    as_bar=False,
+    category="ckd_primis_stage",
+)
+
+for d in ["age_band", "ethnicity", "sex"]:
+    df_ckd_stage = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_ckd_primis_1_5_stage_population_{d}_rate.csv",
+        parse_dates=["date"],
+    )
+    df_ckd_stage["rate"] = df_ckd_stage[f"value"] * 100
+
+    df_ckd_stage = df_ckd_stage.drop(["value"], axis=1)
+
+    df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
+
+
+    df_ckd_stage = redact_small_numbers(
+        df_ckd_stage, 10,"ckd_primis_1_5", "population", "rate", "date"
+    )
+
+    plot_measures(
+        df=df_ckd_stage,
+        filename=f"plot_ckd_stage_{d}",
+        title=f"CKD stage by {d}",
+        column_to_plot="rate",
+        y_label="Proportion",
+        as_bar=False,
+        category=d,
+    )
+
