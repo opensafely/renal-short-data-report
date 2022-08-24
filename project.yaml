@@ -53,7 +53,7 @@ actions:
 
   generate_study_population_check_SC:
     run: cohortextractor:latest generate_cohort
-      --study-definition study_def_check_SC
+      --study-definition study_definition_check_SC
       --output-format csv.gz
     outputs:
       highly_sensitive:
