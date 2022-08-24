@@ -51,6 +51,13 @@ actions:
       highly_sensitive:
         cohort: output/input_paeds.csv.gz
 
+  generate_study_population_check_SC:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_check_SC
+      --output-format csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/input_check_SC.csv.gz
 
   generate_measures:
     run: cohortextractor:latest generate_measures 
