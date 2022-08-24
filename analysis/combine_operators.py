@@ -85,9 +85,9 @@ for test in tests:
 
     # combine numeric value counts
     test_codes = pd.concat(numeric_value_counts[test])
-    test_codes_count = test_codes.groupby(test_codes.index).sum()
-    test_codes_count = group_low_values_series(test_codes_count)
-    drop_and_round(test_codes_count).to_csv(
+    test_codes_count = test_codes.groupby(test_codes.index).sum().reset_index()
+    test_codes_count.rename(columns={"index": "code", f"{test}_code": "num"}, inplace=True)
+    test_codes_count.to_csv(
         OUTPUT_DIR / f"{test}_numeric_value_count.csv"
     )
 

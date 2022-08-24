@@ -11,6 +11,14 @@ codelist_dict = {
     "eGFR": "codelists/ukrr-egfr-tests.csv"
 }
 
+codelist_dict_numeric = {
+    "creatinine": "codelists/ukrr-creatinine-tests-level.csv",
+    "cr_cl": "codelists/ukrr-creatinine-clearance-tests.csv", #to change
+    "albumin": "codelists/ukrr-albumin-tests-level.csv",
+    "acr": "codelists/ukrr-albumincreatinine-ratio-acr-tests-level.csv",
+    "eGFR": "codelists/ukrr-egfr-tests-level.csv"
+}
+
 for test in tests:
     code_df = pd.read_csv(f"output/{test}_codes_count.csv")
     codelist = pd.read_csv(codelist_dict[test])
@@ -24,3 +32,17 @@ for test in tests:
         rounding_base=10,
     )
     write_csv(top_5_code_table,  Path(f"output/top_5_code_table_{test}.csv"), index=False)
+
+
+    code_df_numeric = pd.read_csv(f"output/{test}_numeric_value_count.csv")
+    codelist_numeric = pd.read_csv(codelist_dict_numeric[test])
+    
+    top_5_code_table_numeric = create_top_5_code_table(
+        df=code_df_numeric,
+        code_df=codelist_numeric,
+        code_column="code",
+        term_column="term",
+        low_count_threshold=7,
+        rounding_base=10,
+    )
+    write_csv(top_5_code_table_numeric,  Path(f"output/top_5_code_table_numeric_{test}.csv"), index=False)
