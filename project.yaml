@@ -57,6 +57,7 @@ actions:
     outputs:
       moderately_sensitive:
         counts: output/table_1.csv
+        at_risk: output/table_1_at_risk.csv
 
   generate_measures:
     run: cohortextractor:latest generate_measures 
