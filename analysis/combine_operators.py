@@ -94,9 +94,12 @@ for test in tests:
     # combine code counts
 
     test_codes_all = pd.concat(code_counts[test])
-    test_codes_count_all = test_codes_all.groupby(test_codes_all.index).sum()
-    test_codes_count_all = group_low_values_series(test_codes_count_all)
-    drop_and_round(test_codes_count_all).to_csv(OUTPUT_DIR / f"{test}_codes_count.csv")
+    test_codes_count_all = test_codes_all.groupby(test_codes_all.index).sum().reset_index()
+
+    test_codes_count_all.rename(columns={"index": "code", f"{test}_code": "num"}, inplace=True)
+    
+
+    test_codes_count_all.to_csv(OUTPUT_DIR / f"{test}_codes_count.csv", index=False)
 
     # combine operator counts
 

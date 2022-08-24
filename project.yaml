@@ -59,6 +59,21 @@ actions:
         counts: output/table_1.csv
         at_risk: output/table_1_at_risk.csv
 
+
+  get_counts:
+    run: python:latest python analysis/combine_operators.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        counts: output/*_count.csv
+
+  generate_top_5_tables:
+    run: python:latest python analysis/top_codes.py
+    needs: [get_counts]
+    outputs:
+      moderately_sensitive:
+        counts: output/top_5_code_table_*.csv
+
   generate_measures:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
@@ -68,12 +83,7 @@ actions:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
         
-  get_counts:
-    run: python:latest python analysis/combine_operators.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        counts: output/*_count.csv
+  
 
   generate_plots:
     run: python:latest python analysis/plot_measures.py
