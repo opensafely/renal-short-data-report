@@ -2,6 +2,7 @@ import pandas as pd
 import argparse
 import glob
 import pathlib
+from utilities import OUTPUT_DIR
 from collections import Counter
 
 
@@ -88,8 +89,8 @@ def main():
     demographics = args.demographics.split(",")
 
     table_1, at_risk = create_table_1(paths, demographics)
-    table_1.to_csv("output/table_1.csv")
-    at_risk.to_csv("output/table_1_at_risk.csv")
+    table_1.to_csv(OUTPUT_DIR / "table_1.csv")
+    at_risk.to_csv(OUTPUT_DIR / "table_1_at_risk.csv")
 
 
 main()

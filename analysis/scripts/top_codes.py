@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from utilities import create_top_5_code_table, write_csv, round_values
+from utilities import create_top_5_code_table, write_csv, round_values ,OUTPUT_DIR
 from variables import tests
 
 codelist_dict = {
@@ -31,7 +31,7 @@ for test in tests:
         low_count_threshold=7,
         rounding_base=10,
     )
-    write_csv(top_5_code_table,  Path(f"output/top_5_code_table_{test}.csv"), index=False)
+    write_csv(top_5_code_table,  OUTPUT_DIR / f"top_5_code_table_{test}.csv", index=False)
 
 
     code_df_numeric = pd.read_csv(f"output/{test}_numeric_value_count.csv")
@@ -45,4 +45,4 @@ for test in tests:
         low_count_threshold=7,
         rounding_base=10,
     )
-    write_csv(top_5_code_table_numeric,  Path(f"output/top_5_code_table_numeric_{test}.csv"), index=False)
+    write_csv(top_5_code_table_numeric,  OUTPUT_DIR / f"top_5_code_table_numeric_{test}.csv", index=False)

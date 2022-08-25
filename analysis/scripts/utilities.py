@@ -7,8 +7,8 @@ import pandas as pd
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parents[1]
-OUTPUT_DIR = BASE_DIR / "output"
-ANALYSIS_DIR = BASE_DIR / "analysis"
+OUTPUT_DIR = BASE_DIR / "../output"
+ANALYSIS_DIR = BASE_DIR / "../analysis"
 
 
 BEST = 0
@@ -316,7 +316,7 @@ def plot_measures(
 
     plt.tight_layout()
 
-    plt.savefig(f"output/figures/{filename}.jpeg")
+    plt.savefig(OUTPUT_DIR / f"figures/{filename}.jpeg")
     plt.clf()
 
 
@@ -351,7 +351,7 @@ def plot_boxplot_numeric_value(x, title, filename):
     plt.title(title)
     plt.ylabel("count")
     plt.xlabel("numeric_value")
-    plt.savefig(f"output/{filename}.jpeg")
+    plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
 
 def plot_violin_numeric_value(x, title, filename):
@@ -367,7 +367,7 @@ def plot_violin_numeric_value(x, title, filename):
     figure_output = sns.violinplot(data=percentile_values, cut=0)
     plt.title(title)
     plt.ylabel("numeric value")
-    plt.savefig(f"output/{filename}.jpeg")
+    plt.savefig(OUTPUT_DIR /f"/{filename}.jpeg")
     plt.clf()
 
 
