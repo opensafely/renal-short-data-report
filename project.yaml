@@ -51,6 +51,7 @@ actions:
       highly_sensitive:
         cohort: output/input_paeds.csv.gz
 
+
   generate_table_1:
     run: python:latest python analysis/scripts/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
     needs: [join_cohorts]
@@ -73,6 +74,14 @@ actions:
     outputs:
       moderately_sensitive:
         counts: output/top_5_code_table_*.csv
+
+  generate_study_population_check_SC:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_check_SC
+      --output-format csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/input_check_SC.csv.gz
 
   generate_measures:
     run: cohortextractor:latest generate_measures 
