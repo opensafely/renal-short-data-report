@@ -8,6 +8,7 @@ from utilities import (
     match_input_files,
     get_date_input_file,
     combine_value_with_operator,
+    group_low_values,
     group_low_values_series,
 )
 
@@ -77,26 +78,41 @@ for file in (OUTPUT_DIR / "joined").iterdir():
 
 for test in tests:
     # combine numeric value operator counts
+   
     combined_values = pd.concat(numeric_value_operator_counts[test])
     test_count = combined_values.groupby(combined_values.index).sum()
-    test_count = drop_and_round(test_count).to_csv(
-        OUTPUT_DIR / f"{test}_numeric_value_operator_count.csv"
-    )
+    test_count = test_count.reset_index(name="count")
+  
+    test_count.rename(columns={"index": "value"}, inplace=True)
+    
+    for operator in ["<", ">", "<=", ">=", "~", "="]:
+        subset = test_count.loc[test_count["value"].str.startswith(operator),:]
+
+        subset = group_low_values(subset, "count", "value", 10)
+ 
+        subset.to_csv(
+            OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator}.csv"
+        )
+    
+ 
 
     # combine numeric value counts
     test_codes = pd.concat(numeric_value_counts[test])
-    test_codes_count = test_codes.groupby(test_codes.index).sum()
-    test_codes_count = group_low_values_series(test_codes_count)
-    drop_and_round(test_codes_count).to_csv(
+    test_codes_count = test_codes.groupby(test_codes.index).sum().reset_index()
+    test_codes_count.rename(columns={"index": "code", f"{test}_code": "num"}, inplace=True)
+    test_codes_count.to_csv(
         OUTPUT_DIR / f"{test}_numeric_value_count.csv"
     )
 
     # combine code counts
 
     test_codes_all = pd.concat(code_counts[test])
-    test_codes_count_all = test_codes_all.groupby(test_codes_all.index).sum()
-    test_codes_count_all = group_low_values_series(test_codes_count_all)
-    drop_and_round(test_codes_count_all).to_csv(OUTPUT_DIR / f"{test}_codes_count.csv")
+    test_codes_count_all = test_codes_all.groupby(test_codes_all.index).sum().reset_index()
+
+    test_codes_count_all.rename(columns={"index": "code", f"{test}_code": "num"}, inplace=True)
+    
+
+    test_codes_count_all.to_csv(OUTPUT_DIR / f"{test}_codes_count.csv", index=False)
 
     # combine operator counts
 

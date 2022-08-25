@@ -13,7 +13,7 @@ library(knitr)
 fs::dir_create(here::here("output", "notebooks"))
 #read in - just doing 2019 as only to check variables are being derived correctly
 d<-read.csv(here::here("output", "input_2019-12-01.csv.gz"))
-ukrr<-read.csv(here::here("output", "input_ethnicity_ukrr.csv.gz"))
+ukrr<-read.csv(here::here("output", "input_ukrr_ethnicity.csv.gz"))
 #redoing join so we get a left join with the UKRR data on the left - the cohort joiner has the monthly file on the left
 #still might not get demogs for all patients as only adults alive and registered at start of December 2019
 d1<-merge(x=ukrr, y=d, by="patient_id", all.x=TRUE)

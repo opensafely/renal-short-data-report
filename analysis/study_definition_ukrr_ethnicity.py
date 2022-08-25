@@ -3,7 +3,7 @@ from cohortextractor import (
     patients,
 )
 
-from ukrr_variables import ukrr_variables
+from variable_definitions.ukrr_variables import ukrr_variables
 from codelists import *
 
 study = StudyDefinition(
@@ -15,6 +15,7 @@ study = StudyDefinition(
     # End of the study period
     index_date="2021-12-31",
     population=patients.all(),
+    
     # Ethnicity
     ethnicity=patients.categorised_as(
         {
@@ -51,7 +52,7 @@ study = StudyDefinition(
             ethnicity_codelist,
             returning="category",
             find_last_match_in_period=True,
-            on_or_before="index_date",
+            on_or_before="2022-07-31",
             return_expectations={
                 "category": {
                     "ratios": {"1": 0.4, "2": 0.4, "3": 0.2, "4": 0.2, "5": 0.2}
@@ -60,6 +61,7 @@ study = StudyDefinition(
             },
         ),
     ),
+    
 
 #########################################################################################################
 #       incident RRT dates

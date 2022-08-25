@@ -14,31 +14,31 @@ actions:
       highly_sensitive:
         cohort: output/input*.csv.gz
 
-#  generate_study_population_2:
-#    run: cohortextractor:latest generate_cohort 
-#      --study-definition study_definition 
-#      --index-date-range "2021-02-01 to 2022-05-01 by month" 
-#      --output-format csv.gz
-#    outputs:
-#      highly_sensitive:
-#        cohort: output/inpu*.csv.gz
+  generate_study_population_2:
+   run: cohortextractor:latest generate_cohort 
+     --study-definition study_definition 
+     --index-date-range "2021-02-01 to 2022-07-01 by month" 
+     --output-format csv.gz
+   outputs:
+     highly_sensitive:
+       cohort: output/inpu*.csv.gz
 
-  generate_study_population_ethnicity_ukrr:
+  generate_study_population_ukrr_ethnicity:
     run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_ethnicity_ukrr
+      --study-definition study_definition_ukrr_ethnicity
       --output-dir=output
       --output-format csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/input_ethnicity_ukrr.csv.gz
+        cohort: output/input_ukrr_ethnicity.csv.gz
 
   join_cohorts:
     run: >
-      cohort-joiner:v0.0.9
+      cohort-joiner:v0.0.46
         --lhs output/input_20*.csv.gz
-        --rhs output/input_ethnicity_ukrr.csv.gz
+        --rhs output/input_ukrr_ethnicity.csv.gz
         --output-dir output/joined
-    needs: [generate_study_population, generate_study_population_ethnicity_ukrr]
+    needs: [generate_study_population, generate_study_population_ukrr_ethnicity]
     outputs:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
@@ -50,6 +50,30 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/input_paeds.csv.gz
+
+
+  generate_table_1:
+    run: python:latest python analysis/scripts/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        counts: output/table_1.csv
+        at_risk: output/table_1_at_risk.csv
+
+
+  get_counts:
+    run: python:latest python analysis/scripts/combine_operators.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        counts: output/*_count.csv
+
+  generate_top_5_tables:
+    run: python:latest python analysis/scripts/top_codes.py
+    needs: [get_counts]
+    outputs:
+      moderately_sensitive:
+        counts: output/top_5_code_table_*.csv
 
   generate_study_population_check_SC:
     run: cohortextractor:latest generate_cohort
@@ -68,22 +92,17 @@ actions:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
         
-  get_counts:
-    run: python:latest python analysis/combine_operators.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        counts: output/*_count.csv
+  
 
   generate_plots:
-    run: python:latest python analysis/plot_measures.py
+    run: python:latest python analysis/scripts/plot_measures.py
     needs: [generate_measures]
     outputs:
       moderately_sensitive:
         counts: output/figures/plot_*.jpeg
 
   generate_plots_numeric_values:
-    run: python:latest python analysis/plot_numeric_values.py
+    run: python:latest python analysis/scripts/plot_numeric_values.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
@@ -99,7 +118,7 @@ actions:
 
   generate_ukrr_checks:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-checks.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [generate_study_population, generate_study_population_ethnicity_ukrr]
+    needs: [generate_study_population, generate_study_population_ukrr_ethnicity]
     outputs:
       moderately_sensitive:
         report: output/notebooks/ukrr-checks.html
@@ -141,7 +160,7 @@ actions:
   
  # generate_frequency_plots:
  #   run: r:latest analysis/test_frequency.R
- #   needs: [join_cohorts]
+ #   needs: [join_cohorts_ethnicity]
  #   outputs:
  #     moderately_sensitive:
  #       figures: output/figures/months_with_*.png

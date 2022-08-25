@@ -42,6 +42,12 @@
       "downloaded_at": "2022-08-23 15:29:31.279563Z",
       "sha": "82314075950301a9994c0bf6a6d118eadbc87a72"
     },
+    "ukrr-creatinine-clearance-tests-level.csv": {
+      "id": "ukrr/creatinine-clearance-tests-level/77939a9f",
+      "url": "https://codelists.opensafely.org/codelist/ukrr/creatinine-clearance-tests-level/77939a9f/",
+      "downloaded_at": "2022-08-24 16:11:02.716001Z",
+      "sha": "ca403128a78cabeed6008d9725cee847ed63eccf"
+    },
     "ukrr-creatinine-tests.csv": {
       "id": "ukrr/creatinine-tests/57f94ea6",
       "url": "https://codelists.opensafely.org/codelist/ukrr/creatinine-tests/57f94ea6/",
