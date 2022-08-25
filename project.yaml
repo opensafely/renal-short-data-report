@@ -165,9 +165,9 @@ actions:
       moderately_sensitive:
         report: output/notebooks/ukrr-tables-figures-paeds.html
   
-  generate_check-SC:
+  generate_check_SC:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/check-SC.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [generate_study_population_check_SC]
+    needs: [generate_study_population_check_SC, join_cohorts]
     outputs:
       moderately_sensitive:
         report: output/notebooks/check-SC.html
