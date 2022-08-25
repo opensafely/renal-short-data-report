@@ -1,1 +1,0 @@
-tests = ["cr_cl","acr", "albumin", "creatinine", "eGFR"]

@@ -3,7 +3,7 @@ from cohortextractor import (
     patients,
 )
 
-from ukrr_variables import ukrr_variables
+from variable_definitions.ukrr_variables import ukrr_variables
 from codelists import *
 
 study = StudyDefinition(
