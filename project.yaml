@@ -165,6 +165,13 @@ actions:
       moderately_sensitive:
         report: output/notebooks/ukrr-tables-figures-paeds.html
   
+  generate_check-SC:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/check-SC.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_check_SC]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/check-SC.html
+  
  # generate_frequency_plots:
  #   run: r:latest analysis/test_frequency.R
  #   needs: [join_cohorts_ethnicity]
