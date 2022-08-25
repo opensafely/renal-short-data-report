@@ -1,7 +1,7 @@
 #code to check the secondary care codes, for one month only
 
 from cohortextractor import StudyDefinition, patients
-from ukrr_variables import ukrr_variables
+from variable_definitions.ukrr_variables import ukrr_variables
 from codelists import *
 
 demographics = ["age_band", "sex", "region", "imd", "ethnicity"]
