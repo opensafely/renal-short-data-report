@@ -23,22 +23,42 @@ actions:
      highly_sensitive:
        cohort: output/inpu*.csv.gz
 
-  generate_study_population_ethnicity_ukrr:
+  generate_study_population_ukrr:
     run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_ethnicity_ukrr
+      --study-definition study_definition_ukrr
       --output-dir=output
       --output-format csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/input_ethnicity_ukrr.csv.gz
+        cohort: output/input_ukrr.csv.gz
 
-  join_cohorts:
+  generate_study_population_ethnicity:
+    run: cohortextractor:latest generate_cohort 
+      --study-definition study_definition_ethnicity
+      --output-dir=output
+      --output-format csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/input_ethnicity.csv.gz
+
+  join_cohorts_ukrr:
     run: >
       cohort-joiner:v0.0.46
         --lhs output/input_20*.csv.gz
-        --rhs output/input_ethnicity_ukrr.csv.gz
+        --rhs output/input_ukrr.csv.gz
         --output-dir output/joined
-    needs: [generate_study_population, generate_study_population_ethnicity_ukrr]
+    needs: [generate_study_population, generate_study_population_ukrr]
+    outputs:
+      highly_sensitive:
+        cohort: output/joined/input_20*.csv.gz
+  
+  join_cohorts_ethnicity:
+    run: >
+      cohort-joiner:v0.0.46
+        --lhs output/joined/input_20*.csv.gz
+        --rhs output/input_ethnicity.csv.gz
+        --output-dir output/joined
+    needs: [join_cohorts_ukrr, generate_study_population_ethnicity]
     outputs:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
