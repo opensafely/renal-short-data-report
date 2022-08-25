@@ -84,6 +84,12 @@ for pop in ["population", "at_risk"]:
                     denominator=pop,
                     group_by=["single_egfr"],
                 ),
+                Measure(
+                    id=f"{test}_single_egfr_{pop}_ethnicity_rate",
+                    numerator=test,
+                    denominator=pop,
+                    group_by=["single_egfr", "ethnicity"],
+                ),
             ]
         )
 
