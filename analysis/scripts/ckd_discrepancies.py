@@ -2,11 +2,11 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-from utilities import OUTPUT_DIR
+from utilities import OUTPUT_DIR, plot_violin_numeric_value
 from upsetplot import plot as upset_plot
 
 
-df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-07-01.csv.gz", usecols=["ckd_primis_stage", "ckd_egfr_category", "ckd_acr_category"])
+df = pd.read_csv(OUTPUT_DIR / "joined/input_2022-07-01.csv.gz")
 
 egfr_subset = df.loc[:, ["ckd_primis_stage", "ckd_egfr_category"]]
 acr_subset = df.loc[:, ["ckd_primis_stage", "ckd_acr_category"]]
@@ -50,5 +50,22 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
 
     upset_plot(counts)
     plt.savefig(OUTPUT_DIR / f"ckd_staging_upset_{i}.png")
+    plt.clf()
 
 
+
+# time from test to code
+
+df_subset = df.loc[df["ckd_egfr_category"].isin(["G1", "G2", "G3a", "G3b", "G4", "G5"]),:]
+
+df_subset["ckd_egfr_category"].replace({ "G3a":"G3", "G3b": "G3"}, inplace=True)
+df_subset["ckd_primis_stage"].replace({1: "G1", 2: "G2", 3:"G3", 4:"G4", 5:"G5"}, inplace=True)
+df_subset = df_subset.loc[df_subset["ckd_egfr_category"] == df_subset["ckd_primis_stage"], :]
+
+df_subset["ckd_primis_stage_date"] = pd.to_datetime(df_subset["ckd_primis_stage_date"])
+df_subset["egfr_numeric_value_history_date"] = pd.to_datetime(df_subset["egfr_numeric_value_history_date"])
+
+df_subset["time_diff"] = (df_subset["ckd_primis_stage_date"] - df_subset["egfr_numeric_value_history_date"]).dt.days
+time_diff = df_subset["time_diff"].dropna()
+
+plot_violin_numeric_value(time_diff, "time between biochemical and recorded", "time_diff_ckd")
