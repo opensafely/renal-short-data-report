@@ -52,7 +52,7 @@ actions:
         cohort: output/input_paeds.csv.gz
 
   generate_table_1:
-    run: python:latest python analysis/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
+    run: python:latest python analysis/scripts/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
@@ -61,14 +61,14 @@ actions:
 
 
   get_counts:
-    run: python:latest python analysis/combine_operators.py
+    run: python:latest python analysis/scripts/combine_operators.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv
 
   generate_top_5_tables:
-    run: python:latest python analysis/top_codes.py
+    run: python:latest python analysis/scripts/top_codes.py
     needs: [get_counts]
     outputs:
       moderately_sensitive:
@@ -86,14 +86,14 @@ actions:
   
 
   generate_plots:
-    run: python:latest python analysis/plot_measures.py
+    run: python:latest python analysis/scripts/plot_measures.py
     needs: [generate_measures]
     outputs:
       moderately_sensitive:
         counts: output/figures/plot_*.jpeg
 
   generate_plots_numeric_values:
-    run: python:latest python analysis/plot_numeric_values.py
+    run: python:latest python analysis/scripts/plot_numeric_values.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
