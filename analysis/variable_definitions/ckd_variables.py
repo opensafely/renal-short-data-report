@@ -49,7 +49,7 @@ ckd_variables = dict(
         returning="category",
         return_expectations={
             "rate": "universal",
-            "category": {"ratios": {"1": 0.5, "2": 0.5}},
+            "category": {"ratios": {"1": 0.2, "2": 0.2, "3": 0.2, "4": 0.2, "5":0.2}},
         },
     ),
     ckd_acr_category=patients.categorised_as(
