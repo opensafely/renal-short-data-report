@@ -17,7 +17,7 @@ actions:
   generate_study_population_2:
    run: cohortextractor:latest generate_cohort 
      --study-definition study_definition 
-     --index-date-range "2021-02-01 to 2022-05-01 by month" 
+     --index-date-range "2021-02-01 to 2022-07-01 by month" 
      --output-format csv.gz
    outputs:
      highly_sensitive:
