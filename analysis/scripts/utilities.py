@@ -367,7 +367,7 @@ def plot_violin_numeric_value(x, title, filename):
     figure_output = sns.violinplot(data=percentile_values, cut=0)
     plt.title(title)
     plt.ylabel("numeric value")
-    plt.savefig(OUTPUT_DIR /f"/{filename}.jpeg")
+    plt.savefig(OUTPUT_DIR /f"{filename}.jpeg")
     plt.clf()
 
 

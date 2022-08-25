@@ -52,6 +52,9 @@ ckd_variables = dict(
             "category": {"ratios": {"1": 0.2, "2": 0.2, "3": 0.2, "4": 0.2, "5":0.2}},
         },
     ),
+    ckd_primis_stage_date=patients.date_of(
+        "ckd_primis_1_5", date_format="YYYY-MM-DD"
+    ),
     ckd_acr_category=patients.categorised_as(
         {
             "None": """
