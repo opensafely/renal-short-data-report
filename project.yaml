@@ -108,6 +108,12 @@ actions:
       moderately_sensitive:
         figures: output/*dis*.jpeg
 
+  generate_upset_plots:
+    run: python:latest python analysis/scripts/ckd_discrepancies.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        figures: output/ckd_staging_upset_*.png
 
   # generate_notebook:
   #   run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
