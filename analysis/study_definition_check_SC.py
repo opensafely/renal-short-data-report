@@ -9,8 +9,10 @@ demographics = ["age_band", "sex", "region", "imd", "ethnicity"]
 def loop_over_proc_codes(code_list):
 
     def make_variable(code):
+        #removing . from variable name
+        code2=code.replace('.','')
         return {
-            f"op_proc_{code}": patients.outpatient_appointment_date(
+            f"op_proc_{code2}": patients.outpatient_appointment_date(
                     returning="binary_flag",
                     with_these_procedures=codelist([code], system="opcs4"),
                     between=["index_date - 3 months", "index_date"],
@@ -18,7 +20,7 @@ def loop_over_proc_codes(code_list):
                         "incidence": 0.3,
                     },
                 ),
-            f"ip_proc_{code}": patients.admitted_to_hospital(
+            f"ip_proc_{code2}": patients.admitted_to_hospital(
                     returning="binary_flag",
                     find_last_match_in_period=True,
                     with_these_procedures=codelist([code], system="opcs4"),
@@ -27,7 +29,7 @@ def loop_over_proc_codes(code_list):
                         "incidence": 0.3,
                     },
                 ),
-#          f"ip_proc_cc_{code}": patients.admitted_to_hospital(
+#          f"ip_proc_cc_{code2}": patients.admitted_to_hospital(
 #                    returning="days_in_critical_care",
 #                    find_last_match_in_period=True,
 #                    with_these_procedures=codelist([code], system="opcs4"),
@@ -47,8 +49,10 @@ def loop_over_proc_codes(code_list):
 def loop_over_diag_codes(code_list):
 
     def make_variable(code):
+        #removing . from variable name
+        code2=code.replace('.','')
         return {
-            f"ip_diag_{code}": patients.admitted_to_hospital(
+            f"ip_diag_{code2}": patients.admitted_to_hospital(
                     returning="binary_flag",
                     find_last_match_in_period=True,
                     with_these_diagnoses=codelist([code], system="icd10"),
@@ -57,7 +61,7 @@ def loop_over_diag_codes(code_list):
                         "incidence": 0.3,
                     },
                 ),
- #           f"ip_diag_cc_{code}": patients.admitted_to_hospital(
+ #           f"ip_diag_cc_{code2}": patients.admitted_to_hospital(
  #                   returning="days_in_critical_care",
  #                   find_last_match_in_period=True,
  #                   with_these_diagnoses=codelist([code], system="icd10"),
@@ -210,9 +214,45 @@ study = StudyDefinition(
         },
     ),
   
-    ### Secondary care codes ####
+   ### Secondary care codes ####
+   #looking at whole codelist to check we aren't somehow picking up codes not on our list of individual codes because of prefix matching
+    # outpatients
+ 
+    op_RRT=patients.outpatient_appointment_date(
+        returning="binary_flag",
+        with_these_procedures=RRT_opcs4_codelist,
+        between=["1900-01-01", "index_date"],
+        return_expectations={
+            "incidence": 0.3,
+        },
+    ),
+  
+    # inpatients
+   
+    ip_RRT_diagnosis=patients.admitted_to_hospital(
+        returning="binary_flag",
+        find_last_match_in_period=True,
+        with_these_diagnoses=RRT_icd10_codelist,
+        on_or_before="index_date",
+        return_expectations={
+            "incidence": 0.3,
+        },
+    ),
+  
+    ip_RRT_procedure=patients.admitted_to_hospital(
+        returning="binary_flag",
+        find_last_match_in_period=True,
+        with_these_procedures=RRT_opcs4_codelist,
+        on_or_before="index_date",
+        return_expectations={
+            "incidence": 0.3,
+        },
+    ),
+  
+  # creating variables from individual codes
     **loop_over_proc_codes(RRT_opcs4_codelist),
     **loop_over_diag_codes(RRT_icd10_codelist),
+
      **ukrr_variables
 )
 
