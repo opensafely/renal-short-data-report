@@ -61,7 +61,7 @@ actions:
     needs: [join_cohorts_ukrr, generate_study_population_ethnicity]
     outputs:
       highly_sensitive:
-        cohort: output/joined/input_20*.csv.gz
+        cohort: output/joined/input_2*.csv.gz
 
   generate_study_population_paeds:
     run: cohortextractor:latest generate_cohort
@@ -74,7 +74,7 @@ actions:
 
   generate_table_1:
     run: python:latest python analysis/scripts/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
-    needs: [join_cohorts]
+    needs: [join_cohorts_ethnicity]
     outputs:
       moderately_sensitive:
         counts: output/table_1.csv
@@ -83,7 +83,7 @@ actions:
 
   get_counts:
     run: python:latest python analysis/scripts/combine_operators.py
-    needs: [join_cohorts]
+    needs: [join_cohorts_ethnicity]
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv
@@ -107,7 +107,7 @@ actions:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
       --output-dir=output/joined
-    needs: [join_cohorts]
+    needs: [join_cohorts_ethnicity]
     outputs:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
@@ -123,7 +123,7 @@ actions:
 
   generate_plots_numeric_values:
     run: python:latest python analysis/scripts/plot_numeric_values.py
-    needs: [join_cohorts]
+    needs: [join_cohorts_ethnicity]
     outputs:
       moderately_sensitive:
         figures: output/*dis*.jpeg
@@ -138,21 +138,21 @@ actions:
 
   generate_ukrr_checks:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-checks.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [generate_study_population, generate_study_population_ethnicity_ukrr]
+    needs: [generate_study_population, generate_study_population_ukrr]
     outputs:
       moderately_sensitive:
         report: output/notebooks/ukrr-checks.html
 
   generate_ukrr_report:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-report.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [join_cohorts]
+    needs: [join_cohorts_ethnicity]
     outputs:
       moderately_sensitive:
         report: output/notebooks/ukrr-report.html
        
   generate_ukrr_discrepancies:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [join_cohorts]
+    needs: [join_cohorts_ethnicity]
     outputs:
       moderately_sensitive:
         report: output/notebooks/ukrr-discrepancies.html
@@ -166,7 +166,7 @@ actions:
   
   generate_ukrr_tables_figures:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [join_cohorts]
+    needs: [join_cohorts_ethnicity]
     outputs:
       moderately_sensitive:
         report: output/notebooks/ukrr-tables-figures.html
@@ -180,7 +180,7 @@ actions:
   
  # generate_frequency_plots:
  #   run: r:latest analysis/test_frequency.R
- #   needs: [join_cohorts]
+ #   needs: [join_cohorts_ethnicity]
  #   outputs:
  #     moderately_sensitive:
  #       figures: output/figures/months_with_*.png
