@@ -1201,11 +1201,18 @@ for pop in ["population", "at_risk"]:
                     group_by=[f"{test}_code"],
                 ),
                 Measure(
-                    id=f"{test}_stage{pop}_rate",
+                    id=f"{test}_stage_{pop}_rate",
                     numerator=test,
                     denominator=pop,
                     group_by=["ckd_primis_stage"],
                 ),
+                Measure(
+                    id=f"{test}_biochemical_stage_{pop}_rate",
+                    numerator=test,
+                    denominator=pop,
+                    group_by=["ckd_egfr_category", "ckd_acr_category"],
+                ),
+                
             ]
         )
 
@@ -1284,7 +1291,7 @@ for pop in ["population", "at_risk"]:
                 group_by=["ethnicity"],
             ),
             Measure(
-                id=f"ckd_primis_1_5_stage_{pop}_age_rate",
+                id=f"ckd_primis_1_5_stage_{pop}_age_band_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
                 group_by=["age_band"],

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from utilities import *
+from variables import tests
 
 if not (OUTPUT_DIR / "figures").exists():
     Path.mkdir(OUTPUT_DIR / "figures")
@@ -29,7 +30,7 @@ for i in [
 
         df = df.drop(["value"], axis=1)
         df = df.replace(np.inf, np.nan)
-
+        
         df_deciles = compute_redact_deciles(df, "date", i, "rate")
 
         deciles_chart(
@@ -134,4 +135,53 @@ for d in ["age_band", "ethnicity", "sex"]:
         as_bar=False,
         category=d,
     )
+
+
+for test in tests:
+    df_ckd_stage = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
+        parse_dates=["date"],
+    )
+    
+    
+    df_ckd_stage_egfr = df_ckd_stage.groupby(by=["ckd_egfr_category", "date"])[[test, "population"]].sum().reset_index()
+    df_ckd_stage_egfr["rate"] = (df_ckd_stage_egfr[test]/df_ckd_stage_egfr["population"]) * 100
+    
+    # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
+    df_ckd_stage_egfr = redact_small_numbers(
+        df_ckd_stage_egfr, 10,test, "population", "rate", "date"
+    )
+    print(df_ckd_stage_egfr)
+
+    plot_measures(
+        df=df_ckd_stage_egfr,
+        filename=f"plot_ckd_biochemical_stage_{test}_egfr",
+        title=f"",
+        column_to_plot="rate",
+        y_label="Proportion",
+        as_bar=False,
+        category="ckd_egfr_category",
+    )
+
+
+    df_ckd_stage_acr = df_ckd_stage.groupby(by=["ckd_acr_category", "date"])[[test, "population"]].sum().reset_index()
+    df_ckd_stage_acr["rate"] = (df_ckd_stage_acr[test]/df_ckd_stage_acr["population"]) * 100
+    
+    # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
+    df_ckd_stage_acr = redact_small_numbers(
+        df_ckd_stage_acr, 10,test, "population", "rate", "date"
+    )
+
+
+    plot_measures(
+        df=df_ckd_stage_acr,
+        filename=f"plot_ckd_biochemical_stage_{test}_acr",
+        title=f"",
+        column_to_plot="rate",
+        y_label="Proportion",
+        as_bar=False,
+        category="ckd_acr_category",
+    )
+
+
 
