@@ -88,6 +88,7 @@ ckd_variables = dict(
             include_date_of_match=True,
             return_expectations={
                 "incidence": 0.5,
+                "float": {"distribution": "normal", "mean": 25, "stddev": 5},
                 "date": {"earliest": "1900-01-01", "latest": "today"},
             },
         ),
@@ -121,6 +122,87 @@ ckd_variables = dict(
                 }
             },
         },
+    ),
+    egfr_numeric_value_history=patients.with_these_clinical_events(
+            codelist=eGFR_numeric_value_codelist,
+            on_or_before="last_day_of_month(index_date)",
+            returning="numeric_value",
+            date_format="YYYY-MM-DD",
+            include_date_of_match=True,
+            return_expectations={
+                "incidence": 0.5,
+                "float": {"distribution": "normal", "mean": 25, "stddev": 5},
+                "date": {"earliest": "1900-01-01", "latest": "today"},
+            },
+        ),
+    egfr_numeric_value_history_operator=patients.comparator_from(
+            "egfr_numeric_value_history",
+            return_expectations={
+                "rate": "universal",
+                "category": {
+                    "ratios": {  # ~, =, >= , > , < , <=
+                        None: 0.10,
+                        "~": 0.05,
+                        "=": 0.65,
+                        ">=": 0.05,
+                        ">": 0.05,
+                        "<": 0.05,
+                        "<=": 0.05,
+                    }
+                },
+                "incidence": 0.80,
+            },
+        ),
+    egfr_numeric_value_90_before=patients.with_these_clinical_events(
+            codelist=eGFR_numeric_value_codelist,
+            on_or_before="egfr_numeric_value_history_date",
+            returning="numeric_value",
+            date_format="YYYY-MM-DD",
+            include_date_of_match=True,
+            return_expectations={
+                "incidence": 0.5,
+                "float": {"distribution": "normal", "mean": 25, "stddev": 5},
+                "date": {"earliest": "1900-01-01", "latest": "today"},
+            },
+        ),
+    egfr_numeric_value_90_before_operator=patients.comparator_from(
+        "egfr_numeric_value_90_before",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {  # ~, =, >= , > , < , <=
+                    None: 0.10,
+                    "~": 0.05,
+                    "=": 0.65,
+                    ">=": 0.05,
+                    ">": 0.05,
+                    "<": 0.05,
+                    "<=": 0.05,
+                }
+            },
+            "incidence": 0.80,
+        },
+    ),
+    
+    single_egfr = patients.satisfying(
+        """
+        egfr_numeric_value_history > 0 AND
+        egfr_numeric_value_history < 60 AND
+        NOT egfr_numeric_value_history_operator = "<" AND
+        NOT egfr_numeric_value_history_operator = "<=" AND
+        NOT egfr_numeric_value_history_operator = ">" AND
+        NOT egfr_numeric_value_history_operator = ">=" AND
+        (
+            (
+                egfr_numeric_value_90_before = 0 OR
+                egfr_numeric_value_90_before >=60
+            ) AND
+            (
+                NOT egfr_numeric_value_90_before_operator = "<" AND
+                NOT egfr_numeric_value_90_before_operator = "<="
+            )
+        )
+        """,
     ),
     ckd_egfr_category=patients.categorised_as(
         {
@@ -207,64 +289,9 @@ ckd_variables = dict(
                 """,
             "Uncategorised": "DEFAULT",
         },
-        egfr_numeric_value_history=patients.with_these_clinical_events(
-            codelist=eGFR_numeric_value_codelist,
-            on_or_before="last_day_of_month(index_date)",
-            returning="numeric_value",
-            date_format="YYYY-MM-DD",
-            include_date_of_match=True,
-            return_expectations={
-                "incidence": 0.5,
-                "date": {"earliest": "1900-01-01", "latest": "today"},
-            },
-        ),
-        egfr_numeric_value_history_operator=patients.comparator_from(
-            "egfr_numeric_value_history",
-            return_expectations={
-                "rate": "universal",
-                "category": {
-                    "ratios": {  # ~, =, >= , > , < , <=
-                        None: 0.10,
-                        "~": 0.05,
-                        "=": 0.65,
-                        ">=": 0.05,
-                        ">": 0.05,
-                        "<": 0.05,
-                        "<=": 0.05,
-                    }
-                },
-                "incidence": 0.80,
-            },
-        ),
-        egfr_numeric_value_90_before=patients.with_these_clinical_events(
-            codelist=eGFR_numeric_value_codelist,
-            on_or_before="egfr_numeric_value_history_date",
-            returning="numeric_value",
-            date_format="YYYY-MM-DD",
-            include_date_of_match=True,
-            return_expectations={
-                "incidence": 0.5,
-                "date": {"earliest": "1900-01-01", "latest": "today"},
-            },
-        ),
-        egfr_numeric_value_90_before_operator=patients.comparator_from(
-            "egfr_numeric_value_90_before",
-            return_expectations={
-                "rate": "universal",
-                "category": {
-                    "ratios": {  # ~, =, >= , > , < , <=
-                        None: 0.10,
-                        "~": 0.05,
-                        "=": 0.65,
-                        ">=": 0.05,
-                        ">": 0.05,
-                        "<": 0.05,
-                        "<=": 0.05,
-                    }
-                },
-                "incidence": 0.80,
-            },
-        ),
+        
+        
+        
         return_expectations={
             "rate": "universal",
             "category": {

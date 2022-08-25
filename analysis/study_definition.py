@@ -78,6 +78,12 @@ for pop in ["population", "at_risk"]:
                     denominator=pop,
                     group_by=["ckd_egfr_category", "ckd_acr_category"],
                 ),
+                Measure(
+                    id=f"{test}_single_egfr_{pop}_rate",
+                    numerator=test,
+                    denominator=pop,
+                    group_by=["single_egfr"],
+                ),
             ]
         )
 

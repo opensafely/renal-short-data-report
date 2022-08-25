@@ -14,14 +14,14 @@ actions:
       highly_sensitive:
         cohort: output/input*.csv.gz
 
-#  generate_study_population_2:
-#    run: cohortextractor:latest generate_cohort 
-#      --study-definition study_definition 
-#      --index-date-range "2021-02-01 to 2022-05-01 by month" 
-#      --output-format csv.gz
-#    outputs:
-#      highly_sensitive:
-#        cohort: output/inpu*.csv.gz
+ generate_study_population_2:
+   run: cohortextractor:latest generate_cohort 
+     --study-definition study_definition 
+     --index-date-range "2021-02-01 to 2022-05-01 by month" 
+     --output-format csv.gz
+   outputs:
+     highly_sensitive:
+       cohort: output/inpu*.csv.gz
 
   generate_study_population_ethnicity_ukrr:
     run: cohortextractor:latest generate_cohort 
