@@ -21,6 +21,13 @@ actions:
       highly_sensitive:
         counts: output/input_calculators_calculated.csv.gz
 
+  generate_notebook_crcl:
+    run: jupyter:latest jupyter nbconvert /workspace/analysis/scripts/crcl_gault.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
+    needs: [calculate_calculators]
+    outputs:
+      moderately_sensitive:
+        notebook: output/crcl_gault.html
+
   generate_study_population:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition

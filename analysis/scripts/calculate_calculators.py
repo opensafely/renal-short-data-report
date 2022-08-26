@@ -24,7 +24,7 @@ def apply_ckd_epi(row):
     return row
 
 df = df.apply(apply_ckd_epi, axis=1)
-df.to_csv(OUTPUT_DIR / "input_calculators_calculated.csv.gz")
+df.to_csv(OUTPUT_DIR / "input_calculators_calculated.csv.gz", index=False)
 
 
 
