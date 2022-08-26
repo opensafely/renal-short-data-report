@@ -1,3 +1,4 @@
+from operator import mul
 import re
 import seaborn as sns
 import matplotlib
@@ -493,4 +494,40 @@ def round_values(x, base=5):
         else:
             rounded = int(base * round(x / base))
     return rounded
+
+def cockcroft_gault(sex, age, weight, weight_date, creatinine, creatinine_date, date_lim):
+
+    date_lim = pd.to_datetime(date_lim)
+    
+    if date_lim < weight_date and date_lim < creatinine_date:
+
+        if sex == "F":
+            multiplier = 0.85
+        elif sex == "M":
+            multiplier = 1
+        else:
+            return None
+
+    
+        return  ((140-age) * (weight) * multiplier) / (72 * creatinine)
+    else:
+        return None
+
+def ckd_epi(sex, age, creatinine, creatinine_date, date_lim):
+
+    date_lim = pd.to_datetime(date_lim)
+    
+    if date_lim < creatinine_date:
+
+        if sex == "F":
+            multiplier = (0.7,-0.241)
+        elif sex == "M":
+            multiplier = (0.9,-0.302)
+        else:
+            return None
+
+    
+        return  (142 * (min([1, creatinine/multiplier[1]])**multiplier[1]) * (max([1, creatinine/multiplier[1]])**-1.200) * (0.9938**age) * multiplier[0])
+    else:
+        return None
 
