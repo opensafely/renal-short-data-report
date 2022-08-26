@@ -1,0 +1,103 @@
+---
+title: "Checking secondary care data"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+The number of people on and starting RRT according to secondary care data seems too high. When selecting admissions/appointments based on a codelist it is not possible to return the code used, so a separate study definition was used, creating variables for each code for just 3 months of data as a check. We also check the incident start dates of the people in the main study definition.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+#read in datasets
+#pick up 1st Jan cohort as latest renal status is on or before index date
+df_check<-read.csv(here::here("output",  "input_check_SC.csv.gz"))
+ df_main<-read.csv(here::here("output", "joined", "input_2020-01-01.csv.gz"))
+ 
+SC_vars<-names(df_check)[grepl('proc_|diag_', names(df_check))]
+demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "at_risk", "region")
+ukrr<-c("ukrr_2019", "ukrr_2020", "ukrr_2021", "ukrr_ckd2020", "ukrr_inc2020")
+ 
+ #getting year of start for incident start dates
+ inc_year_pc<-as.numeric(substr(df_main$incident_rrt_date,1,4))
+ inc_year_sc<-as.numeric(substr(df_main$incident_rrt_date_secondary,1,4))
+ 
+ #looking at whether people have any of the indivudal codes, or any codes on the codelists. 
+ #This is to check that the individual code variables are consistent with the study def variables that look at the whole codelist together.
+ any_individual<-apply(df_check[SC_vars], 1, max)
+any_list<-apply(df_check[c("op_RRT", "ip_RRT_diagnosis", "ip_RRT_procedure")], 1, max)
+
+#function to round up to nearest accuracy
+roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
+```
+
+Tablulate all the binary flags for procedure and diagnosis secondary care codes
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+t<- t(as.matrix(apply(df_check[SC_vars], 2, table)))
+  k<- t  %>%
+          kbl( booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+```
+
+Compare patients who have any of the individual flags with the overall RRT flag- shouldn be the same
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+t<- table(any_individual,any_list)
+
+  k<- t %>%
+          kbl( booktabs=TRUE) %>%
+          add_header_above(c("Overall RRT"=ncol(t))) %>%
+          kable_styling()
+  print(k)
+```
+
+Look at which codes appear based on whether they are in the UKRR or not
+
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+list.of.dts<-lapply(df_check[SC_vars], function(x) table(x, df_check$ukrr_2019, useNA="ifany"))
+
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=SC_vars[i], booktabs=TRUE) %>%
+          add_header_above(c("Overall RRT"=ncol(t)+1)) %>%
+          kable_styling()
+  print(k)
+}
+```
+
+Incident start dates in secondary care from main cohort
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+t<-table(inc_year_sc, inc_year_pc)
+  k<- t %>%
+          kbl( booktabs=TRUE) %>%
+          add_header_above(c("Inc year SC", "Inc year PC"=ncol(t))) %>%
+          kable_styling()
+  print(k)
+  
+list.of.dts<-lapply(df_main[ukrr], function(x) table(inc_year_sc,x, useNA="ifany"))
+
+for(i in 1:length(list.of.dts)) {
+  t<-list.of.dts[[i]]
+  k<- t %>%
+          kbl( caption = ukrr[i], booktabs=TRUE) %>%
+          add_header_above(c("Inc year SC", "ukrr" =ncol(t)  )) %>%
+          kable_styling()
+  print(k)
+}
+```
