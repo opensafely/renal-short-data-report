@@ -5,6 +5,14 @@ expectations:
 
 actions:
 
+  generate_study_population_calculators:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_calculators
+      --output-format csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/input_calculators.csv.gz
+
   generate_study_population:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition
