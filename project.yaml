@@ -13,6 +13,14 @@ actions:
       highly_sensitive:
         cohort: output/input_calculators.csv.gz
 
+
+  calculate_calculators:
+    run: python:latest python analysis/scripts/calculate_calculators.py 
+    needs: [generate_study_population_calculators]
+    outputs:
+      highly_sensitive:
+        counts: output/input_calculators_calculated.csv.gz
+
   generate_study_population:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition
