@@ -27,17 +27,25 @@ df_check<-read.csv(here::here("output",  "input_check_SC.csv.gz"))
 df_main<-read.csv(here::here("output", "input_ukrr_ethnicity.csv.gz"))
  
 SC_vars<-names(df_check)[grepl('proc_|diag_', names(df_check))]
+CC_vars<-names(df_check)[grepl('cc_flag', names(df_check))]
 demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "at_risk", "region")
 ukrr<-c("ukrr_2019", "ukrr_2020", "ukrr_2021", "ukrr_ckd2020", "ukrr_inc2020")
  
  #getting year of start for incident start dates
 inc_year_pc<-as.numeric(substr(df_main$incident_rrt_date,1,4))
 inc_year_sc<-as.numeric(substr(df_main$incident_rrt_date_secondary,1,4))
+#ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
+#will be consistent as we only have one start date per patient in the data that was sent
+inc_year_ukrr<-as.numeric(substr(df_main$ukrr_inc2020_date))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2019_startdate))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2020_startdate))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2021_startdate))
  
  #looking at whether people have any of the indivudal codes, or any codes on the codelists. 
  #This is to check that the individual code variables are consistent with the study def variables that look at the whole codelist together.
  any_individual<-apply(df_check[SC_vars], 1, max)
 any_list<-apply(df_check[c("op_RRT", "ip_RRT_diagnosis", "ip_RRT_procedure")], 1, max)
+
 
 #function to round up to nearest accuracy
 roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
@@ -47,7 +55,7 @@ Tablulate all the binary flags for procedure and diagnosis secondary care codes
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-t<- t(as.matrix(apply(df_check[SC_vars], 2, table)))
+t<- t(as.matrix(apply(df_check[SC_vars], 2, function(x) table(factor(x, levels=0:1)))))
   k<- t  %>%
           kbl( booktabs=TRUE) %>%
           kable_styling()
@@ -83,24 +91,40 @@ for(i in 1:length(list.of.dts)) {
 }
 ```
 
+Look at which codes have any critical care days - need to compare this with total for that procedure/diagnosis
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+t<- t(as.matrix(apply(df_check[CC_vars], 2, function(x) table(factor(x, levels=0:1)))))
+  k<- t  %>%
+          kbl( booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+```
+
 Incident start dates in secondary care from main cohort
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
-t<-table(inc_year_sc, inc_year_pc)
+t<-table(inc_year_sc, inc_year_pc, useNA="ifany")
   k<- t %>%
           kbl( booktabs=TRUE) %>%
           add_header_above(c("Inc year SC", "Inc year PC"=ncol(t))) %>%
           kable_styling()
   print(k)
   
-list.of.dts<-lapply(df_main[ukrr], function(x) table(inc_year_sc,x, useNA="ifany"))
-
-for(i in 1:length(list.of.dts)) {
-  t<-list.of.dts[[i]]
+t<-table(inc_year_sc, inc_year_ukrr, useNA="ifany")
   k<- t %>%
-          kbl( caption = ukrr[i], booktabs=TRUE) %>%
-          add_header_above(c("Inc year SC", "ukrr" =ncol(t)  )) %>%
+          kbl( booktabs=TRUE) %>%
+          add_header_above(c("Inc year SC", "Inc year UKRR"=ncol(t))) %>%
           kable_styling()
   print(k)
-}
+  
+t<-table(inc_year_pc, inc_year_ukrr, useNA="ifany")
+  k<- t %>%
+          kbl( booktabs=TRUE) %>%
+          add_header_above(c("Inc year PC", "Inc year UKRR"=ncol(t))) %>%
+          kable_styling()
+  print(k)
+
 ```

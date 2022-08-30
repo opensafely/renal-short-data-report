@@ -29,16 +29,25 @@ def loop_over_proc_codes(code_list):
                         "incidence": 0.3,
                     },
                 ),
-#          f"ip_proc_cc_{code2}": patients.admitted_to_hospital(
-#                    returning="days_in_critical_care",
-#                    find_last_match_in_period=True,
-#                    with_these_procedures=codelist([code], system="opcs4"),
-#                    between=["index_date - 3 months", "index_date"],
-#                    return_expectations={
-#                        "int" : {"distribution": "poisson", "mean": 5}, 
-#                        "incidence" : 0.3,
-#                        },
-#                ),
+    #get critical care days (not using _proc_ in name as want to pick this up separately)
+            f"ipp_cc_{code2}": patients.admitted_to_hospital(
+                    returning="days_in_critical_care",
+                    find_last_match_in_period=True,
+                    with_these_procedures=codelist([code], system="opcs4"),
+                    between=["index_date - 3 months", "index_date"],
+                    return_expectations={
+                        "category": {
+                            "ratios": {
+                                "0": 0.6,
+                                "1": 0.1,
+                                "2": 0.2,
+                                "3": 0.1,
+                                }
+                            },
+                        "incidence": 0.1,
+                        },
+                ),
+            f"ipp_cc_flag_{code2}": [1 if v > 0 else 0 for v in f"ipp_cc_{code2}"]
         }
 
     variables = {}
@@ -61,16 +70,25 @@ def loop_over_diag_codes(code_list):
                         "incidence": 0.3,
                     },
                 ),
- #           f"ip_diag_cc_{code2}": patients.admitted_to_hospital(
- #                   returning="days_in_critical_care",
- #                   find_last_match_in_period=True,
- #                   with_these_diagnoses=codelist([code], system="icd10"),
- #                   between=["index_date - 3 months", "index_date"],
- #                   return_expectations={
- #                       "int" : {"distribution": "poisson", "mean": 5}, 
- #                       "incidence" : 0.3,
- #                       },
- #               ),
+    #get critical care days (not using _diag_ in name as want to pick this up separately)
+            f"ipd_cc_{code2}": patients.admitted_to_hospital(
+                    returning="days_in_critical_care",
+                    find_last_match_in_period=True,
+                    with_these_diagnoses=codelist([code], system="icd10"),
+                    between=["index_date - 3 months", "index_date"],
+                    return_expectations={
+                        "category": {
+                            "ratios": {
+                                "0": 0.6,
+                                "1": 0.1,
+                                "2": 0.2,
+                                "3": 0.1,
+                                }
+                            },
+                        "incidence": 0.1,
+                        },
+                ),
+            f"ipd_cc_flag_{code2}": [1 if v > 0 else 0 for v in f"ipd_cc_{code2}"]
         }
 
     variables = {}
@@ -221,7 +239,7 @@ study = StudyDefinition(
     op_RRT=patients.outpatient_appointment_date(
         returning="binary_flag",
         with_these_procedures=RRT_opcs4_codelist,
-        between=["1900-01-01", "index_date"],
+        between=["index_date - 3 months", "index_date"],
         return_expectations={
             "incidence": 0.3,
         },
@@ -233,7 +251,7 @@ study = StudyDefinition(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_diagnoses=RRT_icd10_codelist,
-        on_or_before="index_date",
+        between=["index_date - 3 months", "index_date"],
         return_expectations={
             "incidence": 0.3,
         },
@@ -243,7 +261,7 @@ study = StudyDefinition(
         returning="binary_flag",
         find_last_match_in_period=True,
         with_these_procedures=RRT_opcs4_codelist,
-        on_or_before="index_date",
+        between=["index_date - 3 months", "index_date"],
         return_expectations={
             "incidence": 0.3,
         },
