@@ -47,7 +47,7 @@ def loop_over_proc_codes(code_list):
                         "incidence": 0.1,
                         },
                 ),
-            f"ipp_cc_flag_{code2}": [1 if v > 0 else 0 for v in f"ipp_cc_{code2}"]
+ #           f"ipp_cc_flag_{code2}": [1 if v > 0 else 0 for v in f"ipp_cc_{code2}"]
         }
 
     variables = {}
@@ -88,7 +88,7 @@ def loop_over_diag_codes(code_list):
                         "incidence": 0.1,
                         },
                 ),
-            f"ipd_cc_flag_{code2}": [1 if v > 0 else 0 for v in f"ipd_cc_{code2}"]
+ #           f"ipd_cc_flag_{code2}": [1 if v > 0 else 0 for v in f"ipd_cc_{code2}"]
         }
 
     variables = {}

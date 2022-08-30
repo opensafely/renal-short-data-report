@@ -26,8 +26,14 @@ df_check<-read.csv(here::here("output",  "input_check_SC.csv.gz"))
 #using the ethnicity study def as main study def is running -can still get incidence variables so doesn't matter
 df_main<-read.csv(here::here("output", "input_ukrr_ethnicity.csv.gz"))
  
+#list of secondary care cod variables 
 SC_vars<-names(df_check)[grepl('proc_|diag_', names(df_check))]
-CC_vars<-names(df_check)[grepl('cc_flag', names(df_check))]
+#list of variables with critical care info
+CC_vars<-names(df_check)[grepl('_cc_', names(df_check))]
+#create flag for cc vars
+CC_flags<-df_check[CC_vars]
+CC_flags[CC_flags>0]<-1
+
 demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "at_risk", "region")
 ukrr<-c("ukrr_2019", "ukrr_2020", "ukrr_2021", "ukrr_ckd2020", "ukrr_inc2020")
  
@@ -36,10 +42,10 @@ inc_year_pc<-as.numeric(substr(df_main$incident_rrt_date,1,4))
 inc_year_sc<-as.numeric(substr(df_main$incident_rrt_date_secondary,1,4))
 #ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
 #will be consistent as we only have one start date per patient in the data that was sent
-inc_year_ukrr<-as.numeric(substr(df_main$ukrr_inc2020_date))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2019_startdate))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2020_startdate))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2021_startdate))
+inc_year_ukrr<-as.numeric(substr(df_main$ukrr_inc2020_date,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2019_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2020_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2021_startdate,1,4))
  
  #looking at whether people have any of the indivudal codes, or any codes on the codelists. 
  #This is to check that the individual code variables are consistent with the study def variables that look at the whole codelist together.
@@ -62,6 +68,7 @@ t<- t(as.matrix(apply(df_check[SC_vars], 2, function(x) table(factor(x, levels=0
   print(k)
 ```
 
+
 Compare patients who have any of the individual flags with the overall RRT flag- shouldn be the same
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
@@ -76,8 +83,6 @@ t<- table(any_individual,any_list)
 ```
 
 Look at which codes appear based on whether they are in the UKRR or not
-
-
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
 list.of.dts<-lapply(df_check[SC_vars], function(x) table(x, df_check$ukrr_2019, useNA="ifany"))
@@ -92,15 +97,13 @@ for(i in 1:length(list.of.dts)) {
 ```
 
 Look at which codes have any critical care days - need to compare this with total for that procedure/diagnosis
-
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-t<- t(as.matrix(apply(df_check[CC_vars], 2, function(x) table(factor(x, levels=0:1)))))
+t<- t(as.matrix(apply(CC_flags, 2, function(x) table(factor(x, levels=0:1)))))
   k<- t  %>%
           kbl( booktabs=TRUE) %>%
           kable_styling()
   print(k)
-
 ```
 
 Incident start dates in secondary care from main cohort
