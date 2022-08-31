@@ -508,8 +508,11 @@ def cockcroft_gault(sex, age, weight, weight_date, creatinine, creatinine_date, 
         else:
             return None
 
-    
-        return  ((140-age) * (weight) * multiplier) / (72 * creatinine)
+        if creatinine == 0.0:
+            cg = None
+        else:
+            cg = ((140-age) * (weight) * multiplier) / (72 * creatinine)
+        return  cg
     else:
         return None
 
