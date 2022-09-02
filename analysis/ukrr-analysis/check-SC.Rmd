@@ -59,7 +59,7 @@ roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
 
 Tablulate all the binary flags for procedure and diagnosis secondary care codes
 
-```{r, echo=FALSE, results='asis', error=TRUE, eval=FALSE}
+```{r, echo=FALSE, results='asis', error=TRUE}
 
 t<- t(as.matrix(apply(df_check[SC_vars], 2, function(x) table(factor(x, levels=0:1)))))
   k<- t  %>%
@@ -71,7 +71,7 @@ t<- t(as.matrix(apply(df_check[SC_vars], 2, function(x) table(factor(x, levels=0
 
 Compare patients who have any of the individual flags with the overall RRT flag- shouldn be the same
 
-```{r, echo=FALSE, results='asis', error=TRUE, eval=FALSE}
+```{r, echo=FALSE, results='asis', error=TRUE}
 
 t<- table(any_individual,any_list)
 
@@ -83,7 +83,7 @@ t<- table(any_individual,any_list)
 ```
 
 Look at which codes appear based on whether they are in the UKRR or not
-```{r, echo=FALSE, results='asis', error=TRUE, eval=FALSE}
+```{r, echo=FALSE, results='asis', error=TRUE}
 
 list.of.dts<-lapply(df_check[SC_vars], function(x) table(x, df_check$ukrr_2019, useNA="ifany"))
 
@@ -97,7 +97,7 @@ for(i in 1:length(list.of.dts)) {
 ```
 
 Look at which codes have any critical care days - need to compare this with total for that procedure/diagnosis
-```{r, echo=FALSE, results='asis', error=TRUE, eval=FALSE}
+```{r, echo=FALSE, results='asis', error=TRUE}
 
 t<- t(as.matrix(apply(CC_flags, 2, function(x) table(factor(x, levels=0:1)))))
   k<- t  %>%
@@ -108,7 +108,7 @@ t<- t(as.matrix(apply(CC_flags, 2, function(x) table(factor(x, levels=0:1)))))
 
 Incident start dates in secondary care from main cohort
 
-```{r, echo=FALSE, results='asis', error=TRUE, eval=FALSE}
+```{r, echo=FALSE, results='asis', error=TRUE}
 t<-table(inc_year_sc, inc_year_pc, useNA="ifany")
   k<- t %>%
           kbl( booktabs=TRUE) %>%
