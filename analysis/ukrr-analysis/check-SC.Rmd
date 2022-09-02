@@ -178,40 +178,43 @@ Adding comparison with prevalent - should have an earliest date for everyone wit
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-t<-table(df_check$earliest_RRT, df_check$earliest_RRT_b, useNA="ifany")
+t<-table(df_check$RRT, df_check$earliest_RRT, useNA="ifany")
   k<- t %>%
-          kbl( caption="RRT flag", booktabs=TRUE) %>%
+          kbl( caption="RRT prev vs inc", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
-t<-table(as.numeric(substr(df_check$earliest_RRT_date,1,4)), as.numeric(substr(df_check$earliest_RRT_b_date,1,4)), useNA="ifany")
+  t<-table(df_check$RRT, df_check$earliest_RRT_b, useNA="ifany")
   k<- t %>%
-          kbl( caption="RRT dates", booktabs=TRUE) %>%
+          kbl( caption="RRT prev vs inc without ignore missing", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
-t<-table(df_check$earliest_dialysis, df_check$earliest_dialysis_b, useNA="ifany")
-  k<- t %>%
-          kbl( caption="dialysis flag", booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
   
-t<-table(as.numeric(substr(df_check$earliest_dialysis_date,1,4)), as.numeric(substr(df_check$earliest_dialysis_b_date,1,4)), useNA="ifany")
+t<-table(df_check$dialysis, df_check$earliest_dialysis, useNA="ifany")
   k<- t %>%
-          kbl( caption="dialysis dates", booktabs=TRUE) %>%
+          kbl( caption="dialysis prev vs inc", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
-  t<-table(df_check$earliest_kidney_tx, df_check$earliest_kidney_tx_b, useNA="ifany")
+  t<-table(df_check$dialysis, df_check$earliest_dialysis_b, useNA="ifany")
   k<- t %>%
-          kbl( caption="kidney_tx flag", booktabs=TRUE) %>%
+          kbl( caption="dialysis prev vs inc without ignore missing", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
-t<-table(as.numeric(substr(df_check$earliest_kidney_tx_date,1,4)), as.numeric(substr(df_check$earliest_kidney_tx_b_date,1,4)), useNA="ifany")
+  
+t<-table(df_check$kidney_tx, df_check$earliest_kidney_tx, useNA="ifany")
   k<- t %>%
-          kbl( caption="kidney_tx dates", booktabs=TRUE) %>%
+          kbl( caption="kidney_tx prev vs inc", booktabs=TRUE) %>%
           kable_styling()
   print(k)
+
+  t<-table(df_check$kidney_tx, df_check$earliest_kidney_tx_b, useNA="ifany")
+  k<- t %>%
+          kbl( caption="kidney_tx prev vs inc without ignore missing", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
 
 ```
