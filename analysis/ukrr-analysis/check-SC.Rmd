@@ -132,43 +132,85 @@ t<-table(inc_year_pc, inc_year_ukrr, useNA="ifany")
 
 ```
 NOt sure why we aren't pickng up as many incident patients in PC - we should have start dates for all prevalent patients
-at least because they have at least one RRT entry. Checking frequency of incident flags 
+at least because they have at least one RRT entry.Comparing incident flags with and without the ignore_missing_values
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
-t<-table(df_main$earliest_RRT, as.numeric(substr(df_main$earliest_RRT_date,1,4)), useNA="ifany")
+
+t<-table(df_check$earliest_RRT, df_check$earliest_RRT_b, useNA="ifany")
   k<- t %>%
-          kbl( booktabs=TRUE) %>%
+          kbl( caption="RRT flag", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
-t<-table(df_main$earliest_RRT, is.na(df_main$earliest_RRT_date) | df_main$earliest_RRT_date=="", useNA="ifany")
+t<-table(as.numeric(substr(df_check$earliest_RRT_date,1,4)), as.numeric(substr(df_check$earliest_RRT_b_date,1,4)), useNA="ifany")
   k<- t %>%
-          kbl( booktabs=TRUE) %>%
+          kbl( caption="RRT dates", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+t<-table(df_check$earliest_dialysis, df_check$earliest_dialysis_b, useNA="ifany")
+  k<- t %>%
+          kbl( caption="dialysis flag", booktabs=TRUE) %>%
           kable_styling()
   print(k)
   
+t<-table(as.numeric(substr(df_check$earliest_dialysis_date,1,4)), as.numeric(substr(df_check$earliest_dialysis_b_date,1,4)), useNA="ifany")
+  k<- t %>%
+          kbl( caption="dialysis dates", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+  t<-table(df_check$earliest_kidney_tx, df_check$earliest_kidney_tx_b, useNA="ifany")
+  k<- t %>%
+          kbl( caption="kidney_tx flag", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+t<-table(as.numeric(substr(df_check$earliest_kidney_tx_date,1,4)), as.numeric(substr(df_check$earliest_kidney_tx_b_date,1,4)), useNA="ifany")
+  k<- t %>%
+          kbl( caption="kidney_tx dates", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+```
+
+Adding comparison with prevalent - should have an earliest date for everyone with a latest date.
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+t<-table(df_check$earliest_RRT, df_check$earliest_RRT_b, useNA="ifany")
+  k<- t %>%
+          kbl( caption="RRT flag", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+t<-table(as.numeric(substr(df_check$earliest_RRT_date,1,4)), as.numeric(substr(df_check$earliest_RRT_b_date,1,4)), useNA="ifany")
+  k<- t %>%
+          kbl( caption="RRT dates", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+t<-table(df_check$earliest_dialysis, df_check$earliest_dialysis_b, useNA="ifany")
+  k<- t %>%
+          kbl( caption="dialysis flag", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
   
-t<-table(df_main$earliest_dialysis, as.numeric(substr(df_main$earliest_dialysis_date,1,4)), useNA="ifany")
+t<-table(as.numeric(substr(df_check$earliest_dialysis_date,1,4)), as.numeric(substr(df_check$earliest_dialysis_b_date,1,4)), useNA="ifany")
   k<- t %>%
-          kbl( booktabs=TRUE) %>%
+          kbl( caption="dialysis dates", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
-  t<-table(df_main$earliest_dialysis, is.na(df_main$earliest_dialysis_date) | df_main$earliest_dialysis_date=="", useNA="ifany")
+  t<-table(df_check$earliest_kidney_tx, df_check$earliest_kidney_tx_b, useNA="ifany")
   k<- t %>%
-          kbl( booktabs=TRUE) %>%
+          kbl( caption="kidney_tx flag", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
-  t<-table(df_main$earliest_kidney_tx, as.numeric(substr(df_main$earliest_kidney_tx_date,1,4)), useNA="ifany")
+t<-table(as.numeric(substr(df_check$earliest_kidney_tx_date,1,4)), as.numeric(substr(df_check$earliest_kidney_tx_b_date,1,4)), useNA="ifany")
   k<- t %>%
-          kbl( booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-
-  t<-table(df_main$earliest_kidney_tx, is.na(df_main$earliest_kidney_tx_date) | df_main$earliest_kidney_tx_date=="", useNA="ifany")
-  k<- t %>%
-          kbl( booktabs=TRUE) %>%
+          kbl( caption="kidney_tx dates", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 
