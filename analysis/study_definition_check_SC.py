@@ -267,6 +267,150 @@ study = StudyDefinition(
         },
     ),
   
+# PC incidence data as a check
+
+# RRT 
+    earliest_RRT=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        ignore_missing_values=True,
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+
+    # dialysis 
+    earliest_dialysis=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        ignore_missing_values=True,
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    # kidney_tx 
+    earliest_kidney_tx=patients.with_these_clinical_events(
+        codelist=kidney_tx_codelist,
+        on_or_before="index_date",
+       returning="binary_flag",
+        find_first_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        ignore_missing_values=True,
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    incident_rrt_date=patients.minimum_of(
+        "earliest_dialysis_date", "earliest_kidney_tx_date", "earliest_RRT_date"
+        ),
+
+#now removing the "ignore_missing_values" to match how we look for prevalent dates
+
+# RRT 
+    earliest_RRT_b=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        #ignore_missing_values=True,
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+
+    # dialysis 
+    earliest_dialysis_b=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        #ignore_missing_values=True,
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    # kidney_tx 
+    earliest_kidney_tx_b=patients.with_these_clinical_events(
+        codelist=kidney_tx_codelist,
+        on_or_before="index_date",
+       returning="binary_flag",
+        find_first_match_in_period=True,
+        date_format="YYYY-MM-DD",
+        #ignore_missing_values=True,
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
+    incident_rrt_date_b=patients.minimum_of(
+        "earliest_dialysis_b_date", "earliest_kidney_tx_b_date", "earliest_RRT_b_date"
+        ),
+
+#and prevlant flag for comparison
+
+ RRT=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    # dialysis
+    # defaults to the lastest match
+    dialysis=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    # kidney_tx
+    # defaults to the lastest match
+    kidney_tx=patients.with_these_clinical_events(
+        codelist=kidney_tx_codelist,
+        on_or_before="index_date",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+
   # creating variables from individual codes
     **loop_over_proc_codes(RRT_opcs4_codelist),
     **loop_over_diag_codes(RRT_icd10_codelist),
