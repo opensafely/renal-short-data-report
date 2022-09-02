@@ -1,0 +1,89 @@
+---
+title: "Modality difference table"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+This document describes the cohorts of patients prevalent to renal replacement therapy (RRT) at 1st January 2020, and incident to renal replacement therapy during 2020 using 3 sources of data: the UK Renal Registry (UKRR), primary care data from TPP practices (PC) and secondary care inpatient and outpatient data (SC).  
+Extra table looking at modality differences for people in UKRR and PC/SC as there was an error in the code before.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+#read in dataset
+#pick up 1st Jan cohort as latest renal status is on or before index date
+ df<-read.csv(here::here("output", "joined", "input_2020-01-01.csv.gz")) 
+ 
+#add variable for dialysis/tx for UKRR
+df<- df %>%
+  mutate(ukrr_dtx = ifelse(ukrr_2019_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_2019_mod == "Tx", "Transplant", "Not on RRT")))
+
+# order factor
+df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
+
+# add variable for source
+df <- df %>%
+  mutate(source_prev_rrt = case_when(ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "UPS",
+                                      ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "PS",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "US",
+                                     ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "UP",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "U",
+                                     ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "P",
+                                     ukrr_2019!=1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "S")) 
+# order factor
+source_levels<-c("UPS", "UP", "US", "PS", "U", "P", "S")
+df$source_prev_rrt<-factor(df$source_prev_rrt, levels=source_levels)
+
+
+#function to round up to nearest accuracy
+roundup = function(x, accuracy, f=ceiling){f(x/ accuracy) * accuracy}
+```
+
+
+
+Of people who are captured in UKRR and PC/SC, do the modalitie agree?   
+
+## Prevalent 1/1/2020
+### UKRR and PC
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-roundup(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status),5)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("UKRR", "Primary care" = 3)) %>%
+  kable_styling()
+print(k2)
+```
+### UKRR and SC
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-roundup(table(df[df$source_prev_rrt %in% c("US", "UPS"),]$ukrr_dtx,
+      df[df$source_prev_rrt %in% c("US", "UPS"),]$latest_rrt_status_secondary),5) 
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
