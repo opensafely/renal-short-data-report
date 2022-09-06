@@ -355,7 +355,7 @@ def plot_boxplot_numeric_value(x, title, filename):
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
 
-def plot_violin_numeric_value(x, title, filename):
+def plot_violin_numeric_value(x, title, filename, cut=0):
     """Plots a violin plot from an array of numeric values. Controls for disclosure by
     calculating percentiles and using this to generate the plots rather than the raw values. 
     This will be sufficient for large the majority of populations. Limits the range of plotted data
@@ -365,7 +365,7 @@ def plot_violin_numeric_value(x, title, filename):
 
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=x, q=percentiles)
-    figure_output = sns.violinplot(data=percentile_values, cut=0)
+    figure_output = sns.violinplot(data=percentile_values, cut=cut)
     plt.title(title)
     plt.ylabel("numeric value")
     plt.savefig(OUTPUT_DIR /f"{filename}.jpeg")
@@ -534,3 +534,14 @@ def ckd_epi(sex, age, creatinine, creatinine_date, date_lim):
     else:
         return None
 
+def update_df(original_df, new_df, columns=[], on="patient_id"):
+    updated = original_df.merge(new_df, on=on, how="outer", suffixes=('_old', '_new'), indicator=True)
+    
+    for c in columns:
+    
+        updated[c] = np.nan
+        updated.loc[updated["_merge"]=="left_only",c] = updated[f"{c}_old"]
+        updated.loc[updated["_merge"]!="left_only",c] = updated[f"{c}_new"]
+        updated = updated.drop([f"{c}_old", f"{c}_new"], axis=1)
+    updated = updated.drop(["_merge"], axis=1)
+    return updated
