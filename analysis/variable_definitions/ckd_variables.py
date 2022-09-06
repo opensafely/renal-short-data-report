@@ -1,3 +1,4 @@
+import numpy as np
 from cohortextractor import patients
 
 from codelists import *
@@ -49,7 +50,7 @@ ckd_variables = dict(
         returning="category",
         return_expectations={
             "rate": "universal",
-            "category": {"ratios": {"1": 0.2, "2": 0.2, "3": 0.2, "4": 0.2, "5":0.2}},
+            "category": {"ratios": {"1": 0.2, "2": 0.2, "3": 0.2, "4": 0.2, "5":0.1, np.nan:0.1}},
         },
     ),
     ckd_primis_stage_date=patients.date_of(
