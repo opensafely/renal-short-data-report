@@ -99,6 +99,7 @@ df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
 df_ckd_stage = redact_small_numbers(
     df_ckd_stage, 10,"ckd_primis_1_5", "population", "rate", "date"
 )
+subset["ckd_primis_stage"] = df["ckd_primis_stage"].astype(str)
 
 plot_measures(
     df=df_ckd_stage,
