@@ -2,56 +2,39 @@ import pandas as pd
 import argparse
 import glob
 import pathlib
-from utilities import OUTPUT_DIR
+from utilities import OUTPUT_DIR, update_df
 from collections import Counter
 
 
 def create_table_1(paths, demographics):
 
-    demographics_dict = {d: {} for d in demographics}
-    demographics_dict_total = {d: {} for d in demographics}
+    for i, path in enumerate(paths):
+        if i ==0:
+            df = pd.read_csv(path, usecols=demographics + ["patient_id", "at_risk"])
+            df_at_risk = df.loc[df["at_risk"]==1,:]
+            df = df.drop("at_risk", axis=1)
+            df_at_risk = df_at_risk.drop("at_risk", axis=1)
+           
+        
+        else:
+            updated_df = pd.read_csv(path, usecols=demographics + ["patient_id", "at_risk"])
+            updated_df_at_risk = updated_df.loc[updated_df["at_risk"]==1,:]
+            updated_df = updated_df.drop("at_risk", axis=1)
+            updated_df_at_risk = updated_df_at_risk.drop("at_risk", axis=1)
 
-    demographics_dict_at_risk = {d: {} for d in demographics}
-    demographics_dict_at_risk_total = {d: {} for d in demographics}
 
-    for path in paths:
-        df = pd.read_csv(path, usecols=demographics + ["patient_id", "at_risk"])
+            
+            df = update_df(df, updated_df, columns=demographics)
+            df_at_risk = update_df(df_at_risk, updated_df_at_risk, columns=demographics)
+    
+    df = df.drop("patient_id", axis=1)
+    df_counts = df.apply(lambda x: x.value_counts()).T.stack()
 
-        for i, row in df.iterrows():
-            for d in demographics:
-                if row[d]:
-                    patient_id = row["patient_id"]
+    df_at_risk = df_at_risk.drop("patient_id", axis=1)
+    df_counts_at_risk = df_at_risk.apply(lambda x: x.value_counts()).T.stack()
 
-                    demographics_dict[d][patient_id] = row[d]
-
-                    if row["at_risk"] == 1:
-                        demographics_dict_at_risk[d][patient_id] = row[d]
-
-    for d in demographics:
-        counts = dict(Counter([v for k, v in demographics_dict[d].items()]))
-        demographics_dict_total[d] = counts
-
-        counts_at_risk = dict(
-            Counter([v for k, v in demographics_dict_at_risk[d].items()])
-        )
-        demographics_dict_at_risk_total[d] = counts_at_risk
-
-    def reform_dict(dict):
-        reformed_dict = {}
-        reformed_dict["total"] = sum(dict[demographics[0]].values())
-        for outerKey, innerDict in dict.items():
-            for innerKey, values in innerDict.items():
-
-                reformed_dict[(outerKey, innerKey)] = values
-        return reformed_dict
-
-    reformed_dict = reform_dict(demographics_dict_total)
-    reformed_dict_at_risk = reform_dict(demographics_dict_at_risk_total)
-
-    return (
-        pd.DataFrame(reformed_dict, index=[0]).T,
-        pd.DataFrame(reformed_dict_at_risk, index=[0]).T,
-    )
+    return df_counts, df_counts_at_risk
+   
 
 
 def get_path(*args):
