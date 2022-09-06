@@ -42,33 +42,32 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
             "ckd_egfr_category_G3": "Biochemical G3",
             "ckd_egfr_category_G4": "Biochemical G4",
             "ckd_egfr_category_G5": "Biochemical G5",
-            "ckd_egfr_category_None": "Biochemical Missing",
-            "ckd_egfr_category_Uncategorised": "Biochemical Uncategorised",
-            "ckd_acr_category_None": "A - None",
             "ckd_acr_category_A1": "A1",
             "ckd_acr_category_A2": "A2",
             "ckd_acr_category_A3": "A3",
-            "ckd_acr_category_Uncategorised": "A - Uncategorised",
         }
     )
 
     # don't worry about overlap where both groups are None
     if i == 0:
-        subset_encoded = subset_encoded.loc[
-            (
-                (subset_encoded["ckd_egfr_category_None"] != 1)
-                & (subset_encoded["ckd_primis_stage_nan"] != 1)
-            ),
-            :,
-        ]
+        if "ckd_primis_stage_nan" in subset_encoded.columns:
+            subset_encoded = subset_encoded.loc[
+                (
+                    (subset_encoded["ckd_egfr_category_None"] != 1)
+                    & (subset_encoded["ckd_primis_stage_nan"] != 1)
+                ),
+                :,
+            ]
     elif i == 1:
-        subset_encoded = subset_encoded.loc[
-            (
-                (subset_encoded["ckd_acr_category_None"] != 1)
-                & (subset_encoded["ckd_primis_stage_nan"] != 1)
-            ),
-            :,
-        ]
+        if "ckd_primis_stage_nan" in subset_encoded.columns:
+
+            subset_encoded = subset_encoded.loc[
+                (
+                    (subset_encoded["ckd_acr_category_None"] != 1)
+                    & (subset_encoded["ckd_primis_stage_nan"] != 1)
+                ),
+                :,
+            ]
 
     else:
         subset_encoded = subset_encoded.loc[
