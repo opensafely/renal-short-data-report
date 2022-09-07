@@ -14,14 +14,14 @@ demographic_variables = dict(
     age_band=patients.categorised_as(
         {
             "missing": "DEFAULT",
-            "18-19": """ age >= 0 AND age < 20""",
+            "18-19": """ age >= 18 AND age < 20""",
             "20-29": """ age >=  20 AND age < 30""",
             "30-39": """ age >=  30 AND age < 40""",
             "40-49": """ age >=  40 AND age < 50""",
             "50-59": """ age >=  50 AND age < 60""",
             "60-69": """ age >=  60 AND age < 70""",
             "70-79": """ age >=  70 AND age < 80""",
-            "80+": """ age >=  80 AND age < 120""",
+            "80+": """ age >=  80 AND age <= 120""",
         },
         return_expectations={
             "rate": "universal",
