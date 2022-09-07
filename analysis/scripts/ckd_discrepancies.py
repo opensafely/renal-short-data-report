@@ -17,15 +17,6 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
         subset.loc[subset["ckd_egfr_category"] == "G3b", "ckd_egfr_category"] = "G3"
         subset.loc[subset["ckd_egfr_category"] == "G3a", "ckd_egfr_category"] = "G3"
 
-        subset.loc[
-            subset["ckd_egfr_category"] == "Uncategorised", "ckd_egfr_category"
-        ] = "None"
-
-    if "ckd_acr_category" in subset.columns:
-        subset.loc[
-            subset["ckd_acr_category"] == "Uncategorised", "ckd_acr_category"
-        ] = "None"
-
     if "ckd_primis_stage" in subset.columns:
         subset["ckd_primis_stage"] = df["ckd_primis_stage"].astype(str)
 
@@ -53,7 +44,7 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
         if "ckd_primis_stage_nan" in subset_encoded.columns:
             subset_encoded = subset_encoded.loc[
                 (
-                    (subset_encoded["ckd_egfr_category_None"] != 1)
+                    (subset_encoded["ckd_egfr_category_Uncategorised"] != 1)
                     & (subset_encoded["ckd_primis_stage_nan"] != 1)
                 ),
                 :,
@@ -63,7 +54,7 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
 
             subset_encoded = subset_encoded.loc[
                 (
-                    (subset_encoded["ckd_acr_category_None"] != 1)
+                    (subset_encoded["ckd_acr_category_Uncategorised"] != 1)
                     & (subset_encoded["ckd_primis_stage_nan"] != 1)
                 ),
                 :,
@@ -72,8 +63,8 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
     else:
         subset_encoded = subset_encoded.loc[
             (
-                (subset_encoded["ckd_egfr_category_None"] != 1)
-                & (subset_encoded["ckd_acr_category_None"] != 1)
+                (subset_encoded["ckd_egfr_category_Uncategorised"] != 1)
+                & (subset_encoded["ckd_acr_category_Uncategorised"] != 1)
             ),
             :,
         ]

@@ -152,7 +152,7 @@ for test in tests:
     df_ckd_stage_egfr = redact_small_numbers(
         df_ckd_stage_egfr, 10,test, "population", "rate", "date"
     )
-    print(df_ckd_stage_egfr)
+   
 
     plot_measures(
         df=df_ckd_stage_egfr,

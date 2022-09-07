@@ -123,17 +123,7 @@ for pop in ["population", "at_risk"]:
             group_by=[d],
         )
 
-        m_ckd = Measure(
-            id=f"ckd_rate", numerator="ckd", denominator="population", group_by=[d]
-        )
-        m_ckd_1_5 = Measure(
-            id=f"ckd_primis_1_5_rate",
-            numerator="ckd_primis_1_5",
-            denominator="population",
-            group_by=[d],
-        )
-
-    measures.extend([m_rrt, m_dialysis, m_ckd, m_ckd_1_5, m_kidney_tx])
+    measures.extend([m_rrt, m_dialysis, m_kidney_tx])
 
     measures.extend(
         [
