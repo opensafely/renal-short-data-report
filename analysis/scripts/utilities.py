@@ -24,8 +24,10 @@ LOWER_CENTER = 8
 UPPER_CENTER = 9
 CENTER = 10
 
+
 def round_column(column, base):
     return column.apply(lambda x: base * round(x / base))
+
 
 def drop_and_round(column, base=5, threshold=5):
     column[column <= threshold] = 0
@@ -322,30 +324,27 @@ def plot_measures(
 
 
 def group_low_values_series(series):
-    
-    suppressed_count = series[series<=5].sum()
-    
+
+    suppressed_count = series[series <= 5].sum()
+
     if suppressed_count == 0:
         pass
 
     else:
-        series[series <=5]  = np.nan
+        series[series <= 5] = np.nan
 
-        while suppressed_count <=5:
+        while suppressed_count <= 5:
             suppressed_count += series.min()
-            series[series.idxmin()] = np.nan 
-            
-            
-   
+            series[series.idxmin()] = np.nan
+
         series = series[series.notnull()]
-        
-        suppressed_count_series= pd.Series(suppressed_count, index=["Other"])
-       
-        
+
+        suppressed_count_series = pd.Series(suppressed_count, index=["Other"])
+
         series = pd.concat([series, suppressed_count_series])
-    
-    
+
     return series
+
 
 def plot_boxplot_numeric_value(x, title, filename):
     plt.boxplot(x, showfliers=False)
@@ -355,9 +354,10 @@ def plot_boxplot_numeric_value(x, title, filename):
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
 
+
 def plot_violin_numeric_value(x, title, filename, cut=0):
     """Plots a violin plot from an array of numeric values. Controls for disclosure by
-    calculating percentiles and using this to generate the plots rather than the raw values. 
+    calculating percentiles and using this to generate the plots rather than the raw values.
     This will be sufficient for large the majority of populations. Limits the range of plotted data
     to the top and bottom quantile using `cut=0`.
 
@@ -368,7 +368,7 @@ def plot_violin_numeric_value(x, title, filename, cut=0):
     figure_output = sns.violinplot(data=percentile_values, cut=cut)
     plt.title(title)
     plt.ylabel("numeric value")
-    plt.savefig(OUTPUT_DIR /f"{filename}.jpeg")
+    plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
 
 
@@ -434,7 +434,7 @@ def create_top_5_code_table(
     Returns:
         A table of the top `nrows` codes.
     """
-   
+
     # cast both code columns to str
     df[code_column] = df[code_column].astype(str)
     code_df[code_column] = code_df[code_column].astype(str)
@@ -475,11 +475,12 @@ def create_top_5_code_table(
 
     # drop events column
     event_counts = event_counts.loc[
-        :, ["Code", "Description", "Events","Proportion of codes (%)"]
+        :, ["Code", "Description", "Events", "Proportion of codes (%)"]
     ]
 
     # return top n rows
     return event_counts.head(5)
+
 
 def write_csv(df, path, **kwargs):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -495,10 +496,13 @@ def round_values(x, base=5):
             rounded = int(base * round(x / base))
     return rounded
 
-def cockcroft_gault(sex, age, weight, weight_date, creatinine, creatinine_date, date_lim):
+
+def cockcroft_gault(
+    sex, age, weight, weight_date, creatinine, creatinine_date, date_lim
+):
 
     date_lim = pd.to_datetime(date_lim)
-    
+
     if date_lim < weight_date and date_lim < creatinine_date:
 
         if sex == "F":
@@ -511,37 +515,50 @@ def cockcroft_gault(sex, age, weight, weight_date, creatinine, creatinine_date, 
         if creatinine == 0.0:
             cg = None
         else:
-            cg = ((140-age) * (weight) * multiplier) / (72 * creatinine)
-        return  cg
+            cg = ((140 - age) * (weight) * multiplier) / (72 * creatinine)
+        return cg
     else:
         return None
+
 
 def ckd_epi(sex, age, creatinine, creatinine_date, date_lim):
 
     date_lim = pd.to_datetime(date_lim)
-    
+
     if date_lim < creatinine_date:
 
         if sex == "F":
-            multiplier = (0.7,-0.241)
+            multiplier = (0.7, -0.241)
         elif sex == "M":
-            multiplier = (0.9,-0.302)
+            multiplier = (0.9, -0.302)
         else:
             return None
 
-    
-        return  (142 * (min([1, creatinine/multiplier[1]])**multiplier[1]) * (max([1, creatinine/multiplier[1]])**-1.200) * (0.9938**age) * multiplier[0])
+        if creatinine == 0.0:
+            return None
+
+        else:
+            return (
+                142
+                * (min([1, creatinine / multiplier[1]]) ** multiplier[1])
+                * (max([1, creatinine / multiplier[1]]) ** -1.200)
+                * (0.9938**age)
+                * multiplier[0]
+            )
     else:
         return None
 
+
 def update_df(original_df, new_df, columns=[], on="patient_id"):
-    updated = original_df.merge(new_df, on=on, how="outer", suffixes=('_old', '_new'), indicator=True)
-    
+    updated = original_df.merge(
+        new_df, on=on, how="outer", suffixes=("_old", "_new"), indicator=True
+    )
+
     for c in columns:
-    
+
         updated[c] = np.nan
-        updated.loc[updated["_merge"]=="left_only",c] = updated[f"{c}_old"]
-        updated.loc[updated["_merge"]!="left_only",c] = updated[f"{c}_new"]
+        updated.loc[updated["_merge"] == "left_only", c] = updated[f"{c}_old"]
+        updated.loc[updated["_merge"] != "left_only", c] = updated[f"{c}_new"]
         updated = updated.drop([f"{c}_old", f"{c}_new"], axis=1)
     updated = updated.drop(["_merge"], axis=1)
     return updated
