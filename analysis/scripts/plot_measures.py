@@ -24,6 +24,7 @@ for i in [
         df = pd.read_csv(
             OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
         )
+        
         df = drop_irrelevant_practices(df)
 
         df["rate"] = df[f"value"] * 100
@@ -89,7 +90,14 @@ df_ckd_stage = pd.read_csv(
     OUTPUT_DIR / f"joined/measure_ckd_primis_1_5_stage_population_rate.csv",
     parse_dates=["date"],
 )
-df_ckd_stage["rate"] = df_ckd_stage[f"value"] * 100
+pop = df_ckd_stage.groupby(by=["date"])[["population"]].sum()
+
+df_ckd_stage = df_ckd_stage.drop("population",axis=1)
+
+df_ckd_stage = df_ckd_stage.merge(pop, on="date")
+
+
+df_ckd_stage["rate"] = df_ckd_stage["ckd_primis_1_5"] / df_ckd_stage["population"]
 
 df_ckd_stage = df_ckd_stage.drop(["value"], axis=1)
 
@@ -116,7 +124,15 @@ for d in ["age_band", "ethnicity", "sex"]:
         OUTPUT_DIR / f"joined/measure_ckd_primis_1_5_stage_population_{d}_rate.csv",
         parse_dates=["date"],
     )
-    df_ckd_stage["rate"] = df_ckd_stage[f"value"] * 100
+    pop = df_ckd_stage.groupby(by=["date"])[["population"]].sum()
+
+    df_ckd_stage = df_ckd_stage.drop("population",axis=1)
+
+    df_ckd_stage = df_ckd_stage.merge(pop, on="date")
+
+
+    df_ckd_stage["rate"] = df_ckd_stage["ckd_primis_1_5"] / df_ckd_stage["population"]
+
 
     df_ckd_stage = df_ckd_stage.drop(["value"], axis=1)
 
@@ -127,10 +143,24 @@ for d in ["age_band", "ethnicity", "sex"]:
         df_ckd_stage, 10,"ckd_primis_1_5", "population", "rate", "date"
     )
 
+    df_ckd_stage["rate"] = df_ckd_stage["rate"]*100
+    early_stage = df_ckd_stage.loc[df_ckd_stage["ckd_primis_stage"].isin([1, 2, 3]),:].groupby(["date", d])[["rate"]].mean().reset_index()
+    late_stage = df_ckd_stage.loc[df_ckd_stage["ckd_primis_stage"].isin([4, 5]),:].groupby(["date", d])[["rate"]].mean().reset_index()
+
     plot_measures(
-        df=df_ckd_stage,
-        filename=f"plot_ckd_stage_{d}",
-        title=f"CKD stage by {d}",
+        df=early_stage,
+        filename=f"plot_ckd_early_stage_{d}",
+        title=f"Early stage CKD by {d}",
+        column_to_plot="rate",
+        y_label="Proportion",
+        as_bar=False,
+        category=d,
+    )
+
+    plot_measures(
+        df=late_stage,
+        filename=f"plot_ckd_late_stage_{d}",
+        title=f"Late stage CKD by {d}",
         column_to_plot="rate",
         y_label="Proportion",
         as_bar=False,

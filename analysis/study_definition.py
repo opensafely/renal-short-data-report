@@ -155,19 +155,19 @@ for pop in ["population", "at_risk"]:
                 id=f"ckd_primis_1_5_stage_{pop}_ethnicity_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
-                group_by=["ethnicity"],
+                group_by=["ethnicity", "ckd_primis_stage"],
             ),
             Measure(
                 id=f"ckd_primis_1_5_stage_{pop}_age_band_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
-                group_by=["age_band"],
+                group_by=["age_band", "ckd_primis_stage"],
             ),
             Measure(
                 id=f"ckd_primis_1_5_stage_{pop}_sex_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
-                group_by=["sex"],
+                group_by=["sex", "ckd_primis_stage"],
             ),
             Measure(
                 id=f"RRT_{pop}_rate",

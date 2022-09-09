@@ -1,4 +1,3 @@
-from operator import mul
 import re
 import seaborn as sns
 import matplotlib
@@ -88,10 +87,11 @@ def compute_deciles(measure_table, groupby_col, values_col, has_outer_percentile
 
     percentiles = (
         measure_table.groupby(groupby_col)[values_col]
-        .quantile(pd.Series(quantiles, name="percentile"))
+        .quantile(pd.Series(quantiles))
         .reset_index()
     )
-    percentiles["percentile"] = percentiles["percentile"].apply(lambda x: int(x * 100))
+
+    percentiles["percentile"] = percentiles["level_1"].apply(lambda x: int(x * 100))
 
     return percentiles
 
