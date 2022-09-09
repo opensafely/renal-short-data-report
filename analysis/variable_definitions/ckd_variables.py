@@ -63,9 +63,6 @@ ckd_variables = dict(
     ckd_primis_stage_date=patients.date_of("ckd_primis_1_5", date_format="YYYY-MM-DD"),
     ckd_acr_category=patients.categorised_as(
         {
-            "None": """
-                acr_numeric_value_history=0
-                """,
             "A1": """
                 acr_numeric_value_history < 3 AND
                 acr_numeric_value_history > 0 AND
@@ -126,8 +123,7 @@ ckd_variables = dict(
                     "A1": 0.2,
                     "A2": 0.2,
                     "A3": 0.1,
-                    "Uncategorised": 0.1,
-                    "None": 0.4,
+                    "Uncategorised": 0.5,
                 }
             },
         },
@@ -214,9 +210,6 @@ ckd_variables = dict(
     ),
     ckd_egfr_category=patients.categorised_as(
         {
-            "None": """
-                egfr_numeric_value_history=0
-                """,
             "G1": """
                 egfr_numeric_value_history >= 90 AND
                 egfr_numeric_value_90_before >= 90 AND
@@ -306,8 +299,7 @@ ckd_variables = dict(
                     "G3a": 0.1,
                     "G3b": 0.1,
                     "G4": 0.1,
-                    "Uncategorised": 0.05,
-                    "None": 0.25,
+                    "Uncategorised": 0.3,
                 }
             },
         },

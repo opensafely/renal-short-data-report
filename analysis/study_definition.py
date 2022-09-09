@@ -123,17 +123,7 @@ for pop in ["population", "at_risk"]:
             group_by=[d],
         )
 
-        m_ckd = Measure(
-            id=f"ckd_rate", numerator="ckd", denominator="population", group_by=[d]
-        )
-        m_ckd_1_5 = Measure(
-            id=f"ckd_primis_1_5_rate",
-            numerator="ckd_primis_1_5",
-            denominator="population",
-            group_by=[d],
-        )
-
-    measures.extend([m_rrt, m_dialysis, m_ckd, m_ckd_1_5, m_kidney_tx])
+    measures.extend([m_rrt, m_dialysis, m_kidney_tx])
 
     measures.extend(
         [
@@ -165,19 +155,19 @@ for pop in ["population", "at_risk"]:
                 id=f"ckd_primis_1_5_stage_{pop}_ethnicity_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
-                group_by=["ethnicity"],
+                group_by=["ethnicity", "ckd_primis_stage"],
             ),
             Measure(
                 id=f"ckd_primis_1_5_stage_{pop}_age_band_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
-                group_by=["age_band"],
+                group_by=["age_band", "ckd_primis_stage"],
             ),
             Measure(
                 id=f"ckd_primis_1_5_stage_{pop}_sex_rate",
                 numerator="ckd_primis_1_5",
                 denominator=pop,
-                group_by=["sex"],
+                group_by=["sex", "ckd_primis_stage"],
             ),
             Measure(
                 id=f"RRT_{pop}_rate",
