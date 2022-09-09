@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-from utilities import OUTPUT_DIR, plot_violin_numeric_value
+from utilities import OUTPUT_DIR, plot_violin_numeric_value, drop_and_round
 from upsetplot import plot as upset_plot
 
 df = pd.read_csv(OUTPUT_DIR / "joined/input_2022-07-01.csv.gz")
@@ -70,7 +70,12 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
         ]
 
     counts = subset_encoded.groupby(by=subset_encoded.columns.tolist()).grouper.size()
-    upset_plot(counts, show_counts=True, sort_by="cardinality")
+    counts = drop_and_round(counts)
+    counts = (counts/1000)
+    print(counts)
+
+    plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
+   
     plt.savefig(OUTPUT_DIR / f"ckd_staging_upset_{i}.png")
     plt.clf()
 
