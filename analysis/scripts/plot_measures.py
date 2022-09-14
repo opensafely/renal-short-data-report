@@ -176,7 +176,7 @@ for test in tests:
         parse_dates=["date"],
     )
 
-    df = df.iloc[df["single_egfr"]==1,:]
+    df = df.loc[df["single_egfr"]==1,:]
     redact_small_numbers(
         df, 10,test, "population", "rate", "date"
     )
