@@ -178,14 +178,14 @@ for test in tests:
 
     df = df.loc[df["single_egfr"]==1,:]
     redact_small_numbers(
-        df, 10,test, "population", "rate", "date"
+        df, 10,test, "population", "value", "date"
     )
     
     plot_measures(
         df=df,
         filename=f"plot_single_reduced_egfr_{test}",
         title=f"",
-        column_to_plot="rate",
+        column_to_plot="value",
         y_label="Proportion",
         as_bar=False,
     )
