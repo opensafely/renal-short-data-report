@@ -5,7 +5,7 @@ from codelists import *
 ckd_variables = dict(
     ckd=patients.with_these_clinical_events(
         codelist=ckd_codelist,
-        on_or_before="index_date",
+        on_or_before="last_day_of_month(index_date)",
         returning="binary_flag",
         date_format="YYYY-MM-DD",
         include_date_of_match=True,
@@ -16,7 +16,7 @@ ckd_variables = dict(
     ),
     ckd_code=patients.with_these_clinical_events(
         codelist=ckd_codelist,
-        on_or_before="index_date",
+        on_or_before="last_day_of_month(index_date)",
         returning="code",
         return_expectations={
             "rate": "universal",
@@ -25,7 +25,7 @@ ckd_variables = dict(
     ),
     ckd_primis_1_5=patients.with_these_clinical_events(
         codelist=primis_ckd_1_5_codelist,
-        on_or_before="index_date",
+        on_or_before="last_day_of_month(index_date)",
         returning="binary_flag",
         date_format="YYYY-MM-DD",
         include_date_of_match=True,
@@ -36,7 +36,7 @@ ckd_variables = dict(
     ),
     ckd_primis_1_5_code=patients.with_these_clinical_events(
         codelist=primis_ckd_1_5_codelist,
-        on_or_before="index_date",
+        on_or_before="last_day_of_month(index_date)",
         returning="code",
         return_expectations={
             "rate": "universal",
@@ -45,7 +45,7 @@ ckd_variables = dict(
     ),
     ckd_primis_stage=patients.with_these_clinical_events(
         codelist=primis_ckd_stage,
-        on_or_before="index_date",
+        on_or_before="last_day_of_month(index_date)",
         returning="category",
         return_expectations={
             "rate": "universal",
@@ -126,6 +126,18 @@ ckd_variables = dict(
                     "Uncategorised": 0.5,
                 }
             },
+        },
+    ),
+    creatinine_numeric_value_history=patients.with_these_clinical_events(
+        codelist=creatinine_numeric_value_codelist,
+        on_or_before="last_day_of_month(index_date)",
+        returning="numeric_value",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.5,
+            "float": {"distribution": "normal", "mean": 25, "stddev": 5},
+            "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
     egfr_numeric_value_history=patients.with_these_clinical_events(
