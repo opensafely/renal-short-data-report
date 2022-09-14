@@ -8,6 +8,7 @@ from variable_definitions.comorbidity_variables import comorbidity_variables
 from variable_definitions.ukrr_variables import ukrr_variables
 from variable_definitions.incident_variables import incident_variables
 from scripts.variables import demographics
+from codelists import *
 
 
 study = StudyDefinition(
