@@ -1,21 +1,46 @@
-from cohortextractor import (
-    StudyDefinition,
-    patients,
-)
-
+from cohortextractor import StudyDefinition, patients, Measure
+from variable_definitions.demographic_variables import demographic_variables
+from variable_definitions.test_variables import test_variables, path_tests
+from variable_definitions.ckd_variables import ckd_variables
+from variable_definitions.secondary_care_variables import secondary_care_variables
+from variable_definitions.rrt_variables import rrt_variables
+from variable_definitions.comorbidity_variables import comorbidity_variables
 from variable_definitions.ukrr_variables import ukrr_variables
-from codelists import *
+from variable_definitions.incident_variables import incident_variables
+from scripts.variables import demographics
+
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1900-01-01", "latest": "today"},
+        "date": {"earliest": "2019-01-01", "latest": "today"},
         "rate": "uniform",
         "incidence": 0.5,
     },
-    # End of the study period
-    index_date="2021-12-31",
-    population=patients.all(),
-    
+    # define study index date
+    index_date="2020-01-01",
+    population=patients.satisfying(
+        """
+            registered AND
+            NOT died AND
+            (age >=18 AND age <=120) AND 
+            (sex = 'M' OR sex = 'F')
+        """,
+        registered=patients.registered_as_of("index_date"),
+        died=patients.died_from_any_cause(
+            on_or_before="index_date",
+            returning="binary_flag",
+            return_expectations={"incidence": 0.1},
+        ),
+    ),
+    practice=patients.registered_practice_as_of(
+        "index_date",
+        returning="pseudo_id",
+        return_expectations={
+            "int": {"distribution": "normal", "mean": 25, "stddev": 5},
+            "incidence": 0.5,
+        },
+    ),
+
     # Ethnicity
     ethnicity=patients.categorised_as(
         {
@@ -61,8 +86,15 @@ study = StudyDefinition(
             },
         ),
     ),
-    
 
-    **ukrr_variables
-   
+    **demographic_variables,
+    **comorbidity_variables,
+    **test_variables,
+    **ckd_variables,
+    **rrt_variables,
+    **secondary_care_variables,
+    **ukrr_variables,
+    **incident_variables
 )
+
+

@@ -21,7 +21,7 @@ demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "a
 
 #read in dataset
 #pick up 1st Jan cohort as latest renal status is on or before index date
- df<-read.csv(here::here("output", "joined", "input_2020-01-01.csv.gz")) 
+ df<-read.csv(here::here("output","input_ukrr_2020-01-01.csv.gz")) 
  
  #only keep incident data for 2020 for PC and SC
 df<-df %>%
