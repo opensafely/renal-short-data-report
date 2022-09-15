@@ -276,6 +276,36 @@ for(i in 1:length(list.of.dts)) {
 }
 ```
 
+### add median age
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+
+med.age<-function(x){
+  x <- enquo(x)
+  df%>%
+    group_by(!!x)%>% 
+    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
+    spread(q, age)
+  }
+
+  k<- med.age(ukrr_dtx) %>%
+          kbl(caption="Prevalent UKRR", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+    k<- med.age(latest_rrt_status ) %>%
+          kbl(caption="Prevalent primary care", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+  
+    k<- med.age(latest_rrt_status_secondary) %>%
+          kbl(caption="Prevalent secondary care", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+
+```
+
+
 # Section 2 Overall agreement  
 
 Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.  
@@ -398,7 +428,7 @@ for(i in 1:length(list.of.dts)) {
 
 # Section 4  - Agreement of modality  
 
-Of people who are captured in UKRR and PC/SC, do the modalitie agree?   
+Of people who are captured in UKRR and PC/SC, do the modalities agree?   
 
 ## Prevalent 1/1/2020
 ### UKRR and PC
