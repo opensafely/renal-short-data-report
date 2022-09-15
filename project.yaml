@@ -217,12 +217,12 @@ actions:
   #      report: output/notebooks/ukrr-report.html
        
 
-  generate_ukrr_discrepancies:
-    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        report: output/notebooks/ukrr-discrepancies.html
+  # generate_ukrr_discrepancies:
+  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+  #   needs: [join_cohorts]
+  #   outputs:
+  #     moderately_sensitive:
+  #       report: output/notebooks/ukrr-discrepancies.html
 
   ukrr_vs_prim_care_ckd:
     run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
