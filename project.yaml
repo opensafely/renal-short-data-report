@@ -256,4 +256,12 @@ actions:
     outputs:
       moderately_sensitive:
         report: output/notebooks/modality-difference-table.html
+        
+  generate_study_population_flowchart:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_flowchart
+      --output-format csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/input_flowchart.csv.gz
   
