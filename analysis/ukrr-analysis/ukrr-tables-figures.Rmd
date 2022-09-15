@@ -574,5 +574,10 @@ list.of.dts<- mapply(function(y, z)
 
   for(j in 1:2){
    k<- list.of.dts[j]%>%
+          kbl(caption=c("Dialysis", "Transplant")[j], booktabs=TRUE) %>% 
+          kable_styling()
+  print(k)     
+  }
+```    
       
 
