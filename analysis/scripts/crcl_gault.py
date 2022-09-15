@@ -18,6 +18,7 @@ with open(OUTPUT_DIR / "creatinine_vs_crlc.json", "w") as f:
     
 
 latest_crcl_calculated = df["cg"][df["cg"].notnull()]
+latest_crcl_calculated = latest_crcl_calculated/0.01131
 latest_crcl_recorded = df["creatinine_clearance_numeric_value"][df["creatinine_clearance_numeric_value"].notnull()
 ]
 
