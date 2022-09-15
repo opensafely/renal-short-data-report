@@ -28,6 +28,7 @@ actions:
     outputs:
       moderately_sensitive:
         plots: output/violi*.png
+        venn: output/venn*.png
         counts: output/creatinine_vs_crlc.json
 
   generate_study_population:
