@@ -1,11 +1,9 @@
 ---
-title: "Data for tables and figures"
+title: "PC and SC codes"
 author: "Shalini Santhakumaran"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
-
-This document describes the cohorts of patients prevalent to renal replacement therapy (RRT) at 1st January 2020, and incident to renal replacement therapy during 2020 using 3 sources of data: the UK Renal Registry (UKRR), primary care data from TPP practices (PC) and secondary care inpatient and outpatient data (SC).  
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -215,339 +213,84 @@ disclosure <-function(x, whichmargins=0){
   return(x)
 }
 
+#list of secondary care cod variables 
+SC_vars<-names(df)[grepl('proc_|diag_', names(df))]
+#list of variables with critical care info
+CC_vars<-names(df)[grepl('_cc_', names(df))]
+#create flag for cc vars
+CC_flags<-df[CC_vars]
+CC_flags[CC_flags>0]<-1
+
+
 ```
 
-# Section 1 Chacteristics of the study population
-##  Prevalent at 1/1/2020, by data source and modality
-### UKRR
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[df$ukrr_2019==1, demogs],
-    function(x) disclosure(table(x, df[df$ukrr_2019==1,]$ukrr_dtx, useNA="ifany"),2))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Prevalent UKRR", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
-### Primary care
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
-       function(x) disclosure(table(x, df[df$latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$latest_rrt_status, useNA="ifany"),2))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Prevalent primary care", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
-### Secondary care
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[df$latest_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
-       function(x) 
-         disclosure(
-           table(x, df[df$latest_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$latest_rrt_status_secondary, useNA="ifany")
-           ,2))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Prevalent secondary care", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
+  # Section 1 Codes for people on RRT according to primary care data but not the UKRR
+Below we look at what the most recent primary care codes are for these patients, by modality
+```{r, echo=FALSE, results='asis'}
 
-## Incident in 2020, by data source and modality
-### UKRR
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[df$ukrr_inc2020==1, demogs],
-       function(x) disclosure(table(x, df[df$ukrr_inc2020==1,]$ukrr_dtx_inc, useNA="ifany"),2))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Incident UKRR", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
+codes.table.3<-function(df, grouplist, status, codelist){
+  df %>%
+    filter(source_prev_rrt %in% grouplist & latest_rrt_status==status) %>%
+    group_by(latest_rrt_code)%>%
+    summarise(n=n()) %>%
+    left_join(codelist, by=setNames(names(codelist)[1], "latest_rrt_code")) %>%
+    mutate(latest_rrt_code= replace(latest_rrt_code, latest_rrt_code %in% c("", NA) , "Missing")) %>%
+      mutate(n=ifelse(n<=7,0,n)) %>% #first replace n<=7 with 0
+      mutate(n=round(n/5)*5) %>%  #round to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+        arrange(desc(n))  %>% #descending sort by n
+      mutate(n=ifelse(n<=5,"<=5",n)) #now replacing <=5 (which is now 0 anyway) with "<=5"
 }
-```
-### Primary care 
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[df$incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
-       function(x) disclosure(table(x, df[df$incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$incident_rrt_status, useNA="ifany"),2))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Incident primary care", demogs[i]), booktabs=TRUE) %>%
+
+list.of.dts<- mapply(function(y, z) 
+    codes.table.3(df, c("P", "PS") , y, z), 
+    c("Dialysis", "Transplant"),  all.codelists[1:2], SIMPLIFY=FALSE)
+
+  for(j in 1:2){
+   k<- list.of.dts[j]%>%
+          kbl(caption=c("Dialysis", "Transplant")[j], booktabs=TRUE) %>% 
           kable_styling()
-  print(k)
-}
-```
-
-### Secondary care
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[df$incident_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"), demogs],
-       function(x) disclosure(
-         table(x, df[df$incident_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown"),]$incident_rrt_status_secondary, useNA="ifany")
-         ,2))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Incident secondary care", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
-
-### add median age
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-
-med.age<-function(x){
-  x <- enquo(x)
-  df%>%
-    group_by(!!x)%>% 
-    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
-    spread(q, age)
+  print(k)     
   }
+```    
+And repeating for people who are in the UKRR, for reference
 
-  k<- med.age(ukrr_dtx) %>%
-          kbl(caption="Prevalent UKRR", booktabs=TRUE) %>%
+```{r, echo=FALSE, results='asis'}
+
+list.of.dts<- mapply(function(y, z) 
+    codes.table.3(df, c("UP", "UPS") , y, z), 
+    c("Dialysis", "Transplant"),  all.codelists[1:2], SIMPLIFY=FALSE)
+
+  for(j in 1:2){
+   k<- list.of.dts[j]%>%
+          kbl(caption=c("Dialysis", "Transplant")[j], booktabs=TRUE) %>% 
           kable_styling()
-  print(k)
+  print(k)     
+  }
+```   
 
-    k<- med.age(latest_rrt_status ) %>%
-          kbl(caption="Prevalent primary care", booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-  
-    k<- med.age(latest_rrt_status_secondary) %>%
-          kbl(caption="Prevalent secondary care", booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-
-```
-
-
-# Section 2 Overall agreement  
-
-Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.  
-
-## Prevalent at 1/1/2020, overall and by modality
-### All RRT
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_rrt, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Dialysis
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_dialysis, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Transplant
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_transplant, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-## Incident 2020, overall and by modality
-### All RRT
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_inc_rrt, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Dialysis
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_inc_dialysis, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Transplant
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_inc_transplant, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-
-# Section 3 Agreement by demographic characteristics
-## Prevalent at 1/1/2020, overall and by modality
-### All RRT
+ # Section 2 Secondary care codes for people on RRT according to secondary care data but not the UKRR
+This is done slightly differently as we have one variable per code
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[demogs], function(x) disclosure(table(x, df$source_prev_rrt, useNA="ifany"),0))
-#printing
+
+list.of.dts<-lapply(df[SC_vars], function(x) table(x, df$ukrr_2019, useNA="ifany"))
+
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Prevalent, all RRT", demogs[i]), booktabs=TRUE) %>%
+          kbl(caption=SC_vars[i], booktabs=TRUE) %>%
+          add_header_above(c("UKRR"=ncol(t)+1)) %>%
           kable_styling()
   print(k)
 }
 ```
-### Dialysis
+Now for each code, looking at critical care days x whether they are in UKRR
+
 ```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[demogs], function(x) disclosure(table(x, df$source_prev_dialysis, useNA="ifany"),0))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Prevalent dialysis", demogs[i]), booktabs=TRUE) %>%
+
+t<- t(as.matrix(apply(CC_flags, 2, function(x) table(factor(x, levels=0:1),df$ukrr_2019, useNA="ifany"))))
+  k<- t  %>%
+          kbl( booktabs=TRUE) %>%
           kable_styling()
   print(k)
-}
 ```
-### Transplant
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[demogs], function(x) disclosure(table(x, df$source_prev_transplant, useNA="ifany"),0))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Prevalent transplant", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
-## Incident 2020, overall and by modality
-### All RRT
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[demogs], function(x) disclosure(table(x, df$source_inc_rrt, useNA="ifany"),0))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Incident all RRT", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
-### Dialysis
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[demogs], function(x) disclosure(table(x, df$source_inc_dialysis, useNA="ifany"),0))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Incident dialysis", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
-### Transplant
-```{r, echo=FALSE, results='asis', error=TRUE}
-#create tables
-list.of.dts<-lapply(df[demogs], function(x) disclosure(table(x, df$source_inc_transplant, useNA="ifany"),0))
-#printing
-for(i in 1:length(list.of.dts)) {
-  k<- list.of.dts[[i]] %>%
-          kbl(caption=paste("Incident transplant", demogs[i]), booktabs=TRUE) %>%
-          kable_styling()
-  print(k)
-}
-```
-
-# Section 4  - Agreement of modality  
-
-Of people who are captured in UKRR and PC/SC, do the modalities agree?   
-
-## Prevalent 1/1/2020
-### UKRR and PC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status),0)
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Primary care" = 3)) %>%
-  kable_styling()
-print(k2)
-```
-### UKRR and SC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_prev_rrt %in% c("US", "UPS"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("US", "UPS"),]$incident_rrt_status_secondary),0) 
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-## incident 2020
-### UKRR and PC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_inc_rrt %in% c("UP", "UPS"),]$ukrr_dtx_inc,
-      df[df$source_inc_rrt %in% c("UP", "UPS"),]$incident_rrt_status),0)  
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-### UKRR and SC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_inc_rrt %in% c("US", "UPS"),]$ukrr_dtx_inc,
-      df[df$source_inc_rrt %in% c("US", "UPS"),]$incident_rrt_status_secondary),0)  
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-
-
-# Section 5 - CKD codes in PC/SC care for people in UKRR and not PC/SC, by modality  
-## Prevalent 1/1/2020
-### in UKRR and not PC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_prev_rrt %in% c("US", "U"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("US", "U"),]$latest_renal_status, exclude="Not on RRT")  ,0)
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-### in UKRR and not SC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "U"),]$ukrr_dtx,
-      df[df$source_prev_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary) ,0)
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-## Incident 2020
-These might not make much sense as they could have been incident before or after 2020 in PC/SC.
-### in UKRR and not PC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_inc_rrt %in% c("US", "U"),]$ukrr_dtx_inc,
-      df[df$source_inc_rrt %in% c("US", "U"),]$latest_renal_status),0)
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-### in UKRR and not SC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_inc_rrt %in% c("UP", "U"),]$ukrr_dtx_inc,
-      df[df$source_inc_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary),0) 
-k2<-k %>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-
- 
-
