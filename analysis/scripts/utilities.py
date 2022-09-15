@@ -294,7 +294,7 @@ def plot_measures(
 
             plt.plot(df_subset["date"], df_subset[column_to_plot])
     else:
-        if bar:
+        if as_bar:
             df.plot.bar("date", column_to_plot, legend=False)
         else:
             plt.plot(df["date"], df[column_to_plot])

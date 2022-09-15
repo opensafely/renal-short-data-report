@@ -89,7 +89,8 @@ for test in tests:
         subset = test_count.loc[test_count["value"].str.startswith(operator),:]
 
         subset = group_low_values(subset, "count", "value", 10)
- 
+        subset = subset.sort_values(by="count")
+    
         subset.to_csv(
             OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator}.csv"
         )

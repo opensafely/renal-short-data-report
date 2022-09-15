@@ -145,6 +145,7 @@ actions:
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv
+        operator_counts: output/*_count_*.csv
 
   generate_top_5_tables:
     run: python:latest python analysis/scripts/top_codes.py
@@ -215,12 +216,22 @@ actions:
   #    moderately_sensitive:
   #      report: output/notebooks/ukrr-report.html
        
-  #generate_ukrr_discrepancies:
-  #  run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #  needs: [join_cohorts]
-  #  outputs:
-  #    moderately_sensitive:
-  #      report: output/notebooks/ukrr-discrepancies.html
+
+  # generate_ukrr_discrepancies:
+  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+  #   needs: [join_cohorts]
+  #   outputs:
+  #     moderately_sensitive:
+  #       report: output/notebooks/ukrr-discrepancies.html
+
+  ukrr_vs_prim_care_ckd:
+    run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        upset: output/ukrr_overlap_stage.png
+        violin: output/violin_*.png
+
   
   # generate_kidney_week:
   #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/kidney_week.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
