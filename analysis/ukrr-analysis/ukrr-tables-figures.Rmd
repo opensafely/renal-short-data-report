@@ -165,6 +165,15 @@ df <- df %>%
                                      ukrr_dtx_inc!="Transplant" & 
                                       !(incident_rrt_status  =="Transplant") &
                                       incident_rrt_status_secondary =="Transplant" ~ "S"))
+
++# pick out latest RRT code for primary care
+df<-df %>%
+    mutate(latest_rrt_code = ifelse(latest_rrt_status=="None", "None",
+                                  ifelse(latest_rrt_status=="Dialysis", dialysis_code,
+                                      ifelse(latest_rrt_status=="Transplant", kidney_tx_code,
+                                             ifelse(latest_rrt_status=="RRT_unknown", RRT_code,"Uncategorised")))))
+
+
 # order factor
 source_levels<-c("UPS", "UP", "US", "PS", "U", "P", "S")
 df$source_prev_rrt<-factor(df$source_prev_rrt, levels=source_levels)
@@ -173,6 +182,11 @@ df$source_prev_transplant<-factor(df$source_prev_transplant, levels=source_level
 df$source_inc_rrt<-factor(df$source_inc_rrt, levels=source_levels)
 df$source_inc_dialysis<-factor(df$source_inc_dialysis, levels=source_levels)
 df$source_inc_transplant<-factor(df$source_inc_transplant, levels=source_levels)
+
+#read in codelists so we can tabulate the names
+dialysis_codelist<-unique(read.csv(here::here("codelists", "opensafely-dialysis.csv"))[,1:2])
+kidney_tx_codelist<-unique(read.csv(here::here("codelists", "opensafely-kidney-transplant.csv"))[,1:2])
+all.codelists<-list(dialysis_codelist, kidney_tx_codelist )
 
 
 # function to filter dataset to exclude patients with no RRT in either OS or UKRR as this is what we want to show pct by
@@ -519,5 +533,30 @@ k2<-k %>%
 print(k2)
 ```
 
-       
+  # Section 6 Codes for people on RRT according to primary care data but not the UKRR
+Below we look at what the most recent primary care codes are for these patients, by modality
+```{r, echo=FALSE, results='asis'}
+
+# Looking at median time since code
+codes.table.3<-function(df,status, codelist){
+  df %>%
+    filter(source_prev_rrt %in% c("P", "PS") & latest_rrt_status==status) %>%
+    group_by(latest_rrt_code)%>%
+    summarise(n=n()) %>%
+    left_join(codelist, by=setNames(names(codelist)[1], "latest_rrt_code")) %>%
+    mutate(latest_rrt_code= replace(latest_rrt_code, latest_rrt_code %in% c("", NA) , "Missing")) %>%
+      mutate(n=ifelse(n<=7,0,n)) %>% #first replace n<=7 with 0
+      mutate(n=round(n/5)*5) %>%  #round to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+        arrange(desc(n))  %>% #descending sort by n
+      mutate(n=ifelse(n<=5,"<=5",n)) #now replacing <=5 (which is now 0 anyway) with "<=5"
+}
+
+list.of.dts<- mapply(function(y, z) 
+    codes.table.3(df, y, z), 
+    c("Dialysis", "Transplant"),  all.codelists[1:2], SIMPLIFY=FALSE)
+
+  for(j in 1:2){
+   k<- list.of.dts[j]%>%
+      
 
