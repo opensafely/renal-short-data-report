@@ -14,9 +14,6 @@ for i in [
     "eGFR",
     "albumin",
     "acr",
-    "RRT",
-    "dialysis",
-    "kidney_tx",
     "ckd",
     "ckd_primis_1_5",
 ]:
