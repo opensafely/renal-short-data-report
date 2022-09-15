@@ -10,7 +10,7 @@ from variable_definitions.incident_variables import incident_variables
 from scripts.variables import demographics
 from codelists import *
 
-+def loop_over_proc_codes(code_list):
+def loop_over_proc_codes(code_list):
 
     def make_variable(code):
         #removing . from variable name

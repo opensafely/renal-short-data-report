@@ -166,7 +166,7 @@ df <- df %>%
                                       !(incident_rrt_status  =="Transplant") &
                                       incident_rrt_status_secondary =="Transplant" ~ "S"))
 
-+# pick out latest RRT code for primary care
+# pick out latest RRT code for primary care
 df<-df %>%
     mutate(latest_rrt_code = ifelse(latest_rrt_status=="None", "None",
                                   ifelse(latest_rrt_status=="Dialysis", dialysis_code,
