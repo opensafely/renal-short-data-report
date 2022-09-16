@@ -99,8 +99,7 @@ def loop_over_diag_codes_prev(code_list):
         variables.update(make_variable(code))
     return variables
 
- #and for incident codes
- def loop_over_proc_codes_inc(code_list):
+def loop_over_proc_codes_inc(code_list):
 
     def make_variable(code):
         #removing . from variable name

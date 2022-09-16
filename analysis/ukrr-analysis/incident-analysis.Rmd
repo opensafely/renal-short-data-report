@@ -26,19 +26,19 @@ demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "a
  df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
 
 #getting year of start for incident start dates
-inc_year_pc<-as.numeric(substr(df_main$incident_rrt_date,1,4))
-inc_year_sc<-as.numeric(substr(df_main$incident_rrt_date_secondary,1,4))
+inc_year_pc<-as.numeric(substr(df$incident_rrt_date,1,4))
+inc_year_sc<-as.numeric(substr(df$incident_rrt_date_secondary,1,4))
 #ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
 #will be consistent as we only have one start date per patient in the data that was sent
-inc_year_ukrr<-as.numeric(substr(df_main$ukrr_inc2020_date,1,4))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2019_startdate,1,4))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2020_startdate,1,4))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2021_startdate,1,4))
+inc_year_ukrr<-as.numeric(substr(df$ukrr_inc2020_date,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df$ukrr_2019_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df$ukrr_2020_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df$ukrr_2021_startdate,1,4))
  
 
 #add variable for dialysis/tx for UKRR
 df<- df %>%
-  mutate(ukrr_dtx_inc = ifelse(ukrr_inc2020_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_inc2020_mod == "Tx", "Transplant", "Not on RRT"))) %>%
+  mutate(ukrr_dtx_inc = ifelse(ukrr_inc2020_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_inc2020_mod == "Tx", "Transplant", "Not on RRT"))) 
 # order factor
 df$ukrr_dtx_inc<-factor(df$ukrr_dtx_inc, levels=c("Not on RRT", "Dialysis", "Transplant"))
 
