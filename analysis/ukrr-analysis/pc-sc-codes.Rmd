@@ -321,15 +321,18 @@ for(i in 1:length(list.of.dts)) {
   print(k)
 }
 ```
+
 Now for each code, looking at critical care days x whether they are in UKRR
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-t<- apply(CC_flags_prev, 2, function(x) disclosure(table(factor(x, levels=0:1),df$ukrr_2019, useNA="ifany")))
-  k<- t  %>%
-          kbl( booktabs=TRUE) %>%
+list.of.dts<- lapply(CC_flags_prev, function(x) disclosure(table(factor(x, levels=0:1),df$ukrr_2019)))
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=SC_vars_prev[i],  booktabs=TRUE) %>%
           kable_styling()
   print(k)
+}
 ```
 
 
@@ -408,7 +411,7 @@ for(i in 1:length(list.of.dts)) {
 }
 ```
 
-Now for each code, looking at critical care days x whether they are in UKRR
+Now for each code, looking at critical care days 
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
