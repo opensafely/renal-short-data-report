@@ -20,11 +20,29 @@ demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "a
 #read in dataset
 #pick up 1st Jan cohort as latest renal status is on or before index date
  df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
+
+#getting year of start for incident start dates
+inc_year_pc<-as.numeric(substr(df_main$incident_rrt_date,1,4))
+inc_year_sc<-as.numeric(substr(df_main$incident_rrt_date_secondary,1,4))
+#ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
+#will be consistent as we only have one start date per patient in the data that was sent
+inc_year_ukrr<-as.numeric(substr(df_main$ukrr_inc2020_date,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2019_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2020_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2021_startdate,1,4))
  
  #only keep incident data for 2020 for PC and SC
 df<-df %>%
   mutate(incident_rrt_status=ifelse(grepl("2020",incident_rrt_date), incident_rrt_status, "" )) %>%
   mutate(incident_rrt_status_secondary=ifelse(grepl("2020",incident_rrt_date_secondary), incident_rrt_status_secondary, "" ))
+
+#find nearest event to UKRR start date
+df<-df%>%
+  mutate(nearest_rrt_code = ifelse(ukrr_inc2020==0, "Not inc in UKRR,
+                          ifelse(next_before_allRRT=="" and next_after_allRRT=="", "No events",
+                            ifelse(next_before_allRRT=="", next_after_allRRT,
+                                ifelse(next_after_allRRT=="", next_before_allRRT,
+                                  ifelse(ukrr_inc2020_date - next_before_allRRT_date < next_after_allRRT_date - ukrr_inc2020_date, next_before_allRRT_date, next_after_allRRT_date))))))
 
 #add variable for dialysis/tx for UKRR
 df<- df %>%
@@ -171,6 +189,14 @@ df<-df %>%
                                       ifelse(latest_rrt_status=="Transplant", kidney_tx_code,
                                              ifelse(latest_rrt_status=="RRT_unknown", RRT_code,"Uncategorised")))))
 
+# pick out incident RRT code for primary care
+df<-df %>%
+    mutate(incident_rrt_code = ifelse(incident_rrt_status=="None", "None",
+                                  ifelse(incident_rrt_status=="Dialysis", dialysis_code,
+                                      ifelse(incident_rrt_status=="Transplant", kidney_tx_code,
+                                             ifelse(incident_rrt_status=="RRT_unknown", RRT_code,"Uncategorised")))))
+
+
 
 # order factor
 source_levels<-c("UPS", "UP", "US", "PS", "U", "P", "S")
@@ -213,22 +239,29 @@ disclosure <-function(x, whichmargins=0){
   return(x)
 }
 
-#list of secondary care cod variables 
-SC_vars<-names(df)[grepl('proc_|diag_', names(df))]
+#list of secondary care code variables for prevalent
+SC_vars_prev<-names(df)[grepl('_procp_|_diagp_', names(df))]
 #list of variables with critical care info
-CC_vars<-names(df)[grepl('_cc_', names(df))]
+CC_vars_prev<-names(df)[grepl('_ccp_', names(df))]
 #create flag for cc vars
-CC_flags<-df[CC_vars]
-CC_flags[CC_flags>0]<-1
+CC_flags_prev<-df[CC_vars_prev]
+CC_flags_prev[CC_flags_prev>0]<-1
 
+#list of secondary care code variables for incident
+SC_vars_inc<-names(df)[grepl('_proci_|_diagi_', names(df))]
+#list of variables with critical care info
+CC_vars_inc<-names(df)[grepl('_cci_', names(df))]
+#create flag for cc vars
+CC_flags_inc<-df[CC_vars_inc]
+CC_flags_inc[CC_flags_inc>0]<-1
 
 ```
 
-  # Section 1 Codes for people on RRT according to primary care data but not the UKRR
+  # Section 1 PC codes for people prevalent to RRT according to primary care data but not the UKRR
 Below we look at what the most recent primary care codes are for these patients, by modality
 ```{r, echo=FALSE, results='asis'}
 
-codes.table.3<-function(df, grouplist, status, codelist){
+codes.table<-function(df, grouplist, status, codelist){
   df %>%
     filter(source_prev_rrt %in% grouplist & latest_rrt_status==status) %>%
     group_by(latest_rrt_code)%>%
@@ -243,7 +276,7 @@ codes.table.3<-function(df, grouplist, status, codelist){
 }
 
 list.of.dts<- mapply(function(y, z) 
-    codes.table.3(df, c("P", "PS") , y, z), 
+    codes.table(df, c("P", "PS") , y, z), 
     c("Dialysis", "Transplant"),  all.codelists[1:2], SIMPLIFY=FALSE)
 
   for(j in 1:2){
@@ -269,16 +302,16 @@ list.of.dts<- mapply(function(y, z)
   }
 ```   
 
- # Section 2 Secondary care codes for people on RRT according to secondary care data but not the UKRR
+ # Section 2 Secondary care codes for people prevalent to RRT according to secondary care data by whether or not they are prevalent in the UKRR
 This is done slightly differently as we have one variable per code
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-list.of.dts<-lapply(df[SC_vars], function(x) table(x, df$ukrr_2019, useNA="ifany"))
+list.of.dts<-lapply(df[SC_vars_prev], function(x) disclosure(table(x, df$ukrr_2019, useNA="ifany")))
 
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
-          kbl(caption=SC_vars[i], booktabs=TRUE) %>%
+          kbl(caption=SC_vars_prev[i], booktabs=TRUE) %>%
           add_header_above(c("UKRR"=ncol(t)+1)) %>%
           kable_styling()
   print(k)
@@ -288,7 +321,91 @@ Now for each code, looking at critical care days x whether they are in UKRR
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-t<- t(as.matrix(apply(CC_flags, 2, function(x) table(factor(x, levels=0:1),df$ukrr_2019, useNA="ifany"))))
+t<- t(as.matrix(apply(CC_flags_prev, 2, function(x) disclosure(table(factor(x, levels=0:1),df$ukrr_2019, useNA="ifany")))))
+  k<- t  %>%
+          kbl( booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+```
+
+
+# Section 3 - Nearest primary care code for UKRR incident starters (within 3 months of UKRR start date)
+```{r, echo=FALSE, results='asis'}
+
+codes.table.2<-function(df, modality){
+  df %>%
+    filter(ukrr_inc2020==1 & ukrr_inc2020_mod %in% modality) %>%
+    group_by(nearest_rrt_code)%>%
+    summarise(n=n()) %>%
+    mutate(nearest_rrt_code= replace(nearest_rrt_code, nearest_rrt_code %in% c("", NA) , "Missing")) %>%
+      mutate(n=ifelse(n<=7,0,n)) %>% #first replace n<=7 with 0
+      mutate(n=round(n/5)*5) %>%  #round to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+        arrange(desc(n))  %>% #descending sort by n
+      mutate(n=ifelse(n<=5,"<=5",n)) #now replacing <=5 (which is now 0 anyway) with "<=5"
+}
+
+   k<- codes.table.2(df, c("ICHD", "HD", "HHD", "PD")) %>%
+          kbl(caption="Nearest PC code within 3 months for people incident to dialysis in the UKRR in 2020" , booktabs=TRUE) %>% 
+          kable_styling()
+  print(k)     
+
+     k<- codes.table.2(df, c("Tx", "Transplant")) %>%
+          kbl(caption="Nearest PC code within 3 months for people incident to transplant in the UKRR in 2020" , booktabs=TRUE) %>% 
+          kable_styling()
+  print(k)    
+  
+```   
+
+# Section 4 - Look at PC codes for people starting in 2020 in PC not in UKRR at all
+```{r, echo=FALSE, results='asis'}
+
+codes.table.2<-function(df, status, codelist){
+  df %>%
+    filter(inc_year_pc==2020  & is.na(inc_year_ukrr)) %>%
+    group_by(incident_rrt_code)%>%
+    summarise(n=n()) %>%
+    left_join(codelist, by=setNames(names(codelist)[1], "incident_rrt_code")) %>%
+    mutate(incident_rrt_code= replace(incident_rrt_code, incident_rrt_code %in% c("", NA) , "Missing")) %>%
+      mutate(n=ifelse(n<=7,0,n)) %>% #first replace n<=7 with 0
+      mutate(n=round(n/5)*5) %>%  #round to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+        arrange(desc(n))  %>% #descending sort by n
+      mutate(n=ifelse(n<=5,"<=5",n)) #now replacing <=5 (which is now 0 anyway) with "<=5"
+}
+
+list.of.dts<- mapply(function(y, z) 
+    codes.table.2(df , y, z), 
+    c("Dialysis", "Transplant"),  all.codelists[1:2], SIMPLIFY=FALSE)
+
+  for(j in 1:2){
+   k<- list.of.dts[j]%>%
+          kbl(caption=c("Dialysis", "Transplant")[j], booktabs=TRUE) %>% 
+          kable_styling()
+  print(k)     
+  }
+```    
+
+# Section 5 - Look at SC codes for people starting in 2020 in SC not in UKRR at all
+This is done slightly differently as we have one variable per code
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+list.of.dts<-lapply(df[SC_vars_inc], function(x) disclosure(table(x[is.na(inc_year_ukrr)])))
+
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=SC_vars_inc[i], booktabs=TRUE) %>%
+          add_header_above(c("UKRR"=ncol(t)+1)) %>%
+          kable_styling()
+  print(k)
+}
+```
+Now for each code, looking at critical care days x whether they are in UKRR
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+t<- t(as.matrix(apply(CC_flags_inc, 2, function(x) disclosure(table(factor(x[is.na(inc_year_ukrr)], levels=0:1))))))
   k<- t  %>%
           kbl( booktabs=TRUE) %>%
           kable_styling()

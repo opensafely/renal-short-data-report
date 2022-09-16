@@ -18,6 +18,17 @@ incident_variables = dict(
         },
     ),
 
+    earliest_RRT_code=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        between=["1901-01-01", "2022-01-01"],
+        returning="code",
+        find_first_match_in_period=True,
+        return_expectations={
+            "incidence": 0.2,
+            "category": {"ratios": {"14S2.": 0.5, "7A600": 0.5}},
+        },
+    ),
+
 
     # dialysis 
     earliest_dialysis=patients.with_these_clinical_events(
@@ -30,6 +41,17 @@ incident_variables = dict(
         return_expectations={
             "incidence": 0.2,
             "date": {"earliest": "1901-01-01", "latest": "today"},
+        },
+    ),
+
+    earliest_dialysis_code=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        between=["1901-01-01", "2022-01-01"],
+        returning="code",
+        find_first_match_in_period=True,
+        return_expectations={
+            "incidence": 0.2,
+            "category": {"ratios": {"7A602": 0.5, "7A600": 0.5}},
         },
     ),
 
@@ -46,6 +68,18 @@ incident_variables = dict(
             "date": {"earliest": "1901-01-01", "latest": "today"},
         },
     ),
+
+    earliest_kidney_tx_code=patients.with_these_clinical_events(
+        codelist=kidney_tx_codelist,
+        between=["1901-01-01", "2022-01-01"],
+       returning="code",
+        find_first_match_in_period=True,
+        return_expectations={
+            "incidence": 0.2,
+            "category": {"ratios": {"14S2.": 0.5, "7B00.": 0.5}},
+        },
+    ),
+
 
     incident_rrt_date=patients.minimum_of(
         "earliest_dialysis_date", "earliest_kidney_tx_date", "earliest_RRT_date"

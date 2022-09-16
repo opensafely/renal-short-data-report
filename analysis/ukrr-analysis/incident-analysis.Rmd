@@ -1,0 +1,132 @@
+---
+title: "Analysis of incident patients"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+This document describes the cohorts of incident to renal replacement therapy during 2020 using 3 sources of data: the UK Renal Registry (UKRR), primary care data from TPP practices (PC) and secondary care inpatient and outpatient data (SC).  
+Done separately to the rest of the analyis as we want to look at primary care data up to the end of 2020
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "at_risk", "region")
+
+#read in dataset
+# Considered picking up 1/1/2021 cohort but then we won't have anyone who died in 2020
+#instead do a separate analysis of the nearest event  
+ df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
+
+#getting year of start for incident start dates
+inc_year_pc<-as.numeric(substr(df_main$incident_rrt_date,1,4))
+inc_year_sc<-as.numeric(substr(df_main$incident_rrt_date_secondary,1,4))
+#ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
+#will be consistent as we only have one start date per patient in the data that was sent
+inc_year_ukrr<-as.numeric(substr(df_main$ukrr_inc2020_date,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2019_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2020_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df_main$ukrr_2021_startdate,1,4))
+ 
+
+#add variable for dialysis/tx for UKRR
+df<- df %>%
+  mutate(ukrr_dtx_inc = ifelse(ukrr_inc2020_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_inc2020_mod == "Tx", "Transplant", "Not on RRT"))) %>%
+# order factor
+df$ukrr_dtx_inc<-factor(df$ukrr_dtx_inc, levels=c("Not on RRT", "Dialysis", "Transplant"))
+
+
+#read in codelists so we can tabulate the names
+dialysis_codelist<-unique(read.csv(here::here("codelists", "opensafely-dialysis.csv"))[,1:2])
+kidney_tx_codelist<-unique(read.csv(here::here("codelists", "opensafely-kidney-transplant.csv"))[,1:2])
+all.codelists<-list(dialysis_codelist, kidney_tx_codelist )
+
+
+# function to filter dataset to exclude patients with no RRT in either OS or UKRR as this is what we want to show pct by
+keepRRT<-function(x){
+  filter(x , ukrr_prev==1 | latest_renal_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+}
+keepRRT_nockd<-function(x){
+  filter(x , ukrr_prev==1 | latest_rrt_status %in% c("Dialysis", "Transplant", "RRT_unknown"))
+}
+
+#apply disclosure control to a table - redact if less than 7, then round to nearest 5
+disclosure <-function(x, whichmargins=0){
+  redact <- x<=7  #flag redacted values for later
+  x[redact] <- 0  # set redacted to 0
+  x<-round(x/5)*5 # round to nearest 5
+  if(whichmargins!=0){
+    x<-addmargins(x,whichmargins) #add totals
+  }
+  if(whichmargins==1){
+    redact<-rbind(redact, rep(FALSE,ncol(redact))) #add extra row to redaction, otherwise won't blank correctly
+  }
+  if(whichmargins==2){
+    redact<-cbind(redact, rep(FALSE,nrow(redact))) #add extra col to redaction, otherwise won't blank correctly
+  }
+  x[redact]<-"<=7"  # flag redacted values
+  return(x)
+}
+
+```
+
+# Section 1 - Compare incident start dates in PC, SC and UKRR
+Use this output to look at PC/SC start dates for people starting in 2020 in the UKRR, and for UKRR start dates for people starting in PC/SC in 2020.
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+  
+t<-disclosure(table(inc_year_sc, inc_year_ukrr, useNA="ifany"))
+  k<- t %>%
+          kbl(caption="SC start date and UKRR start date", booktabs=TRUE) %>%
+          add_header_above(c("Inc year SC", "Inc year UKRR"=ncol(t))) %>%
+          kable_styling()
+  print(k)
+  
+t<-disclosure(table(inc_year_pc, inc_year_ukrr, useNA="ifany"))
+  k<- t %>%
+          kbl(caption="PC start date and UKRR start date", booktabs=TRUE) %>%
+          add_header_above(c("Inc year PC", "Inc year UKRR"=ncol(t))) %>%
+          kable_styling()
+  print(k)
+
+t<-disclosure(table(inc_year_pc, inc_year_sc, useNA="ifany"))
+  k<- t %>%
+          kbl(caption="PC start date and UKRR start date", booktabs=TRUE) %>%
+          add_header_above(c("Inc year PC", "Inc year SC"=ncol(t))) %>%
+          kable_styling()
+  print(k)
+
+```
+
+# Section 2 - Look at CKD status at the start of 2020 for people starting in 2020 in UKRR who are not incident in PC/SC at all
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+# note that in this Rmd file incident_rrt_status refers to the incident status whenever they started, not just in 2020 like in other programs
+k<-disclosure(table(df[df$ukrr_inc2020==1 & df$incident_rrt_status=="None",]$ukrr_dtx_inc,
+      df[df$ukrr_inc2020==1 & df$incident_rrt_status=="None",]$latest_renal_status),0)
+k2<-k%>%
+  kbl(caption="Latest CKD status at start of 2020 for people not incident in PC at all") %>%
+  add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+
+
+k<-disclosure(table(df[df$ukrr_inc2020==1  & df$incident_rrt_status_secondary=="None",]$ukrr_dtx_inc,
+      df[df$ukrr_inc2020==1  & df$incident_rrt_status_secondary=="None",]$latest_ckd_status_secondary),0) 
+k2<-k %>%
+  kbl(caption="Latest CKD status at start of 2020 for people not incident in SC at all") %>%
+  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+
+```
+
+
+

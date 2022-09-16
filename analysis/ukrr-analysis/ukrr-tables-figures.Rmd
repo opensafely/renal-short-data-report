@@ -526,28 +526,7 @@ k2<-k%>%
   kable_styling()
 print(k2)
 ```
-## Incident 2020
-These might not make much sense as they could have been incident before or after 2020 in PC/SC.
-### in UKRR and not PC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_inc_rrt %in% c("US", "U"),]$ukrr_dtx_inc,
-      df[df$source_inc_rrt %in% c("US", "U"),]$latest_renal_status),0)
-k2<-k%>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Primary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
-### in UKRR and not SC
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<-disclosure(table(df[df$source_inc_rrt %in% c("UP", "U"),]$ukrr_dtx_inc,
-      df[df$source_inc_rrt %in% c("UP", "U"),]$latest_ckd_status_secondary),0) 
-k2<-k %>%
-  kbl() %>%
-  add_header_above(c("UKRR", "Secondary care" = ncol(k))) %>%
-  kable_styling()
-print(k2)
-```
+
 
  
 
