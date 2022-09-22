@@ -169,7 +169,7 @@ for d in ["age_band", "ethnicity", "sex"]:
 
 
 for test in tests:
-    print(f"TEST: {test")
+    print(f"TEST: {test}")
     df_ckd_stage = pd.read_csv(
         OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
         parse_dates=["date"],
