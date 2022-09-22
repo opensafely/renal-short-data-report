@@ -320,7 +320,7 @@ def plot_measures(
     plt.tight_layout()
 
     plt.savefig(OUTPUT_DIR / f"figures/{filename}.jpeg")
-    plt.clf()
+    plt.close()
 
 
 def group_low_values_series(series):
