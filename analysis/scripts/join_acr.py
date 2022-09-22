@@ -14,7 +14,7 @@ for file in (OUTPUT_DIR / "joined").iterdir():
         # keep the new acr values.
         merged_df = merged_df.drop([
             "acr_x",
-            "acr_date_x"
+            "acr_date_x",
             "acr_code_x",
             "acr_count_x",
             "acr_numeric_value_x",
