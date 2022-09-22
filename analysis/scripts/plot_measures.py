@@ -166,6 +166,8 @@ for d in ["age_band", "ethnicity", "sex"]:
 
 
 for test in tests:
+    print(f"TEST: {test}")
+
 
     # single reduced egfr
     df = pd.read_csv(
@@ -187,10 +189,6 @@ for test in tests:
         as_bar=False,
     )
 
-
-
-
-
     df_ckd_stage = pd.read_csv(
         OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
         parse_dates=["date"],
@@ -200,7 +198,7 @@ for test in tests:
     df_ckd_stage_egfr = df_ckd_stage.groupby(by=["ckd_egfr_category", "date"])[[test, "population"]].sum().reset_index()
     df_ckd_stage_egfr["rate"] = (df_ckd_stage_egfr[test]/df_ckd_stage_egfr["population"]) * 100
     
-    # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
+    df_ckd_stage_egfr = df_ckd_stage_egfr.replace(np.inf, np.nan)
     df_ckd_stage_egfr = redact_small_numbers(
         df_ckd_stage_egfr, 10,test, "population", "rate", "date"
     )
