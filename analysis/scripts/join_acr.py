@@ -22,4 +22,4 @@ for file in (OUTPUT_DIR / "joined").iterdir():
             ], axis=1)
         merged_df = merged_df.rename(columns={"acr_y": "acr", "acr_date_y": "acr_date","acr_code_y": "acr_code", "acr_count_y": "acr_count", "acr_numeric_value_y": "acr_numeric_value", "acr_operator_y": "acr_operator"})
 
-        merged_df.to_csv(OUTPUT_DIR / "joined" / file.name)
+        merged_df.to_csv(OUTPUT_DIR / "joined" / file.name, index=False)
