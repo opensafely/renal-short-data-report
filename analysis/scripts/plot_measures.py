@@ -14,9 +14,6 @@ for i in [
     "eGFR",
     "albumin",
     "acr",
-    "RRT",
-    "dialysis",
-    "kidney_tx",
     "ckd",
     "ckd_primis_1_5",
 ]:
@@ -170,6 +167,28 @@ for d in ["age_band", "ethnicity", "sex"]:
 
 for test in tests:
     print(f"TEST: {test}")
+
+
+    # single reduced egfr
+    df = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_{test}_single_egfr_population_rate.csv",
+        parse_dates=["date"],
+    )
+
+    df = df.loc[df["single_egfr"]==1,:]
+    redact_small_numbers(
+        df, 10,test, "population", "value", "date"
+    )
+    
+    plot_measures(
+        df=df,
+        filename=f"plot_single_reduced_egfr_{test}",
+        title=f"",
+        column_to_plot="value",
+        y_label="Proportion",
+        as_bar=False,
+    )
+
     df_ckd_stage = pd.read_csv(
         OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
         parse_dates=["date"],
@@ -214,6 +233,8 @@ for test in tests:
         as_bar=False,
         category="ckd_acr_category",
     )
+
+
 
 
 

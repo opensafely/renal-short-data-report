@@ -20,7 +20,7 @@ fs::dir_create(here::here("output", "notebooks"))
 
 #read in dataset
 #pick up 1st Jan cohort as latest renal status is on or before index date
- df<-read.csv(here::here("output", "joined", "input_2020-01-01.csv.gz")) 
+ df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
  
 #add variable for dialysis/tx for UKRR
 df<- df %>%

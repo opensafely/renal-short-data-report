@@ -22,12 +22,14 @@ actions:
       highly_sensitive:
         counts: output/input_calculators_calculated.csv.gz
 
-  generate_notebook_crcl:
-    run: jupyter:latest jupyter nbconvert /workspace/analysis/scripts/crcl_gault.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
+  crcl_gault:
+    run: python:latest python analysis/scripts/crcl_gault.py
     needs: [calculate_calculators]
     outputs:
       moderately_sensitive:
-        notebook: output/crcl_gault.html
+        plots: output/violi*.png
+        venn: output/venn*.png
+        counts: output/creatinine_vs_crlc.json
 
   generate_study_population:
     run: cohortextractor:latest generate_cohort
@@ -90,6 +92,36 @@ actions:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
 
+  generate_study_population_ukrr:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_ukrr
+      --index-date-range "2020-01-01"
+      --output-format csv.gz
+      --with-end-date-fix
+    outputs:
+      highly_sensitive:
+        cohort: output/ukrr/input_ukrr*.csv.gz
+
+  generate_study_population_ukrr_1:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_ukrr
+      --index-date-range "2021-01-01"
+      --output-format csv.gz
+      --with-end-date-fix
+    outputs:
+      highly_sensitive:
+        cohort: output/ukrr/input_ukr*.csv.gz
+
+  generate_study_population_ukrr_2:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_ukrr
+      --index-date-range "2022-01-01"
+      --output-format csv.gz
+      --with-end-date-fix
+    outputs:
+      highly_sensitive:
+        cohort: output/ukrr/input_uk*.csv.gz
+
   generate_study_population_paeds:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_paeds
@@ -115,6 +147,7 @@ actions:
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv
+        operator_counts: output/*_count_*.csv
 
   generate_top_5_tables:
     run: python:latest python analysis/scripts/top_codes.py
@@ -142,7 +175,6 @@ actions:
         measure_csv: output/joined/measure_*_rate.csv
         
   
-
   generate_plots:
     run: python:latest python analysis/scripts/plot_measures.py
     needs: [generate_measures]
@@ -172,26 +204,36 @@ actions:
   #     moderately_sensitive:
   #       notebook: output/report.html
 
-  generate_ukrr_checks:
-    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-checks.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [generate_study_population, generate_study_population_ukrr_ethnicity]
-    outputs:
-      moderately_sensitive:
-        report: output/notebooks/ukrr-checks.html
+  # generate_ukrr_checks:
+  #  run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-checks.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+  #  needs: [generate_study_population, generate_study_population_ukrr_ethnicity]
+  #  outputs:
+  #    moderately_sensitive:
+  #      report: output/notebooks/ukrr-checks.html
 
-  generate_ukrr_report:
-    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-report.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        report: output/notebooks/ukrr-report.html
+  #generate_ukrr_report:
+  #  run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-report.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+  #  needs: [join_cohorts]
+  #  outputs:
+  #    moderately_sensitive:
+  #      report: output/notebooks/ukrr-report.html
        
-  generate_ukrr_discrepancies:
-    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+
+  # generate_ukrr_discrepancies:
+  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-discrepancies.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+  #   needs: [join_cohorts]
+  #   outputs:
+  #     moderately_sensitive:
+  #       report: output/notebooks/ukrr-discrepancies.html
+
+  ukrr_vs_prim_care_ckd:
+    run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        report: output/notebooks/ukrr-discrepancies.html
+        upset: output/ukrr_overlap_stage.png
+        violin: output/violin_*.png
+
   
   # generate_kidney_week:
   #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/kidney_week.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
@@ -202,17 +244,24 @@ actions:
   
   generate_ukrr_tables_figures:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [join_cohorts]
+    needs: [generate_study_population_ukrr]
     outputs:
       moderately_sensitive:
         report: output/notebooks/ukrr-tables-figures.html
 
-  generate_ukrr_tables_figures_paeds:
-    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures-paeds.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [generate_study_population_paeds]
+  generate_pc_sc_codes:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
     outputs:
       moderately_sensitive:
-        report: output/notebooks/ukrr-tables-figures-paeds.html
+        report: output/notebooks/pc-sc-codes.html
+
+#  generate_ukrr_tables_figures_paeds:
+#    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures-paeds.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+#    needs: [generate_study_population_paeds]
+#    outputs:
+#      moderately_sensitive:
+#        report: output/notebooks/ukrr-tables-figures-paeds.html
   
   generate_check_SC:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/check-SC.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
@@ -223,14 +272,23 @@ actions:
 
   generate_modality_difference_table:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/modality-difference-table.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-    needs: [join_cohorts]
+    needs: [generate_study_population_ukrr]
     outputs:
       moderately_sensitive:
         report: output/notebooks/modality-difference-table.html
+
+  generate_incident_analysis:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/incident-analysis.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/incident-analysis.html
+        
+  generate_study_population_flowchart:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_flowchart
+      --output-format csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/input_flowchart.csv.gz
   
- # generate_frequency_plots:
- #   run: r:latest analysis/test_frequency.R
- #   needs: [join_cohorts_ethnicity]
- #   outputs:
- #     moderately_sensitive:
- #       figures: output/figures/months_with_*.png
