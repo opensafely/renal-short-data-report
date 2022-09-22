@@ -1,12 +1,12 @@
 from cohortextractor import codelist, codelist_from_csv, combine_codelists
 
 acr_codelist = codelist_from_csv(
-    "codelists/ukrr-albumin-tests.csv",
+    "codelists/ukrr-albumin-creatinine-ratio-acr-tests.csv",
     system="snomed",
     column="code",
 )
 acr_level_codelist = codelist_from_csv(
-    "codelists/ukrr-albumin-tests-level.csv",
+    "codelists/ukrr-albumin-creatinine-ratio-acr-tests-level.csv",
     system="snomed",
     column="code",
 )
