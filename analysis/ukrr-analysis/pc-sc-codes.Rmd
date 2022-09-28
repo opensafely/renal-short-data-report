@@ -241,21 +241,6 @@ disclosure <-function(x, whichmargins=0){
   return(x)
 }
 
-#list of secondary care code variables for prevalent
-SC_vars_prev<-names(df)[grepl('_procp_|_diagp_', names(df))]
-#list of variables with critical care info
-CC_vars_prev<-names(df)[grepl('_ccp_', names(df))]
-#create flag for cc vars
-CC_flags_prev<-df[CC_vars_prev]
-CC_flags_prev[CC_flags_prev>0]<-1
-
-#list of secondary care code variables for incident
-SC_vars_inc<-names(df)[grepl('_proci_|_diagi_', names(df))]
-#list of variables with critical care info
-CC_vars_inc<-names(df)[grepl('_cci_', names(df))]
-#create flag for cc vars
-CC_flags_inc<-df[CC_vars_inc]
-CC_flags_inc[CC_flags_inc>0]<-1
 
 ```
 
