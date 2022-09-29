@@ -1,5 +1,5 @@
 ---
-title: "PC and SC codes 1"
+title: "PC and SC codes 1a"
 author: "Shalini Santhakumaran"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
@@ -261,7 +261,7 @@ CC_flags_inc[CC_flags_inc>0]<-1
 
 # Section 1 PC codes for people prevalent to RRT according to primary care data but not the UKRR
 
-Below we look at what the most recent primary care codes are for these patients, by modality
+1A Below we look at what the most recent primary care codes are for these patients, by modality
 
 ```{r, echo=FALSE, results='asis'}
 
@@ -290,19 +290,3 @@ list.of.dts<- mapply(function(y, z)
   print(k)     
   }
 ```    
-And repeating for people who are in the UKRR, for reference
-
-```{r, echo=FALSE, results='asis'}
-
-list.of.dts<- mapply(function(y, z) 
-    codes.table(df, c("UP", "UPS") , y, z), 
-    c("Dialysis", "Transplant"),  all.codelists[1:2], SIMPLIFY=FALSE)
-
-  for(j in 1:2){
-   k<- list.of.dts[j]%>%
-          kbl(caption=c("Dialysis", "Transplant")[j], booktabs=TRUE) %>% 
-          kable_styling()
-  print(k)     
-  }
-```   
-
