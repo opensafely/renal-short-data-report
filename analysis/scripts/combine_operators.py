@@ -88,7 +88,7 @@ for test in tests:
     for operator in ["<", ">", "<=", ">=", "~", "="]:
         subset = test_count.loc[test_count["value"].str.startswith(operator),:]
 
-        subset = group_low_values(subset, "count", "value", 10)
+        subset = group_low_values(subset, "count", "value", 7, 5)
         subset = subset.sort_values(by="count")
     
         subset.to_csv(
