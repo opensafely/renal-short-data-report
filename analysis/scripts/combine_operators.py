@@ -8,9 +8,8 @@ from utilities import (
     match_input_files,
     get_date_input_file,
     combine_value_with_operator,
-    group_low_values,
-    group_low_values_series,
 )
+from redaction_utils import (group_low_values,group_low_values_series)
 
 numeric_value_operator_counts = {}
 numeric_value_counts = {}

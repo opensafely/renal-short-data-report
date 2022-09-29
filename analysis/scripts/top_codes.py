@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
-from utilities import create_top_5_code_table, write_csv, round_values ,OUTPUT_DIR
+from utilities import create_top_5_code_table, write_csv,OUTPUT_DIR
+from redaction_utils import round_values
 from variables import tests
 
 codelist_dict = {

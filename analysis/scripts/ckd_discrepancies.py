@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-from utilities import OUTPUT_DIR, plot_violin_numeric_value, drop_and_round
+from utilities import OUTPUT_DIR, plot_violin_numeric_value
+from redaction_utils import drop_and_round
 from upsetplot import plot as upset_plot
 
 df = pd.read_csv(OUTPUT_DIR / "joined/input_2022-07-01.csv.gz")
