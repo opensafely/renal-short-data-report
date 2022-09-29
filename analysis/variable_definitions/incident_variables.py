@@ -86,7 +86,7 @@ incident_variables = dict(
         ),
 
 
-#Picking most recent status
+#Picking incident status
 #patients are assigned to the first condition they satisfy
 incident_rrt_status = patients.categorised_as(
     {
