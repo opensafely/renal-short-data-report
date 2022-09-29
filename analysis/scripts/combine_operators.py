@@ -3,13 +3,13 @@ import numpy as np
 from variables import tests
 from utilities import (
     OUTPUT_DIR,
-    drop_and_round,
-    round_column,
     match_input_files,
     get_date_input_file,
     combine_value_with_operator,
 )
-from redaction_utils import (group_low_values,group_low_values_series)
+from redaction_utils import (group_low_values,group_low_values_series, 
+    drop_and_round,
+    round_column,)
 
 numeric_value_operator_counts = {}
 numeric_value_counts = {}
