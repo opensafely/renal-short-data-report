@@ -29,7 +29,7 @@ for test in tests:
         code_column="code",
         term_column="term",
         low_count_threshold=7,
-        rounding_base=10,
+        rounding_base=5,
     )
     write_csv(top_5_code_table,  OUTPUT_DIR / f"top_5_code_table_{test}.csv", index=False)
 
@@ -43,6 +43,6 @@ for test in tests:
         code_column="code",
         term_column="term",
         low_count_threshold=7,
-        rounding_base=10,
+        rounding_base=5,
     )
     write_csv(top_5_code_table_numeric,  OUTPUT_DIR / f"top_5_code_table_numeric_{test}.csv", index=False)
