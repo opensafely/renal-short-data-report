@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from utilities import *
-from redaction_utils import *
+from redaction_utils import compute_redact_deciles
 from variables import tests
 
 if not (OUTPUT_DIR / "figures").exists():
