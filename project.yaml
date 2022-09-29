@@ -275,7 +275,7 @@ actions:
       moderately_sensitive:
         report: output/notebooks/pc-sc-codes1a.html
   
-    generate_pc_sc_codes1b:
+  generate_pc_sc_codes1b:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes1b.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
     needs: [generate_study_population_ukrr]
     outputs:
