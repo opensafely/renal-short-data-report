@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from redaction_utils import group_low_values
 
 BASE_DIR = Path(__file__).parents[1]
 OUTPUT_DIR = BASE_DIR / "../output"
@@ -59,32 +60,7 @@ def drop_irrelevant_practices(df):
     return df[df.practice.isin(is_relevant[is_relevant == True].index)]
 
 
-def compute_deciles(measure_table, groupby_col, values_col, has_outer_percentiles=True):
-    """Computes deciles.
-    Args:
-        measure_table: A measure table.
-        groupby_col: The name of the column to group by.
-        values_col: The name of the column for which deciles are computed.
-        has_outer_percentiles: Whether to compute the nine largest and nine smallest
-            percentiles as well as the deciles.
-    Returns:
-        A data frame with `groupby_col`, `values_col`, and `percentile` columns.
-    """
-    quantiles = np.arange(0.1, 1, 0.1)
-    if has_outer_percentiles:
-        quantiles = np.concatenate(
-            [quantiles, np.arange(0.01, 0.1, 0.01), np.arange(0.91, 1, 0.01)]
-        )
 
-    percentiles = (
-        measure_table.groupby(groupby_col)[values_col]
-        .quantile(pd.Series(quantiles))
-        .reset_index()
-    )
-
-    percentiles["percentile"] = percentiles["level_1"].apply(lambda x: int(x * 100))
-
-    return percentiles
 
 
 
@@ -272,68 +248,7 @@ def plot_violin_numeric_value(x, title, filename, cut=0):
 
 
 
-def create_top_5_code_table(
-    df, code_df, code_column, term_column, low_count_threshold, rounding_base, nrows=5
-):
-    """Creates a table of the top 5 codes recorded with the number of events and % makeup of each code.
-    Args:
-        df: A measure table.
-        code_df: A codelist table.
-        code_column: The name of the code column in the codelist table.
-        term_column: The name of the term column in the codelist table.
-        measure: The measure ID.
-        low_count_threshold: Value to use as threshold for disclosure control.
-        rounding_base: Base to round to.
-        nrows: The number of rows to display.
-    Returns:
-        A table of the top `nrows` codes.
-    """
 
-    # cast both code columns to str
-    df[code_column] = df[code_column].astype(str)
-    code_df[code_column] = code_df[code_column].astype(str)
-
-    # sum event counts over patients
-    event_counts = df.sort_values(ascending=False, by="num")
-
-    event_counts = group_low_values(
-        event_counts, "num", code_column, low_count_threshold
-    )
-
-    # round
-
-    event_counts["num"] = event_counts["num"].apply(
-        lambda x: round_values(x, rounding_base)
-    )
-
-    # calculate % makeup of each code
-    total_events = event_counts["num"].sum()
-    event_counts["Proportion of codes (%)"] = round(
-        (event_counts["num"] / total_events) * 100, 2
-    )
-
-    # Gets the human-friendly description of the code for the given row
-    # e.g. "Systolic blood pressure".
-    code_df[code_column] = code_df[code_column].astype(str)
-    code_df = code_df.set_index(code_column).rename(
-        columns={term_column: "Description"}
-    )
-
-    event_counts = event_counts.set_index(code_column).join(code_df).reset_index()
-
-    # set description of "Other column" to something readable
-    event_counts.loc[event_counts[code_column] == "Other", "Description"] = "-"
-
-    # Rename the code column to something consistent
-    event_counts.rename(columns={code_column: "Code", "num": "Events"}, inplace=True)
-
-    # drop events column
-    event_counts = event_counts.loc[
-        :, ["Code", "Description", "Events", "Proportion of codes (%)"]
-    ]
-
-    # return top n rows
-    return event_counts.head(5)
 
 
 def write_csv(df, path, **kwargs):

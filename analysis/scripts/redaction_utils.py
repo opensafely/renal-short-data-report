@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
-from utilities import compute_deciles
+
 
 def round_column(column, base):
     return column.apply(lambda x: base * round(x / base) if pd.notnull(x) else x)
+
 
 def round_values(x, base=5):
     rounded = x
@@ -14,9 +15,11 @@ def round_values(x, base=5):
             rounded = int(base * round(x / base))
     return rounded
 
+
 def drop_and_round(column, base=5, threshold=7):
     column[column <= threshold] = 0
     return round_column(column, base)
+
 
 def compute_redact_deciles(df, period_column, count_column, column):
     n_practices = df.groupby(by=["date"])[["practice"]].nunique()
@@ -43,7 +46,10 @@ def compute_redact_deciles(df, period_column, count_column, column):
 
     return df
 
-def redact_small_numbers(df, n, rounding_base, numerator, denominator, rate_column, date_column):
+
+def redact_small_numbers(
+    df, n, rounding_base, numerator, denominator, rate_column, date_column
+):
     """
     Takes counts df as input and suppresses low numbers.  Sequentially redacts
     low numbers from numerator and denominator until count of redacted values >=n.
@@ -90,6 +96,7 @@ def redact_small_numbers(df, n, rounding_base, numerator, denominator, rate_colu
 
     return pd.concat(df_list, axis=0)
 
+
 def group_low_values_series(series):
 
     suppressed_count = series[series <= 7].sum()
@@ -112,6 +119,7 @@ def group_low_values_series(series):
         series = pd.concat([series, suppressed_count_series])
 
     return series
+
 
 def group_low_values(df, count_column, code_column, threshold, rounding_base):
     """Suppresses low values and groups suppressed values into
@@ -160,8 +168,98 @@ def group_low_values(df, count_column, code_column, threshold, rounding_base):
 
     return df
 
+
 def redact_table_1(df):
     redacted_table = df.groupby(level=[0]).apply(group_low_values_series)
     return redacted_table
-    
 
+
+def create_top_5_code_table(
+    df, code_df, code_column, term_column, low_count_threshold, rounding_base, nrows=5
+):
+    """Creates a table of the top 5 codes recorded with the number of events and % makeup of each code.
+    Args:
+        df: A measure table.
+        code_df: A codelist table.
+        code_column: The name of the code column in the codelist table.
+        term_column: The name of the term column in the codelist table.
+        measure: The measure ID.
+        low_count_threshold: Value to use as threshold for disclosure control.
+        rounding_base: Base to round to.
+        nrows: The number of rows to display.
+    Returns:
+        A table of the top `nrows` codes.
+    """
+
+    # cast both code columns to str
+    df[code_column] = df[code_column].astype(str)
+    code_df[code_column] = code_df[code_column].astype(str)
+
+    # sum event counts over patients
+    event_counts = df.sort_values(ascending=False, by="num")
+
+    event_counts = group_low_values(
+        event_counts, "num", code_column, low_count_threshold, rounding_base
+    )
+
+    # # round
+
+    # event_counts["num"] = event_counts["num"].apply(
+    #     lambda x: round_values(x, rounding_base)
+    # )
+
+    # calculate % makeup of each code
+    total_events = event_counts["num"].sum()
+    event_counts["Proportion of codes (%)"] = round(
+        (event_counts["num"] / total_events) * 100, 2
+    )
+
+    # Gets the human-friendly description of the code for the given row
+    # e.g. "Systolic blood pressure".
+    code_df[code_column] = code_df[code_column].astype(str)
+    code_df = code_df.set_index(code_column).rename(
+        columns={term_column: "Description"}
+    )
+
+    event_counts = event_counts.set_index(code_column).join(code_df).reset_index()
+
+    # set description of "Other column" to something readable
+    event_counts.loc[event_counts[code_column] == "Other", "Description"] = "-"
+
+    # Rename the code column to something consistent
+    event_counts.rename(columns={code_column: "Code", "num": "Events"}, inplace=True)
+
+    # drop events column
+    event_counts = event_counts.loc[
+        :, ["Code", "Description", "Events", "Proportion of codes (%)"]
+    ]
+
+    # return top n rows
+    return event_counts.head(5)
+
+def compute_deciles(measure_table, groupby_col, values_col, has_outer_percentiles=True):
+    """Computes deciles.
+    Args:
+        measure_table: A measure table.
+        groupby_col: The name of the column to group by.
+        values_col: The name of the column for which deciles are computed.
+        has_outer_percentiles: Whether to compute the nine largest and nine smallest
+            percentiles as well as the deciles.
+    Returns:
+        A data frame with `groupby_col`, `values_col`, and `percentile` columns.
+    """
+    quantiles = np.arange(0.1, 1, 0.1)
+    if has_outer_percentiles:
+        quantiles = np.concatenate(
+            [quantiles, np.arange(0.01, 0.1, 0.01), np.arange(0.91, 1, 0.01)]
+        )
+
+    percentiles = (
+        measure_table.groupby(groupby_col)[values_col]
+        .quantile(pd.Series(quantiles))
+        .reset_index()
+    )
+
+    percentiles["percentile"] = percentiles["level_1"].apply(lambda x: int(x * 100))
+
+    return percentiles
