@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from utilities import compute_deciles
 
 def round_column(column, base):
     return column.apply(lambda x: base * round(x / base) if pd.notnull(x) else x)
