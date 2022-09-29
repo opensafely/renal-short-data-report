@@ -261,36 +261,7 @@ CC_flags_inc[CC_flags_inc>0]<-1
 
 # Section 1 PC codes for people prevalent to RRT according to primary care data but not the UKRR
 
-Below we look at what the most recent primary care codes are for these patients, by modality
-
-```{r, echo=FALSE, results='asis'}
-
-codes.table<-function(df, grouplist, status, codelist){
-  df %>%
-    filter(source_prev_rrt %in% grouplist & latest_rrt_status==status) %>%
-    group_by(latest_rrt_code)%>%
-    summarise(n=n()) %>%
-    left_join(codelist, by=setNames(names(codelist)[1], "latest_rrt_code")) %>%
-    mutate(latest_rrt_code= replace(latest_rrt_code, latest_rrt_code %in% c("", NA) , "Missing")) %>%
-      mutate(n=ifelse(n<=7,0,n)) %>% #first replace n<=7 with 0
-      mutate(n=round(n/5)*5) %>%  #round to nearest 5
-      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
-        arrange(desc(n))  %>% #descending sort by n
-      mutate(n=ifelse(n<=5,"<=5",n)) #now replacing <=5 (which is now 0 anyway) with "<=5"
-}
-
-list.of.dts<- mapply(function(y, z) 
-    codes.table(df, c("P", "PS") , y, z), 
-    c("Dialysis", "Transplant"),  all.codelists[1:2], SIMPLIFY=FALSE)
-
-  for(j in 1:2){
-   k<- list.of.dts[j]%>%
-          kbl(caption=c("Dialysis", "Transplant")[j], booktabs=TRUE) %>% 
-          kable_styling()
-  print(k)     
-  }
-```    
-And repeating for people who are in the UKRR, for reference
+1B And repeating for people who are in the UKRR, for reference
 
 ```{r, echo=FALSE, results='asis'}
 
