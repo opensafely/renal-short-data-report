@@ -3,6 +3,7 @@ import argparse
 import glob
 import pathlib
 from utilities import OUTPUT_DIR, update_df
+from redaction_utils import redact_table_1
 from collections import Counter
 
 
@@ -29,9 +30,11 @@ def create_table_1(paths, demographics):
     
     df = df.drop("patient_id", axis=1)
     df_counts = df.apply(lambda x: x.value_counts()).T.stack()
+    df_counts = redact_table_1(df_counts)
 
     df_at_risk = df_at_risk.drop("patient_id", axis=1)
     df_counts_at_risk = df_at_risk.apply(lambda x: x.value_counts()).T.stack()
+    df_counts_at_risk = redact_table_1(df_counts_at_risk)
 
     return df_counts, df_counts_at_risk
    

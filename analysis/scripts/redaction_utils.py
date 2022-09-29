@@ -93,7 +93,7 @@ def group_low_values_series(series):
     suppressed_count = series[series <= 7].sum()
 
     if suppressed_count == 0:
-        pass
+        series = round_column(series, 5)
 
     else:
         series[series <= 7] = np.nan
@@ -157,4 +157,9 @@ def group_low_values(df, count_column, code_column, threshold, rounding_base):
         df[count_column] = round_column(df[count_column], rounding_base)
 
     return df
+
+def redact_table_1(df):
+    redacted_table = df.groupby(level=[0]).apply(group_low_values_series)
+    return redacted_table
+    
 
