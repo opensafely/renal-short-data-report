@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from utilities import *
+from redaction_utils import compute_redact_deciles, compute_deciles, redact_small_numbers
 from variables import tests
 
 if not (OUTPUT_DIR / "figures").exists():
@@ -68,7 +69,7 @@ for i in [
 
             df["rate"] = df[f"value"] * 100
 
-            df = redact_small_numbers(df, 10, i, j, "rate", "date")
+            df = redact_small_numbers(df, 7, 5, i, j, "rate", "date")
 
             plot_measures(
                 df=df,
@@ -102,7 +103,7 @@ df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
 
 
 df_ckd_stage = redact_small_numbers(
-    df_ckd_stage, 10,"ckd_primis_1_5", "population", "rate", "date"
+    df_ckd_stage, 7, 5,"ckd_primis_1_5", "population", "rate", "date"
 )
 df_ckd_stage["ckd_primis_stage"] = df_ckd_stage["ckd_primis_stage"].astype(str)
 
@@ -137,7 +138,7 @@ for d in ["age_band", "ethnicity", "sex"]:
 
 
     df_ckd_stage = redact_small_numbers(
-        df_ckd_stage, 10,"ckd_primis_1_5", "population", "rate", "date"
+        df_ckd_stage, 7, 5,"ckd_primis_1_5", "population", "rate", "date"
     )
 
     df_ckd_stage["rate"] = df_ckd_stage["rate"]*100
@@ -177,7 +178,7 @@ for test in tests:
 
     df = df.loc[df["single_egfr"]==1,:]
     redact_small_numbers(
-        df, 10,test, "population", "value", "date"
+        df, 7, 5,test, "population", "value", "date"
     )
     
     plot_measures(
@@ -200,7 +201,7 @@ for test in tests:
     
     df_ckd_stage_egfr = df_ckd_stage_egfr.replace(np.inf, np.nan)
     df_ckd_stage_egfr = redact_small_numbers(
-        df_ckd_stage_egfr, 10,test, "population", "rate", "date"
+        df_ckd_stage_egfr, 7, 5,test, "population", "rate", "date"
     )
    
 
@@ -220,7 +221,7 @@ for test in tests:
     
     # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
     df_ckd_stage_acr = redact_small_numbers(
-        df_ckd_stage_acr, 10,test, "population", "rate", "date"
+        df_ckd_stage_acr, 7, 5,test, "population", "rate", "date"
     )
 
 

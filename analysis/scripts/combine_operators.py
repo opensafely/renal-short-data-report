@@ -3,14 +3,13 @@ import numpy as np
 from variables import tests
 from utilities import (
     OUTPUT_DIR,
-    drop_and_round,
-    round_column,
     match_input_files,
     get_date_input_file,
     combine_value_with_operator,
-    group_low_values,
-    group_low_values_series,
 )
+from redaction_utils import (group_low_values,group_low_values_series, 
+    drop_and_round,
+    round_column,)
 
 numeric_value_operator_counts = {}
 numeric_value_counts = {}
@@ -88,7 +87,7 @@ for test in tests:
     for operator in ["<", ">", "<=", ">=", "~", "="]:
         subset = test_count.loc[test_count["value"].str.startswith(operator),:]
 
-        subset = group_low_values(subset, "count", "value", 10)
+        subset = group_low_values(subset, "count", "value", 7, 5)
         subset = subset.sort_values(by="count")
     
         subset.to_csv(

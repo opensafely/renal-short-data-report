@@ -2,7 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from upsetplot import plot as upset_plot
-from utilities import OUTPUT_DIR, drop_and_round
+from utilities import OUTPUT_DIR
+from redaction_utils import drop_and_round
 import seaborn as sns
 import numpy as np
 
