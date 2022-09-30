@@ -44,7 +44,7 @@ df<-df%>%
                                 ifelse(next_after_allRRT=="", next_before_allRRT,
                                   ifelse(as.Date(ukrr_inc2020_date, "%Y-%m-%d") - as.Date(next_before_allRRT_date, "%Y-%m-%d")
                                        < as.Date(next_after_allRRT_date,"%Y-%m-%d") - as.Date(ukrr_inc2020_date, "%Y-%m-%d"), 
-                                       next_before_allRRT_date, next_after_allRRT_date))))))
+                                       next_before_allRRT, next_after_allRRT))))))
 
 #add variable for dialysis/tx for UKRR
 df<- df %>%
@@ -194,9 +194,9 @@ df<-df %>%
 # pick out incident RRT code for primary care
 df<-df %>%
     mutate(incident_rrt_code = ifelse(incident_rrt_status=="None", "None",
-                                  ifelse(incident_rrt_status=="Dialysis", dialysis_code,
-                                      ifelse(incident_rrt_status=="Transplant", kidney_tx_code,
-                                             ifelse(incident_rrt_status=="RRT_unknown", RRT_code,"Uncategorised")))))
+                                  ifelse(incident_rrt_status=="Dialysis", earliest_dialysis_code,
+                                      ifelse(incident_rrt_status=="Transplant", earliest_kidney_tx_code,
+                                             ifelse(incident_rrt_status=="RRT_unknown", earliest_RRT_code,"Uncategorised")))))
 
 
 
