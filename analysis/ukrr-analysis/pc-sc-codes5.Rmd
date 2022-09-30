@@ -27,9 +27,9 @@ inc_year_sc<-as.numeric(substr(df$incident_rrt_date_secondary,1,4))
 #ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
 #will be consistent as we only have one start date per patient in the data that was sent
 inc_year_ukrr<-as.numeric(substr(df$ukrr_inc2020_date,1,4))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df$ukrr_2019_startdate,1,4))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df$ukrr_2020_startdate,1,4))
-inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df$ukrr_2021_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2019_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2020_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2021_startdate,1,4))
  
  #only keep incident data for 2020 for PC and SC
 df<-df %>%
