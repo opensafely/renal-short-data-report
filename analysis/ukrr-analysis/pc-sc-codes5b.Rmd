@@ -1,0 +1,78 @@
+---
+title: "PC and SC codes 5b"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "at_risk", "region")
+
+#read in dataset
+#pick up 1st Jan cohort as latest renal status is on or before index date
+ df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
+
+#getting year of start for incident start dates
+inc_year_pc<-as.numeric(substr(df$incident_rrt_date,1,4))
+inc_year_sc<-as.numeric(substr(df$incident_rrt_date_secondary,1,4))
+#ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
+#will be consistent as we only have one start date per patient in the data that was sent
+inc_year_ukrr<-as.numeric(substr(df$ukrr_inc2020_date,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2019_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2020_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2021_startdate,1,4))
+ 
+
+#apply disclosure control - redact if less than 7, then round to nearest 5
+disclosure <-function(x, whichmargins=0){
+  redact <- 0<x & x<=7  #flag redacted values for later
+  x[redact] <- 0  # set redacted to 0
+  x<-round(x/5)*5 # round to nearest 5
+  if(whichmargins!=0){
+    x<-addmargins(x,whichmargins) #add totals
+  }
+  if(whichmargins==1){
+    redact<-rbind(redact, rep(FALSE,ncol(redact))) #add extra row to redaction, otherwise won't blank correctly
+  }
+  if(whichmargins==2){
+    redact<-cbind(redact, rep(FALSE,nrow(redact))) #add extra col to redaction, otherwise won't blank correctly
+  }
+  x[redact]<-"<=7"  # flag redacted values
+  return(x)
+}
+
+
+#list of secondary care code variables for incident
+SC_vars_inc<-names(df)[grepl('_proci_|_diagi_', names(df))]
+#list of variables with critical care info
+CC_vars_inc<-names(df)[grepl('_cci_', names(df))]
+#create flag for cc vars
+CC_flags_inc<-df[CC_vars_inc]
+CC_flags_inc[CC_flags_inc>0]<-1
+
+```
+
+
+# Section 5 - Look at SC codes for people starting in 2020 in SC not in UKRR at all
+
+This is done slightly differently as we have one variable per code
+
+Now for each code, looking at critical care days 
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+t<- t(as.matrix(apply(CC_flags_inc, 2, function(x) disclosure(table(factor(x[is.na(inc_year_ukrr)], levels=0:1))))))
+  k<- t  %>%
+          kbl( booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+```
