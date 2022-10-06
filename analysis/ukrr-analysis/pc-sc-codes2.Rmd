@@ -282,7 +282,7 @@ Now for each code, looking at critical care days x whether they are in UKRR
 list.of.dts<- lapply(CC_flags_prev, function(x) disclosure(table(factor(x, levels=0:1),df$ukrr_2019)))
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
-          kbl(caption=SC_vars_prev[i],  booktabs=TRUE) %>%
+          kbl(caption=CC_vars_prev[i],  booktabs=TRUE) %>%
           kable_styling()
   print(k)
 }
