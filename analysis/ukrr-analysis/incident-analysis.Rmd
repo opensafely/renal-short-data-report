@@ -34,7 +34,10 @@ inc_year_ukrr<-as.numeric(substr(df$ukrr_inc2020_date,1,4))
 inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2019_startdate,1,4))
 inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2020_startdate,1,4))
 inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2021_startdate,1,4))
- 
+
+inc_year_ukrr_cut<-cut(inc_year_ukrr, breaks=c(0,2017,2018, 2019, 2020, 2050), labels=c("before 2018", "2018", "2019", "2020", "after 2020"))
+inc_year_pc_cut<-cut(inc_year_pc, breaks=c(0,2017,2018, 2019, 2020, 2050), labels=c("before 2018", "2018", "2019", "2020", "after 2020")) 
+inc_year_sc_cut<-cut(inc_year_sc, breaks=c(0,2017,2018, 2019, 2020, 2050), labels=c("before 2018", "2018", "2019", "2020", "after 2020")) 
 
 #add variable for dialysis/tx for UKRR
 df<- df %>%
@@ -82,21 +85,21 @@ Use this output to look at PC/SC start dates for people starting in 2020 in the 
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
   
-t<-disclosure(table(inc_year_sc, inc_year_ukrr, useNA="ifany"))
+t<-disclosure(table(inc_year_sc_cut, inc_year_ukrr_cut, useNA="ifany"))
   k<- t %>%
           kbl(caption="SC start date and UKRR start date", booktabs=TRUE) %>%
           add_header_above(c("Inc year SC", "Inc year UKRR"=ncol(t))) %>%
           kable_styling()
   print(k)
   
-t<-disclosure(table(inc_year_pc, inc_year_ukrr, useNA="ifany"))
+t<-disclosure(table(inc_year_pc_cut, inc_year_ukrr_cut, useNA="ifany"))
   k<- t %>%
           kbl(caption="PC start date and UKRR start date", booktabs=TRUE) %>%
           add_header_above(c("Inc year PC", "Inc year UKRR"=ncol(t))) %>%
           kable_styling()
   print(k)
 
-t<-disclosure(table(inc_year_pc, inc_year_sc, useNA="ifany"))
+t<-disclosure(table(inc_year_pc_cut, inc_year_sc_cut, useNA="ifany"))
   k<- t %>%
           kbl(caption="PC start date and UKRR start date", booktabs=TRUE) %>%
           add_header_above(c("Inc year PC", "Inc year SC"=ncol(t))) %>%
