@@ -164,7 +164,8 @@ def group_low_values(df, count_column, code_column, threshold, rounding_base):
         if suppressed_count > threshold:
             suppressed_count = {code_column: "Other", count_column: suppressed_count}
             df = pd.concat([df, pd.DataFrame([suppressed_count])], ignore_index=True)
-        df[count_column] = round_column(df[count_column], rounding_base)
+
+    df[count_column] = round_column(df[count_column], rounding_base)
 
     return df
 
@@ -197,16 +198,9 @@ def create_top_5_code_table(
 
     # sum event counts over patients
     event_counts = df.sort_values(ascending=False, by="num")
-
     event_counts = group_low_values(
         event_counts, "num", code_column, low_count_threshold, rounding_base
     )
-
-    # # round
-
-    # event_counts["num"] = event_counts["num"].apply(
-    #     lambda x: round_values(x, rounding_base)
-    # )
 
     # calculate % makeup of each code
     total_events = event_counts["num"].sum()
@@ -236,6 +230,7 @@ def create_top_5_code_table(
 
     # return top n rows
     return event_counts.head(5)
+
 
 def compute_deciles(measure_table, groupby_col, values_col, has_outer_percentiles=True):
     """Computes deciles.
