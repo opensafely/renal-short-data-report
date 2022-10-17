@@ -14,17 +14,17 @@ df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-12-01.csv.gz", usecols=["ckd_pr
 stage_subset = df.loc[:,["ckd_primis_stage", "ukrr_ckd2020"]]
 stage_subset =  stage_subset.fillna("Missing")
 stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
-
+stage_subset["ukrr_ckd2020"] = stage_subset["ukrr_ckd2020"].astype(str)
 stage_subset_encoded = pd.get_dummies(stage_subset)
 
 stage_subset_encoded = stage_subset_encoded.rename(
     columns={
-        "ckd_primis_stage_1": "Primary Care Stage 1",
-        "ckd_primis_stage_2": "Primary Care Stage 2",
-        "ckd_primis_stage_3": "Primary Care Stage 3",
-        "ckd_primis_stage_4": "Primary Care Stage 4",
-        "ckd_primis_stage_5": "Primary Care Stage 5",
-        "ckd_primis_stage_nan": "Primary Care Stage Missing",
+        "ckd_primis_stage_1.0": "Primary Care Stage 1",
+        "ckd_primis_stage_2.0": "Primary Care Stage 2",
+        "ckd_primis_stage_3.0": "Primary Care Stage 3",
+        "ckd_primis_stage_4.0": "Primary Care Stage 4",
+        "ckd_primis_stage_5.0": "Primary Care Stage 5",
+        "ckd_primis_stage_Missing": "Primary Care Stage Missing",
         "ukrr_ckd2020_0.0": "Not in UKRR",
         "ukrr_ckd2020_1.0": "In UKRR",
         "ukrr_ckd2020_Missing": "Missing in UKRR"
