@@ -29,10 +29,16 @@ def create_table_1(paths, demographics):
             df_at_risk = update_df(df_at_risk, updated_df_at_risk, columns=demographics)
     
     df = df.drop("patient_id", axis=1)
+
+    #fill in missing values
+    df.loc[:,demographics].fillna("missing", inplace=True)
+
     df_counts = df.apply(lambda x: x.value_counts()).T.stack()
     df_counts = redact_table_1(df_counts)
 
     df_at_risk = df_at_risk.drop("patient_id", axis=1)
+    df_at_risk.loc[:,demographics].fillna("missing", inplace=True)
+
     df_counts_at_risk = df_at_risk.apply(lambda x: x.value_counts()).T.stack()
     df_counts_at_risk = redact_table_1(df_counts_at_risk)
 
