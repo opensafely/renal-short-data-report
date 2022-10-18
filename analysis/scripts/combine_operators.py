@@ -74,6 +74,14 @@ for file in (OUTPUT_DIR / "joined").iterdir():
 
             code_counts[test].append(df[f"{test}_code"].value_counts())
 
+operator_names = {
+    "<": "lt",
+    ">": "gt",
+    "<=": "lte", 
+    ">=": "gte", 
+    "~": "tild", 
+    "=": "equal"
+}
 
 for test in tests:
     # combine numeric value operator counts
@@ -91,7 +99,10 @@ for test in tests:
         subset = subset.sort_values(by="count")
     
         subset.to_csv(
+
             OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator}.csv",index=False
+UT_DIR / f"{test}_numeric_value_operator_count_{operator_names[operator]}.csv"
+
         )
     
  
