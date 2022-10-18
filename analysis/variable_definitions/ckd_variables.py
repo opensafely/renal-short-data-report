@@ -1,6 +1,10 @@
 from cohortextractor import patients
-
 from codelists import *
+
+def generate_expectations_codes(codelist, incidence=0.5):
+    expectations = {str(x): (1-incidence) / len(codelist) for x in codelist}
+    expectations[None] = incidence
+    return expectations
 
 ckd_variables = dict(
     ckd=patients.with_these_clinical_events(
@@ -20,7 +24,7 @@ ckd_variables = dict(
         returning="code",
         return_expectations={
             "rate": "universal",
-            "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
+            "category": {"ratios": generate_expectations_codes(ckd_codelist)},
         },
     ),
     ckd_primis_1_5=patients.with_these_clinical_events(
@@ -40,7 +44,7 @@ ckd_variables = dict(
         returning="code",
         return_expectations={
             "rate": "universal",
-            "category": {"ratios": {"238318009": 0.5, "864311000000105": 0.5}},
+            "category": {"ratios": generate_expectations_codes(primis_ckd_1_5_codelist)},
         },
     ),
     ckd_primis_stage=patients.with_these_clinical_events(
