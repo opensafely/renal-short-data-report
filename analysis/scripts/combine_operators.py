@@ -101,8 +101,6 @@ for test in tests:
         subset.to_csv(
 
             OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator}.csv",index=False
-UT_DIR / f"{test}_numeric_value_operator_count_{operator_names[operator]}.csv"
-
         )
     
  
