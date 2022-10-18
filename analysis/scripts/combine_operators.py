@@ -91,7 +91,7 @@ for test in tests:
         subset = subset.sort_values(by="count")
     
         subset.to_csv(
-            OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator}.csv"
+            OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator}.csv",index=False
         )
     
  
@@ -101,7 +101,7 @@ for test in tests:
     test_codes_count = test_codes.groupby(test_codes.index).sum().reset_index()
     test_codes_count.rename(columns={"index": "code", f"{test}_code": "num"}, inplace=True)
     test_codes_count.to_csv(
-        OUTPUT_DIR / f"{test}_numeric_value_count.csv"
+        OUTPUT_DIR / f"{test}_numeric_value_count.csv", index=False
     )
 
     # combine code counts
@@ -118,4 +118,4 @@ for test in tests:
 
     test_operators = pd.concat(operator_counts[test], axis=1, sort=False).sum(axis=1)
     test_operators = group_low_values_series(test_operators)
-    drop_and_round(test_operators).to_csv(OUTPUT_DIR / f"{test}_operators_count.csv")
+    drop_and_round(test_operators).to_csv(OUTPUT_DIR / f"{test}_operators_count.csv", index=False)
