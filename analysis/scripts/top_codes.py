@@ -24,6 +24,7 @@ for test in tests:
     code_df = pd.read_csv(f"output/{test}_codes_count.csv")
     codelist = pd.read_csv(codelist_dict[test])
     
+    code_df["code"] = code_df["code"].astype(int).astype(str)
     top_5_code_table = create_top_5_code_table(
         df=code_df,
         code_df=codelist,

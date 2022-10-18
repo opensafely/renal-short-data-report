@@ -2,6 +2,11 @@ from cohortextractor import StudyDefinition, patients
 
 from codelists import *
 
+def generate_expectations_codes(codelist, incidence=0.5):
+    expectations = {str(x): (1-incidence) / len(codelist) for x in codelist}
+    expectations[None] = incidence
+    return expectations
+
 study = StudyDefinition(
     default_expectations={
         "date": {"earliest": "2019-01-01", "latest": "today"},
@@ -54,9 +59,7 @@ study = StudyDefinition(
         returning="code",
         return_expectations={
             "rate": "universal",
-            "category": {
-                "ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}
-            },
+            "category": {"ratios": generate_expectations_codes(acr_codelist)},
         },
     ),
     acr_count = patients.with_these_clinical_events(
