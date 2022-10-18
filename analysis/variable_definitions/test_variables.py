@@ -2,6 +2,11 @@ from cohortextractor import patients
 path_tests = ["creatinine", "cr_cl", "albumin", "acr", "eGFR"]
 from codelists import *
 
+def generate_expectations_codes(codelist, incidence=0.5):
+    expectations = {str(x): (1-incidence) / len(codelist) for x in codelist}
+    expectations[None] = incidence
+    return expectations
+
 codelists = {
     "creatinine": creatinine_codelist,
     "cr_cl": creatinine_clearance_codelist,
@@ -39,9 +44,7 @@ def create_path_variables(path_tests):
                 returning="code",
                 return_expectations={
                     "rate": "universal",
-                    "category": {
-                        "ratios": {"1000731000000107": 0.5, "1000981000000109": 0.5}
-                    },
+                    "category": {"ratios": generate_expectations_codes(codelists[test])},
                 },
             ),
             f"{test}_count": patients.with_these_clinical_events(

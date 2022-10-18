@@ -12,6 +12,9 @@ def create_table_1(paths, demographics):
     for i, path in enumerate(paths):
         if i ==0:
             df = pd.read_csv(path, usecols=demographics + ["patient_id", "at_risk"])
+           
+            #fill in missing values
+            df.loc[:,demographics] = df.loc[:,demographics].fillna("missing")
             df_at_risk = df.loc[df["at_risk"]==1,:]
             df = df.drop("at_risk", axis=1)
             df_at_risk = df_at_risk.drop("at_risk", axis=1)
@@ -19,6 +22,8 @@ def create_table_1(paths, demographics):
         
         else:
             updated_df = pd.read_csv(path, usecols=demographics + ["patient_id", "at_risk"])
+            
+            updated_df.loc[:,demographics] = updated_df.loc[:,demographics].fillna("missing")
             updated_df_at_risk = updated_df.loc[updated_df["at_risk"]==1,:]
             updated_df = updated_df.drop("at_risk", axis=1)
             updated_df_at_risk = updated_df_at_risk.drop("at_risk", axis=1)
@@ -30,14 +35,12 @@ def create_table_1(paths, demographics):
     
     df = df.drop("patient_id", axis=1)
 
-    #fill in missing values
-    df.loc[:,demographics].fillna("missing", inplace=True)
+    
 
     df_counts = df.apply(lambda x: x.value_counts()).T.stack()
     df_counts = redact_table_1(df_counts)
 
     df_at_risk = df_at_risk.drop("patient_id", axis=1)
-    df_at_risk.loc[:,demographics].fillna("missing", inplace=True)
 
     df_counts_at_risk = df_at_risk.apply(lambda x: x.value_counts()).T.stack()
     df_counts_at_risk = redact_table_1(df_counts_at_risk)

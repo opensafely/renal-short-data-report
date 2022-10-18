@@ -25,8 +25,8 @@ stage_subset_encoded = stage_subset_encoded.rename(
         "ckd_primis_stage_4.0": "Primary Care Stage 4",
         "ckd_primis_stage_5.0": "Primary Care Stage 5",
         "ckd_primis_stage_Missing": "Primary Care Stage Missing",
-        "ukrr_ckd2020_0.0": "Not in UKRR",
-        "ukrr_ckd2020_1.0": "In UKRR",
+        "ukrr_ckd2020_0": "Not in UKRR",
+        "ukrr_ckd2020_1": "In UKRR",
         "ukrr_ckd2020_Missing": "Missing in UKRR"
     }
     )
