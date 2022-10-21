@@ -1,0 +1,85 @@
+---
+title: "Extra age quantiles by KRT cohort"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+This document describes the cohorts of patients prevalent to renal replacement therapy (RRT) at 1st January 2020, and incident to renal replacement therapy during 2020 using 3 sources of data: the UK Renal Registry (UKRR), primary care data from TPP practices (PC) and secondary care inpatient and outpatient data (SC).  
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+
+#read in dataset
+#pick up 1st Jan cohort as latest renal status is on or before index date
+ df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
+ 
+ #only keep incident data for 2020 for PC and SC
+df<-df %>%
+  mutate(incident_rrt_status=ifelse(grepl("2020",incident_rrt_date), incident_rrt_status, "" )) %>%
+  mutate(incident_rrt_status_secondary=ifelse(grepl("2020",incident_rrt_date_secondary), incident_rrt_status_secondary, "" ))
+
+
+```
+
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+#create tables
+
+k<-df%>%
+    filter(ukrr_2019==1 ) %>%
+    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
+    spread(q, age) %>%
+    kbl(caption="Prevalent UKRR", booktabs=TRUE) %>%
+    kable_styling()
+  print(k)
+
+k<-df%>%
+    filter(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) %>%
+    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
+    spread(q, age) %>%
+    kbl(caption="Prevalent primary care", booktabs=TRUE) %>%
+    kable_styling()
+  print(k)
+
+k<-df%>%
+    filter(latest_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown")) %>%
+    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
+    spread(q, age) %>%
+    kbl(caption="Prevalent secondary care", booktabs=TRUE) %>%
+    kable_styling()
+  print(k)
+
+k<-df%>%
+    filter(ukrr_inc2020==1 ) %>%
+    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
+    spread(q, age) %>%
+    kbl(caption="Incident UKRR", booktabs=TRUE) %>%
+    kable_styling()
+  print(k)
+
+k<-df%>%
+    filter(incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) %>%
+    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
+    spread(q, age) %>%
+    kbl(caption="Incident primary care", booktabs=TRUE) %>%
+    kable_styling()
+  print(k)
+
+k<-df%>%
+    filter(incident_rrt_status_secondary  %in%  c("Dialysis", "Transplant", "RRT_unknown")) %>%
+    summarise(age = quantile(age, c(0.25, 0.5, 0.75), na.rm=TRUE), q = c(0.25, 0.5, 0.75)) %>%
+    spread(q, age) %>%
+    kbl(caption="Incident secondary care", booktabs=TRUE) %>%
+    kable_styling()
+  print(k)
+
+```

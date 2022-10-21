@@ -360,3 +360,10 @@ actions:
       highly_sensitive:
         cohort: output/input_flowchart.csv.gz
   
+  generate_median_age:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/median-age.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/median-age.html
+  
