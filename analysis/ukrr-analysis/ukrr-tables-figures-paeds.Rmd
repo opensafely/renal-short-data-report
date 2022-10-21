@@ -17,8 +17,6 @@ library(kableExtra)
 # Create directory if it doesnt exist
 fs::dir_create(here::here("output", "notebooks"))
 
-demogs<-c("age_band2", "sex")
-
 #read in dataset
 #pick up 1st Jan cohort as latest renal status is on or before index date
  df<-read.csv(here::here("output", "input_paeds.csv.gz")) 
@@ -26,8 +24,7 @@ demogs<-c("age_band2", "sex")
 
 #add variable for dialysis/tx for UKRR
 df<- df %>%
-  mutate(ukrr_dtx = ifelse(ukrr_2019_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_2019_mod == "Tx", "Transplant", "Not on RRT"))) %>%
-  mutate(region = replace(region, region=="", "Missing")) 
+  mutate(ukrr_dtx = ifelse(ukrr_2019_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_2019_mod == "Tx", "Transplant", "Not on RRT"))) 
 # order factor
 df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
 
@@ -138,13 +135,13 @@ disclosure(table(df$source_prev_rrt, useNA="ifany"),0) %>%
 ```
 ### Dialysis
 ```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_rrt, useNA="ifany"),0) %>%
+disclosure(table(df$source_prev_dialysis, useNA="ifany"),0) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
 ### Transplant
 ```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_rrt, useNA="ifany"),0) %>%
+disclosure(table(df$source_prev_transplant, useNA="ifany"),0) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
