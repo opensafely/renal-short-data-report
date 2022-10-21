@@ -70,7 +70,7 @@ Now for each code, looking at critical care days
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-t<- t(as.matrix(apply(CC_flags_inc, 2, function(x) disclosure(table(factor(x[is.na(inc_year_ukrr)], levels=0:1))))))
+t<- t(as.matrix(apply(CC_flags_inc, 2, function(x) disclosure(table(factor(x[is.na(inc_year_ukrr) & inc_year_sc==2020], levels=0:1))))))
   k<- t  %>%
           kbl( booktabs=TRUE) %>%
           kable_styling()
