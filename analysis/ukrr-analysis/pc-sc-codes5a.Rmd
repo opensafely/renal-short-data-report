@@ -67,7 +67,7 @@ This is done slightly differently as we have one variable per code
 
 ```{r, echo=FALSE, results='asis', error=TRUE}
 
-list.of.dts<-lapply(df[SC_vars_inc], function(x) disclosure(table(x[is.na(inc_year_ukrr)])))
+list.of.dts<-lapply(df[SC_vars_inc], function(x) disclosure(table(x[is.na(inc_year_ukrr) & inc_year_sc==2020])))
 
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
