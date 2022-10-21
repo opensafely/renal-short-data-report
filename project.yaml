@@ -324,12 +324,12 @@ actions:
       moderately_sensitive:
         report: output/notebooks/pc-sc-codes5b.html
 
-#  generate_ukrr_tables_figures_paeds:
-#    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures-paeds.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-#    needs: [generate_study_population_paeds]
-#    outputs:
-#      moderately_sensitive:
-#        report: output/notebooks/ukrr-tables-figures-paeds.html
+  generate_ukrr_tables_figures_paeds:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures-paeds.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_paeds]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/ukrr-tables-figures-paeds.html
   
   generate_check_SC:
     run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/check-SC.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
