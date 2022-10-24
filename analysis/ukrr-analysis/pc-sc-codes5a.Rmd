@@ -71,9 +71,22 @@ list.of.dts<-lapply(df[SC_vars_inc], function(x) disclosure(table(x[is.na(inc_ye
 
 for(i in 1:length(list.of.dts)) {
   k<- list.of.dts[[i]] %>%
-          kbl(caption=SC_vars_inc[i], booktabs=TRUE) %>%
+          kbl(caption=paste(SC_vars_inc[i], "not in UKRR 2020"), booktabs=TRUE) %>%
           kable_styling()
   print(k)
 }
 ```
 
+Adding  codes for people who were in the UKRR
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+list.of.dts<-lapply(df[SC_vars_inc], function(x) disclosure(table(x[inc_year_ukrr==2020 & inc_year_sc==2020])))
+
+for(i in 1:length(list.of.dts)) {
+  k<- list.of.dts[[i]] %>%
+          kbl(caption=paste(SC_vars_inc[i], "in UKRR 2020"), booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+}
+```

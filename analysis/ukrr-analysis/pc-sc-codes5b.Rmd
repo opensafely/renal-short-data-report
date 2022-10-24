@@ -72,7 +72,17 @@ Now for each code, looking at critical care days
 
 t<- t(as.matrix(apply(CC_flags_inc, 2, function(x) disclosure(table(factor(x[is.na(inc_year_ukrr) & inc_year_sc==2020], levels=0:1))))))
   k<- t  %>%
-          kbl( booktabs=TRUE) %>%
+          kbl(caption="Not in UKRR 2020", booktabs=TRUE) %>%
+          kable_styling()
+  print(k)
+```
+Adding  codes for people who were in the UKRR
+
+```{r, echo=FALSE, results='asis', error=TRUE}
+
+t<- t(as.matrix(apply(CC_flags_inc, 2, function(x) disclosure(table(factor(x[inc_year_ukrr==2020 & inc_year_sc==2020], levels=0:1))))))
+  k<- t  %>%
+          kbl(caption="In UKRR 2020", booktabs=TRUE) %>%
           kable_styling()
   print(k)
 ```
