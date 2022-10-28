@@ -1,0 +1,95 @@
+---
+title: "PC and SC codes 4"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+demogs<-c("age_band", "sex", "ethnicity", "imd", "diabetes", "hypertension",  "at_risk", "region")
+
+#read in dataset
+#pick up 1st Jan cohort as latest renal status is on or before index date
+ df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
+
+#getting year of start for incident start dates
+inc_year_pc<-as.numeric(substr(df$incident_rrt_date,1,4))
+inc_year_sc<-as.numeric(substr(df$incident_rrt_date_secondary,1,4))
+#ukrr - start dates are stored in different variables, start with inc 2020 then look at prevalent cohorts, replacing missing values only
+#will be consistent as we only have one start date per patient in the data that was sent
+inc_year_ukrr<-as.numeric(substr(df$ukrr_inc2020_date,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2019_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2020_startdate,1,4))
+inc_year_ukrr[is.na(inc_year_ukrr)]<-as.numeric(substr(df[is.na(inc_year_ukrr),]$ukrr_2021_startdate,1,4))
+ 
+# pick out incident RRT code for primary care
+df<-df %>%
+    mutate(incident_rrt_code = ifelse(incident_rrt_status=="None", "None",
+                                  ifelse(incident_rrt_status=="Dialysis", earliest_dialysis_code,
+                                      ifelse(incident_rrt_status=="Transplant", earliest_kidney_tx_code,
+                                             ifelse(incident_rrt_status=="RRT_unknown", earliest_RRT_code,"Uncategorised")))))
+
+
+
+#read in codelists so we can tabulate the names
+dialysis_codelist<-unique(read.csv(here::here("codelists", "opensafely-dialysis.csv"))[,1:2])
+kidney_tx_codelist<-unique(read.csv(here::here("codelists", "opensafely-kidney-transplant.csv"))[,1:2])
+
+```
+
+# Section 4 - Look at PC codes for people starting in 2020 in PC who were incident in UKRR in 2020
+A Dialysis
+
+```{r, echo=FALSE, results='asis'}
+
+t<-df %>%
+    filter(inc_year_pc==2020  & inc_year_ukrr==2020) %>%
+    group_by(incident_rrt_code)%>%
+    summarise(n=n()) %>%
+    left_join(dialysis_codelist, by=setNames(names(dialysis_codelist)[1], "incident_rrt_code")) %>%
+    mutate(incident_rrt_code= replace(incident_rrt_code, incident_rrt_code %in% c("", NA) , "Missing")) %>%
+      mutate(n=ifelse(n<=7,0,n)) %>% #first replace n<=7 with 0
+      mutate(n=round(n/5)*5) %>%  #round to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+        arrange(desc(n))  %>% #descending sort by n
+      mutate(n=ifelse(n<=7,"<=7",n)) #now replacing <=7 (which is now 0 anyway) with "<=7"
+
+
+   k<- t%>%
+          kbl(caption="Dialysis", booktabs=TRUE) %>% 
+          kable_styling()
+  print(k)     
+
+```    
+B Transplant
+
+```{r, echo=FALSE, results='asis'}
+
+t<-df %>%
+    filter(inc_year_pc==2020  & inc_year_ukrr==2020) %>%
+    group_by(incident_rrt_code)%>%
+    summarise(n=n()) %>%
+    left_join(kidney_tx_codelist, by=setNames(names(kidney_tx_codelist)[1], "incident_rrt_code")) %>%
+    mutate(incident_rrt_code= replace(incident_rrt_code, incident_rrt_code %in% c("", NA) , "Missing")) %>%
+      mutate(n=ifelse(n<=7,0,n)) %>% #first replace n<=7 with 0
+      mutate(n=round(n/5)*5) %>%  #round to nearest 5
+      mutate(Percentage = ifelse(n==0, NA, round(100*n/sum(n), 0))) %>%   #then calculate %s, blanking if n is 0
+        arrange(desc(n))  %>% #descending sort by n
+      mutate(n=ifelse(n<=7,"<=7",n)) #now replacing <=7 (which is now 0 anyway) with "<=7"
+
+
+   k<- t%>%
+          kbl(caption="Transplant", booktabs=TRUE) %>% 
+          kable_styling()
+  print(k)     
+
+```    
