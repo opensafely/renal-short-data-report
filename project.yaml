@@ -273,124 +273,124 @@ actions:
         violin: output/violin_*.png
 
   
-  # generate_kidney_week:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/kidney_week.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [join_acr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/kidney_week.html
+  generate_kidney_week:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/kidney_week.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [join_acr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/kidney_week.html
   
-  # generate_ukrr_tables_figures:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/ukrr-tables-figures.html
+  generate_ukrr_tables_figures:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/ukrr-tables-figures.html
 
 
-  # generate_pc_sc_codes1a:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes1a.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes1a.html
+  generate_pc_sc_codes1a:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes1a.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes1a.html
   
-  # generate_pc_sc_codes1b:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes1b.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes1b.html
+  generate_pc_sc_codes1b:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes1b.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes1b.html
 
-  # generate_pc_sc_codes2:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes2.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes2.html
+  generate_pc_sc_codes2:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes2.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes2.html
 
-  # generate_pc_sc_codes3:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes3.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes3.html
+  generate_pc_sc_codes3:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes3.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes3.html
 
-  # generate_pc_sc_codes4a:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes4a.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes4a.html
+  generate_pc_sc_codes4a:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes4a.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes4a.html
 
-  # generate_pc_sc_codes4b:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes4b.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes4b.html
+  generate_pc_sc_codes4b:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes4b.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes4b.html
 
-  # generate_pc_sc_codes4c:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes4c.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes4c.html
+  generate_pc_sc_codes4c:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes4c.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes4c.html
 
-  # generate_pc_sc_codes5a:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes5a.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes5a.html
+  generate_pc_sc_codes5a:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes5a.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes5a.html
   
-  # generate_pc_sc_codes5b:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes5b.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/pc-sc-codes5b.html
+  generate_pc_sc_codes5b:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/pc-sc-codes5b.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/pc-sc-codes5b.html
 
-  # generate_ukrr_tables_figures_paeds:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures-paeds.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_paeds]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/ukrr-tables-figures-paeds.html
+  generate_ukrr_tables_figures_paeds:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures-paeds.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_paeds]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/ukrr-tables-figures-paeds.html
   
-  # generate_check_SC:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/check-SC.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_check_SC, generate_study_population_ukrr_ethnicity]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/check-SC.html
+  generate_check_SC:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/check-SC.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_check_SC, generate_study_population_ukrr_ethnicity]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/check-SC.html
 
-  # generate_modality_difference_table:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/modality-difference-table.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/modality-difference-table.html
+  generate_modality_difference_table:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/modality-difference-table.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/modality-difference-table.html
 
-  # generate_incident_analysis:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/incident-analysis.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/incident-analysis.html
+  generate_incident_analysis:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/incident-analysis.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/incident-analysis.html
         
-  # generate_study_population_flowchart:
-  #   run: cohortextractor:latest generate_cohort
-  #     --study-definition study_definition_flowchart
-  #     --output-format csv.gz
-  #   outputs:
-  #     highly_sensitive:
-  #       cohort: output/input_flowchart.csv.gz
+  generate_study_population_flowchart:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_flowchart
+      --output-format csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/input_flowchart.csv.gz
   
-  # generate_median_age:
-  #   run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/median_age.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
-  #   needs: [generate_study_population_ukrr]
-  #   outputs:
-  #     moderately_sensitive:
-  #       report: output/notebooks/median_age.html
+  generate_median_age:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/median_age.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/median_age.html
   
