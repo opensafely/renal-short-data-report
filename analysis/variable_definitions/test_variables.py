@@ -65,6 +65,7 @@ def create_path_variables(path_tests):
                     "incidence": 0.5,
                 },
             ),
+
             f"{test}_operator": patients.comparator_from(
                 f"{test}_numeric_value",
                 return_expectations={

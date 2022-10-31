@@ -33,6 +33,7 @@ stage_subset_encoded = stage_subset_encoded.rename(
 
 counts = stage_subset_encoded.groupby(by=stage_subset_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
+
 plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
 plt.savefig(OUTPUT_DIR / "ukrr_overlap_stage.png")
 plt.clf()
