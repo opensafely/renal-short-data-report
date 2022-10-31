@@ -35,8 +35,10 @@ counts = stage_subset_encoded.groupby(by=stage_subset_encoded.columns.tolist()).
 counts = drop_and_round(counts)
 
 # drop patients where missing from Ukrr and prim care - we don't care about these.
-# drop row where index is 1 for "Missing in UKRR" and "Primary Care Stage Missing"
-counts = counts.drop(index=1, level="Primary Care Stage Missing")
+# drop row where index is 1 for "Missing in UKRR" and "Primary Care Stage Missing" if it exists
+
+
+counts = counts.drop(index=1, level="Primary Care Stage Missing", errors="ignore")
 
 #save counts to csv
 counts.to_csv(OUTPUT_DIR / "ukrr_overlap_stage.csv")
@@ -47,10 +49,19 @@ plt.clf()
 
 
 
+#ukrr latest egfr where not null or 0
 
-ukrr_latest_egfr = df["ukrr_ckd2020_egfr"][df["ukrr_ckd2020_egfr"].notnull()]
-prim_care_latest_egfr = df["egfr_numeric_value_history"][df["egfr_numeric_value_history"].notnull()
-]
+ukrr_latest_egfr = df["ukrr_ckd2020_egfr"][(df["ukrr_ckd2020_egfr"].notnull()) & (df["ukrr_ckd2020_egfr"].notnull()>0)]
+prim_care_latest_egfr = df["egfr_numeric_value_history"][(df["egfr_numeric_value_history"].notnull()
+)  & (df["egfr_numeric_value_history"].notnull()>0)]
+
+
+sns.violinplot(data=ukrr_latest_egfr,inner=None)
+plt.title("eGFR UKRR")
+plt.ylabel("numeric value")
+plt.savefig(OUTPUT_DIR / f"violin_plot_ukrr_egfr.png")
+plt.clf()
+
 percentiles = np.arange(0.01, 0.99, 0.01)
 percentile_values_ukrr = np.quantile(a=ukrr_latest_egfr, q=percentiles)
 percentile_values_pc = np.quantile(a=prim_care_latest_egfr, q=percentiles)
@@ -66,9 +77,16 @@ plt.ylabel("numeric value")
 plt.savefig(OUTPUT_DIR / f"violin_plot_ukrr_pc_egfr.png")
 plt.clf()
 
-ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][df["ukrr_ckd2020_creat"].notnull()]
-prim_care_latest_creatinine = df["creatinine_numeric_value_history"][df["creatinine_numeric_value_history"].notnull()
+ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][(df["ukrr_ckd2020_creat"].notnull())&(df["ukrr_ckd2020_creat"]>0)]
+prim_care_latest_creatinine = df["creatinine_numeric_value_history"][(df["creatinine_numeric_value_history"].notnull()) & (df["creatinine_numeric_value_history"]>0)
 ]
+
+sns.violinplot(data=ukrr_latest_creatinine,inner=None)
+plt.title("Creatinine UKRR")
+plt.ylabel("numeric value")
+plt.savefig(OUTPUT_DIR / f"violin_plot_ukrr_creatinine.png")
+plt.clf()
+
 percentiles = np.arange(0.01, 0.99, 0.01)
 percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
 percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
