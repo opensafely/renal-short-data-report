@@ -34,6 +34,10 @@ stage_subset_encoded = stage_subset_encoded.rename(
 counts = stage_subset_encoded.groupby(by=stage_subset_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
 
+# drop patients where missing from Ukrr and prim care - we don't care about these.
+# drop row where index is 1 for "Missing in UKRR" and "Primary Care Stage Missing"
+counts = counts.drop(index=1, level="Primary Care Stage Missing")
+
 plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
 plt.savefig(OUTPUT_DIR / "ukrr_overlap_stage.png")
 plt.clf()
