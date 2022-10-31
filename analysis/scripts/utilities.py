@@ -237,6 +237,8 @@ def plot_violin_numeric_value(x, title, filename, cut=0):
     to the top and bottom quantile using `cut=0`.
 
     """
+    # remove values of 0
+    x = x[x > 0]
 
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=x, q=percentiles)
