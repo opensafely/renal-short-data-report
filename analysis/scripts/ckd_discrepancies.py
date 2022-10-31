@@ -78,9 +78,8 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
 
     counts = subset_encoded.groupby(by=subset_encoded.columns.tolist()).grouper.size()
     counts = drop_and_round(counts)
-    counts = (counts/1000)
-    print(counts)
-
+    
+    counts.to_csv(OUTPUT_DIR / f"ckd_staging_upset_{i}.csv")
     plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
    
     plt.savefig(OUTPUT_DIR / f"ckd_staging_upset_{i}.png")

@@ -269,6 +269,7 @@ actions:
     outputs:
       moderately_sensitive:
         upset: output/ukrr_overlap_stage.png
+        upset_csv: output/ukrr_overlap_stage.csv
         violin: output/violin_*.png
 
   

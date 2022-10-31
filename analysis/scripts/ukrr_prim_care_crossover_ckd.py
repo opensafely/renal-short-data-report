@@ -38,6 +38,9 @@ counts = drop_and_round(counts)
 # drop row where index is 1 for "Missing in UKRR" and "Primary Care Stage Missing"
 counts = counts.drop(index=1, level="Primary Care Stage Missing")
 
+#save counts to csv
+counts.to_csv(OUTPUT_DIR / "ukrr_overlap_stage.csv")
+
 plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
 plt.savefig(OUTPUT_DIR / "ukrr_overlap_stage.png")
 plt.clf()
