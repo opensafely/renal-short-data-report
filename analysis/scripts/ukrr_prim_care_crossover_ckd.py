@@ -53,8 +53,9 @@ plt.clf()
 #ukrr latest egfr where not null or 0
 
 ukrr_latest_egfr = df["ukrr_ckd2020_egfr"][(df["ukrr_ckd2020_egfr"].notnull()) & (df["ukrr_ckd2020_egfr"]>0)]
-prim_care_latest_egfr = df["egfr_numeric_value_history"][(df["egfr_numeric_value_history"].notnull()
-)  & (df["egfr_numeric_value_history"]>0)]
+
+# prim care latest egfr in advanced ckd
+prim_care_latest_egfr = df["egfr_numeric_value_history"][(df["egfr_numeric_value_history"].notnull()) & (df["egfr_numeric_value_history"]>0) & (df["ckd_primis_stage"]>=4)]
 
 # print(ukrr_latest_egfr.values)
 # sns.violinplot(data=ukrr_latest_egfr.values,inner=None)
@@ -68,9 +69,10 @@ percentile_values_ukrr = np.quantile(a=ukrr_latest_egfr, q=percentiles)
 percentile_values_pc = np.quantile(a=prim_care_latest_egfr, q=percentiles)
 
 violin_df = pd.DataFrame({
-    "UKRR": pd.Series(percentile_values_ukrr),
-    "Primary Care": pd.Series(percentile_values_pc)
+    f"UKRR (n={len(ukrr_latest_egfr)})": pd.Series(percentile_values_ukrr),
+    f"Primary Care (n={len(prim_care_latest_egfr)})": pd.Series(percentile_values_pc)
 })
+# show number of values on violin plot
 
 sns.violinplot(data=violin_df, cut=0, inner=None)
 plt.title("eGFR UKRR vs Primary Care")
@@ -79,7 +81,7 @@ plt.savefig(OUTPUT_DIR / f"violin_plot_ukrr_pc_egfr.png")
 plt.clf()
 
 ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][(df["ukrr_ckd2020_creat"].notnull())&(df["ukrr_ckd2020_creat"]>0)]
-prim_care_latest_creatinine = df["creatinine_numeric_value_history"][(df["creatinine_numeric_value_history"].notnull()) & (df["creatinine_numeric_value_history"]>0)
+prim_care_latest_creatinine = df["creatinine_numeric_value_history"][(df["creatinine_numeric_value_history"].notnull()) & (df["creatinine_numeric_value_history"]>0 & (df["ckd_primis_stage"]>=4))
 ]
 
 # sns.violinplot(data=ukrr_latest_creatinine,inner=None)
@@ -93,8 +95,8 @@ percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
 percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
 
 df = pd.DataFrame({
-    "UKRR": pd.Series(percentile_values_ukrr),
-    "Primary Care": pd.Series(percentile_values_pc)
+    f"UKRR (n={len(ukrr_latest_creatinine)})": pd.Series(percentile_values_ukrr),
+    f"Primary Care (n={len(prim_care_latest_creatinine)})": pd.Series(percentile_values_pc)
 })
 
 sns.violinplot(data=df, cut=0, inner=None)
