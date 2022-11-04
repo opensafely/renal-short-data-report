@@ -232,6 +232,7 @@ actions:
     outputs:
       moderately_sensitive:
         figures: output/ckd_staging_upset_*.png
+        tables: output/ckd_staging_upset_*.pcsv
         time: output/time_diff_ckd.jpeg
 
   # generate_notebook:
