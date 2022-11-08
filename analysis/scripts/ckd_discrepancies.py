@@ -12,13 +12,49 @@ egfr_subset = df.loc[:, ["ckd_primis_stage", "ckd_egfr_category"]]
 acr_subset = df.loc[:, ["ckd_primis_stage", "ckd_acr_category"]]
 egfr_acr_subset = df.loc[:, ["ckd_egfr_category", "ckd_acr_category"]]
 
+
+combined = df.loc[:, ["ckd_primis_stage", "ckd_egfr_category", "ckd_acr_category"]]
+combined = combined.fillna("Missing")
+combined["ckd_primis_stage"] = combined["ckd_primis_stage"].astype(str)
+combined["ckd_egfr_category"] = combined["ckd_egfr_category"].astype(str)
+combined["ckd_acr_category"] = combined["ckd_acr_category"].astype(str)
+combined_encoded = pd.get_dummies(combined)
+combined_encoded = combined_encoded.rename(
+        columns={
+            "ckd_primis_stage_1.0": "Coded G1",
+            "ckd_primis_stage_1.0": "Coded G1",
+            "ckd_primis_stage_2.0": "Coded G2",
+            "ckd_primis_stage_3.0": "Coded G3",
+            "ckd_primis_stage_4.0": "Coded G4",
+            "ckd_primis_stage_5.0": "Coded G5",
+            "ckd_primis_stage_Missing": "Primary Care Stage Missing",
+            "ckd_egfr_category_Undefined": "Biochemical Undefined",
+            "ckd_egfr_category_G1": "Biochemical G1",
+            "ckd_egfr_category_G2": "Biochemical G2",
+            "ckd_egfr_category_G3a": "Biochemical G3a",
+            "ckd_egfr_category_G3b": "Biochemical G3b",
+            "ckd_egfr_category_G4": "Biochemical G4",
+            "ckd_egfr_category_G5": "Biochemical G5",
+            "ckd_acr_category_A1": "A1",
+            "ckd_acr_category_A2": "A2",
+            "ckd_acr_category_A3": "A3",
+            "ckd_acr_category_Undefined": "ACR Undefined",
+        }
+    )
+
+counts = combined_encoded.groupby(by=combined_encoded.columns.tolist()).grouper.size()
+counts = drop_and_round(counts)
+
+counts.to_csv(OUTPUT_DIR / f"ckd_staging_upset_combined.csv")
+
+
 for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
 
     subset =  subset.fillna("Missing")
 
-    if "ckd_egfr_category" in subset.columns:
-        subset.loc[subset["ckd_egfr_category"] == "G3b", "ckd_egfr_category"] = "G3"
-        subset.loc[subset["ckd_egfr_category"] == "G3a", "ckd_egfr_category"] = "G3"
+    # if "ckd_egfr_category" in subset.columns:
+        # subset.loc[subset["ckd_egfr_category"] == "G3b", "ckd_egfr_category"] = "G3"
+        # subset.loc[subset["ckd_egfr_category"] == "G3a", "ckd_egfr_category"] = "G3"
 
     if "ckd_primis_stage" in subset.columns:
         subset["ckd_primis_stage"] = df["ckd_primis_stage"].astype(str)
@@ -36,7 +72,8 @@ for i, subset in enumerate([egfr_subset, acr_subset, egfr_acr_subset]):
             "ckd_egfr_category_Undefined": "Biochemical Undefined",
             "ckd_egfr_category_G1": "Biochemical G1",
             "ckd_egfr_category_G2": "Biochemical G2",
-            "ckd_egfr_category_G3": "Biochemical G3",
+            "ckd_egfr_category_G3a": "Biochemical G3a",
+            "ckd_egfr_category_G3b": "Biochemical G3b",
             "ckd_egfr_category_G4": "Biochemical G4",
             "ckd_egfr_category_G5": "Biochemical G5",
             "ckd_acr_category_A1": "A1",
