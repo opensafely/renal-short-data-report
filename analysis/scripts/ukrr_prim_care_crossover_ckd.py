@@ -37,9 +37,9 @@ counts = drop_and_round(counts)
 # drop patients where missing from Ukrr and prim care - we don't care about these.
 # drop row where index is 1 for "Missing in UKRR" and "Primary Care Stage Missing" if it exists
 
-if "Primary Care Stage Missing" in counts.index.names:
+# if "Primary Care Stage Missing" in counts.index.names:
 
-    counts = counts.drop(index=1, level="Primary Care Stage Missing", errors="ignore", axis=0)
+#     counts = counts.drop(index=1, level="Primary Care Stage Missing", errors="ignore", axis=0)
 
 #save counts to csv
 counts.to_csv(OUTPUT_DIR / "ukrr_overlap_stage.csv")
