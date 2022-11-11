@@ -11,7 +11,7 @@ import numpy as np
 df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-12-01.csv.gz", usecols=["ckd_primis_stage", "ukrr_2020", "ukrr_ckd2020_creat", "ukrr_ckd2020_egfr", "egfr_numeric_value_history", "creatinine_numeric_value_history"])
 
 # Overlap between those in ukkr_ckd2020 and those with ckd stage using primis
-stage_subset = df.loc[:,["ckd_primis_stage", "ukrr_ckd2020"]]
+stage_subset = df.loc[:,["ckd_primis_stage", "ukrr_2020"]]
 stage_subset =  stage_subset.fillna("Missing")
 stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
 stage_subset["ukrr_2020"] = stage_subset["ukrr_2020"].astype(str)
