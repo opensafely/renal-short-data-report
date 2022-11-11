@@ -269,8 +269,8 @@ actions:
     needs: [join_numeric_value]
     outputs:
       moderately_sensitive:
-        upset: output/ukrr_overlap_stage.png
-        upset_csv: output/ukrr_overlap_stage.csv
+        upset: output/ukrr*overlap_stage.png
+        upset_csv: output/ukrr*overlap_stage.csv
         violin: output/violin_*.png
 
   

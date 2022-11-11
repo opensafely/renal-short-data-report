@@ -8,16 +8,47 @@ import seaborn as sns
 import numpy as np
 
 
-df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-12-01.csv.gz", usecols=["ckd_primis_stage", "ukrr_2020", "ukrr_ckd2020_creat", "ukrr_ckd2020_egfr", "egfr_numeric_value_history", "creatinine_numeric_value_history"])
+df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-12-01.csv.gz", usecols=["ckd_primis_stage", "ukrr_2020","ukrr_ckd2020", "ukrr_ckd2020_creat", "ukrr_ckd2020_egfr", "egfr_numeric_value_history", "creatinine_numeric_value_history"])
 
 # Overlap between those in ukkr_ckd2020 and those with ckd stage using primis
-stage_subset = df.loc[:,["ckd_primis_stage", "ukrr_2020"]]
+stage_subset = df.loc[:,["ckd_primis_stage", "ukrr_ckd2020"]]
 stage_subset =  stage_subset.fillna("Missing")
 stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
-stage_subset["ukrr_2020"] = stage_subset["ukrr_2020"].astype(str)
+stage_subset["ukrr_ckd2020"] = stage_subset["ukrr_ckd2020"].astype(str)
 stage_subset_encoded = pd.get_dummies(stage_subset)
 
 stage_subset_encoded = stage_subset_encoded.rename(
+    columns={
+        "ckd_primis_stage_1.0": "Primary Care Stage 1",
+        "ckd_primis_stage_2.0": "Primary Care Stage 2",
+        "ckd_primis_stage_3.0": "Primary Care Stage 3",
+        "ckd_primis_stage_4.0": "Primary Care Stage 4",
+        "ckd_primis_stage_5.0": "Primary Care Stage 5",
+        "ckd_primis_stage_Missing": "Primary Care Stage Missing",
+        "ukrr_ckd2020_0": "Not in UKRR",
+        "ukrr_ckd2020_1": "In UKRR",
+        "ukrr_ckd2020_Missing": "Missing in UKRR"
+    }
+    )
+
+counts = stage_subset_encoded.groupby(by=stage_subset_encoded.columns.tolist()).grouper.size()
+counts = drop_and_round(counts)
+counts.to_csv(OUTPUT_DIR / "ukrr_rrt_overlap_stage.csv")
+
+plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
+plt.savefig(OUTPUT_DIR / "ukrr_rrt_overlap_stage.png")
+plt.clf()
+
+
+
+# Overlap between those in ukkr_2020 and those with ckd stage using primis
+stage_subset_rrt = df.loc[:,["ckd_primis_stage", "ukrr_2020"]]
+stage_subset_rrt =  stage_subset_rrt.fillna("Missing")
+stage_subset_rrt["ckd_primis_stage"] = stage_subset_rrt["ckd_primis_stage"].astype(str)
+stage_subset_rrt["ukrr_2020"] = stage_subset_rrt["ukrr_2020"].astype(str)
+stage_subset_rrt_encoded = pd.get_dummies(stage_subset_rrt)
+
+stage_subset_rrt_encoded = stage_subset_rrt_encoded.rename(
     columns={
         "ckd_primis_stage_1.0": "Primary Care Stage 1",
         "ckd_primis_stage_2.0": "Primary Care Stage 2",
@@ -31,18 +62,9 @@ stage_subset_encoded = stage_subset_encoded.rename(
     }
     )
 
-counts = stage_subset_encoded.groupby(by=stage_subset_encoded.columns.tolist()).grouper.size()
+counts = stage_subset_rrt_encoded.groupby(by=stage_subset_rrt_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
-
-# drop patients where missing from Ukrr and prim care - we don't care about these.
-# drop row where index is 1 for "Missing in UKRR" and "Primary Care Stage Missing" if it exists
-
-# if "Primary Care Stage Missing" in counts.index.names:
-
-#     counts = counts.drop(index=1, level="Primary Care Stage Missing", errors="ignore", axis=0)
-
-#save counts to csv
-counts.to_csv(OUTPUT_DIR / "ukrr_overlap_stage.csv")
+counts.to_csv(OUTPUT_DIR / "ukrr_rrt_overlap_stage.csv")
 
 plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
 plt.savefig(OUTPUT_DIR / "ukrr_overlap_stage.png")
