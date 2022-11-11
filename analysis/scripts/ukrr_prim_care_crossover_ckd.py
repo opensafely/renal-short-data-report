@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from upsetplot import plot as upset_plot
 from utilities import OUTPUT_DIR
-from redaction_utils import drop_and_round
+from redaction_utils import drop_and_round, round_values
 import seaborn as sns
 import numpy as np
 
@@ -91,8 +91,8 @@ percentile_values_ukrr = np.quantile(a=ukrr_latest_egfr, q=percentiles)
 percentile_values_pc = np.quantile(a=prim_care_latest_egfr, q=percentiles)
 
 violin_df = pd.DataFrame({
-    f"UKRR (n={len(ukrr_latest_egfr)})": pd.Series(percentile_values_ukrr),
-    f"Primary Care (n={len(prim_care_latest_egfr)})": pd.Series(percentile_values_pc)
+    f"UKRR (n={round_values(len(ukrr_latest_egfr))})": pd.Series(percentile_values_ukrr),
+    f"Primary Care (n={round_values(len(prim_care_latest_egfr))})": pd.Series(percentile_values_pc)
 })
 # show number of values on violin plot
 
@@ -117,8 +117,8 @@ percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
 percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
 
 df = pd.DataFrame({
-    f"UKRR (n={len(ukrr_latest_creatinine)})": pd.Series(percentile_values_ukrr),
-    f"Primary Care (n={len(prim_care_latest_creatinine)})": pd.Series(percentile_values_pc)
+    f"UKRR (n={round_values(len(ukrr_latest_creatinine))})": pd.Series(percentile_values_ukrr),
+    f"Primary Care (n={round_values(len(prim_care_latest_creatinine))})": pd.Series(percentile_values_pc)
 })
 
 sns.violinplot(data=df, cut=0)
