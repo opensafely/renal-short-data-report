@@ -8,13 +8,13 @@ import seaborn as sns
 import numpy as np
 
 
-df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-12-01.csv.gz", usecols=["ckd_primis_stage", "ukrr_ckd2020", "ukrr_ckd2020_creat", "ukrr_ckd2020_egfr", "egfr_numeric_value_history", "creatinine_numeric_value_history"])
+df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-12-01.csv.gz", usecols=["ckd_primis_stage", "ukrr_2020", "ukrr_ckd2020_creat", "ukrr_ckd2020_egfr", "egfr_numeric_value_history", "creatinine_numeric_value_history"])
 
 # Overlap between those in ukkr_ckd2020 and those with ckd stage using primis
 stage_subset = df.loc[:,["ckd_primis_stage", "ukrr_ckd2020"]]
 stage_subset =  stage_subset.fillna("Missing")
 stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
-stage_subset["ukrr_ckd2020"] = stage_subset["ukrr_ckd2020"].astype(str)
+stage_subset["ukrr_2020"] = stage_subset["ukrr_2020"].astype(str)
 stage_subset_encoded = pd.get_dummies(stage_subset)
 
 stage_subset_encoded = stage_subset_encoded.rename(
@@ -25,9 +25,9 @@ stage_subset_encoded = stage_subset_encoded.rename(
         "ckd_primis_stage_4.0": "Primary Care Stage 4",
         "ckd_primis_stage_5.0": "Primary Care Stage 5",
         "ckd_primis_stage_Missing": "Primary Care Stage Missing",
-        "ukrr_ckd2020_0": "Not in UKRR",
-        "ukrr_ckd2020_1": "In UKRR",
-        "ukrr_ckd2020_Missing": "Missing in UKRR"
+        "ukrr_2020_0": "Not in UKRR",
+        "ukrr_2020_1": "In UKRR",
+        "ukrr_2020_Missing": "Missing in UKRR"
     }
     )
 
