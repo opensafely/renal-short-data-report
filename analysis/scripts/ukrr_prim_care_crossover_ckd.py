@@ -96,7 +96,7 @@ violin_df = pd.DataFrame({
 })
 # show number of values on violin plot
 
-sns.violinplot(data=violin_df, cut=0, inner=None)
+sns.violinplot(data=violin_df, cut=0)
 plt.title("eGFR UKRR vs Primary Care")
 plt.ylabel("numeric value")
 plt.savefig(OUTPUT_DIR / f"violin_plot_ukrr_pc_egfr.png")
@@ -121,7 +121,7 @@ df = pd.DataFrame({
     f"Primary Care (n={len(prim_care_latest_creatinine)})": pd.Series(percentile_values_pc)
 })
 
-sns.violinplot(data=df, cut=0, inner=None)
+sns.violinplot(data=df, cut=0)
 plt.title("Creatinine UKRR vs Primary Care")
 plt.ylabel("numeric value")
 plt.savefig(OUTPUT_DIR / f"violin_plot_ukrr_pc_creatinine.png")
