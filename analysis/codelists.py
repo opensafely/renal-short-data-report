@@ -140,34 +140,35 @@ primis_ckd_3_5_codelist = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-ckd35.csv", system="snomed", column="code"
 )
 # just a single code for this one so haven't created a list
-kidney_tx_icd10_codelist = codelist(["Z940"], system="icd10")
+kidney_tx_icd10_codelist = codelist(["Z940"], system="icd10", category_column="Y")
 
 kidney_tx_opcs4_codelist = codelist_from_csv(
     "codelists/user-viyaasan-kidney-transplant-opcs-4.csv",
     system="opcs4",
     column="code",
+    category_column="reduced"
 )
 
 dialysis_icd10_codelist = codelist_from_csv(
-    "codelists/ukrr-dialysis.csv", system="icd10", column="code"
+    "codelists/ukrr-dialysis.csv", system="icd10", column="code", category_column="reduced"
 )
 
 dialysis_opcs4_codelist = codelist_from_csv(
-    "codelists/ukrr-dialysis-opcs-4.csv", system="opcs4", column="code"
+    "codelists/ukrr-dialysis-opcs-4.csv", system="opcs4", column="code", category_column="reduced"
 )
 
 # Combining tx and dialysis codelists into RRT codelist, and adding tx failure code
 RRT_icd10_codelist = combine_codelists(
     kidney_tx_icd10_codelist,
     dialysis_icd10_codelist,
-    codelist(["T861"], system="icd10"),
+    codelist(["T861"], system="icd10", category_column="N"),
 )
 
 # Same for OPCS4, also PD catheter removal and bilateral nephrectomy
 RRT_opcs4_codelist = combine_codelists(
     kidney_tx_opcs4_codelist,
     dialysis_opcs4_codelist,
-    codelist(["M023", "M026", "M027", "X412"], system="opcs4"),
+    codelist(["M023", "M026", "M027", "X412"], system="opcs4", category_column="N"),
 )
 
 # CKD ICD codelist to look at pts in UKRR but not in secondary care
