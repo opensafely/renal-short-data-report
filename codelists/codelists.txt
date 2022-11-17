@@ -9,7 +9,7 @@ ukrr/creatinine-clearance-tests-level/77939a9f/
 ukrr/creatinine-tests/57f94ea6/
 ukrr/creatinine-tests-level/3ee9db71/
 ukrr/dialysis-opcs-4/505bef04
-ukrr/dialysis/66b8a243
+ukrr/dialysis-icd10/2a5cf9a2/
 ukrr/egfr-tests/47021b53/
 ukrr/egfr-tests-level/5293ceba/
 user/viyaasan/kidney-transplant-opcs-4/18d788ae/

@@ -309,11 +309,11 @@ study = StudyDefinition(
 
 
      # creating variables from individual codes, first prevalent
-    **loop_over_proc_codes_prev(RRT_opcs4_codelist),
-    **loop_over_diag_codes_prev(RRT_icd10_codelist),
+    **loop_over_proc_codes_prev(RRT_opcs4_reduced_codelist),
+    **loop_over_diag_codes_prev(RRT_icd10_reduced_codelist),
          # and now incident
-    **loop_over_proc_codes_inc(RRT_opcs4_codelist),
-    **loop_over_diag_codes_inc(RRT_icd10_codelist),
+    **loop_over_proc_codes_inc(RRT_opcs4_reduced_codelist),
+    **loop_over_diag_codes_inc(RRT_icd10_reduced_codelist),
 )
 
 

@@ -139,7 +139,7 @@ primis_ckd_stage = codelist_from_csv(
 primis_ckd_3_5_codelist = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-ckd35.csv", system="snomed", column="code"
 )
-# just a single code for this one so haven't created a list
+# just a single code for this one so haven't created a list. We do want to create a variable for this in the study def
 kidney_tx_icd10_codelist = codelist(["Z940"], system="icd10")
 
 kidney_tx_opcs4_codelist = codelist_from_csv(
@@ -148,12 +148,29 @@ kidney_tx_opcs4_codelist = codelist_from_csv(
     column="code",
 )
 
+#same as above but reduced to the ones we want to create variables for
+kidney_tx_opcs4_reduced_codelist = codelist_from_csv(
+    "codelists/local_codelists/viyaasan-kidney-transplant-opcs-4-reduced.csv",
+    system="opcs4",
+    column="code",
+)
+
 dialysis_icd10_codelist = codelist_from_csv(
-    "codelists/ukrr-dialysis.csv", system="icd10", column="code"
+    "codelists/ukrr-dialysis-icd10.csv", system="icd10", column="code",
+)
+
+#same as above but reduced to the ones we want to create variables for
+dialysis_icd10_reduced_codelist = codelist_from_csv(
+    "codelists/local_codelists/ukrr-dialysis-icd10-reduced.csv", system="icd10", column="code",
 )
 
 dialysis_opcs4_codelist = codelist_from_csv(
     "codelists/ukrr-dialysis-opcs-4.csv", system="opcs4", column="code"
+)
+
+#same as above but reduced to the ones we want to create variables for
+dialysis_opcs4_reduced_codelist = codelist_from_csv(
+    "codelists/local_codelists/ukrr-dialysis-opcs-4-reduced.csv", system="opcs4", column="code"
 )
 
 # Combining tx and dialysis codelists into RRT codelist, and adding tx failure code
@@ -163,12 +180,25 @@ RRT_icd10_codelist = combine_codelists(
     codelist(["T861"], system="icd10"),
 )
 
+#same as above but reduced to the ones we want to create variables for (tx icd10 is only one code which we want)
+RRT_icd10_reduced_codelist = combine_codelists(
+    kidney_tx_icd10_codelist,
+    dialysis_icd10_reduced_codelist,
+)
+
 # Same for OPCS4, also PD catheter removal and bilateral nephrectomy
 RRT_opcs4_codelist = combine_codelists(
     kidney_tx_opcs4_codelist,
     dialysis_opcs4_codelist,
     codelist(["M023", "M026", "M027", "X412"], system="opcs4"),
 )
+
+#same as above but reduced to the ones we want to create variables for
+RRT_opcs4_reduced_codelist = combine_codelists(
+    kidney_tx_opcs4_reduced_codelist,
+    dialysis_opcs4_reduced_codelist,
+)
+
 
 # CKD ICD codelist to look at pts in UKRR but not in secondary care
 CKD_icd10_codelist = codelist_from_csv(
