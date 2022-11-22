@@ -230,15 +230,17 @@ def plot_boxplot_numeric_value(x, title, filename):
     plt.clf()
 
 
-def plot_violin_numeric_value(x, title, filename, cut=0):
+
+def plot_violin_numeric_value(x, title, filename, cut=0, combined=False):
     """Plots a violin plot from an array of numeric values. Controls for disclosure by
     calculating percentiles and using this to generate the plots rather than the raw values.
     This will be sufficient for large the majority of populations. Limits the range of plotted data
     to the top and bottom quantile using `cut=0`.
 
     """
-    # remove values of 0
-    x = x[x > 0]
+    if not combined:
+        # remove values of 0
+        x = x[x > 0]
 
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=x, q=percentiles)
@@ -246,6 +248,30 @@ def plot_violin_numeric_value(x, title, filename, cut=0):
     plt.title(title)
     plt.ylabel("numeric value")
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
+   
+    plt.clf()
+
+
+def plot_violin_numeric_value_combined(x, title, filename, cut=0):
+    """Plots a violin plot from an array of numeric values. Controls for disclosure by
+    calculating percentiles and using this to generate the plots rather than the raw values.
+    This will be sufficient for large the majority of populations. Limits the range of plotted data
+    to the top and bottom quantile using `cut=0`.
+
+    """
+    
+    # violin plot with boxplot
+
+    figure_output = sns.violinplot(data=x, x ="test", y = "value",cut=cut, inner='box')
+
+   
+    # no legend
+    # figure_output.get_legend().remove()
+
+    plt.title(title)
+    plt.ylabel("numeric value")
+    plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
+   
     plt.clf()
 
 

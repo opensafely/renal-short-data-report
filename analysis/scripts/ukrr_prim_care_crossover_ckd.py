@@ -76,8 +76,8 @@ plt.clf()
 
 ukrr_latest_egfr = df["ukrr_ckd2020_egfr"][(df["ukrr_ckd2020_egfr"].notnull()) & (df["ukrr_ckd2020_egfr"]>0)]
 
-# prim care latest egfr in advanced ckd
-prim_care_latest_egfr = df["egfr_numeric_value_history"][(df["egfr_numeric_value_history"].notnull()) & (df["egfr_numeric_value_history"]>0) & (df["ckd_primis_stage"]>=4)]
+# prim care latest egfr in (for patients in UKRR)
+prim_care_latest_egfr = df["egfr_numeric_value_history"][(df["egfr_numeric_value_history"].notnull()) & (df["egfr_numeric_value_history"]>0) & (df["ckd_primis_stage"]>=4) & ((df["ukrr_ckd2020_egfr"].notnull()) & (df["ukrr_ckd2020_egfr"]>0))]
 
 # print(ukrr_latest_egfr.values)
 # sns.violinplot(data=ukrr_latest_egfr.values,inner=None)
@@ -103,7 +103,7 @@ plt.savefig(OUTPUT_DIR / f"violin_plot_ukrr_pc_egfr.png")
 plt.clf()
 
 ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][(df["ukrr_ckd2020_creat"].notnull())&(df["ukrr_ckd2020_creat"]>0)]
-prim_care_latest_creatinine = df["creatinine_numeric_value_history"][(df["creatinine_numeric_value_history"].notnull()) & (df["creatinine_numeric_value_history"]>0) & (df["ckd_primis_stage"]>=4)
+prim_care_latest_creatinine = df["creatinine_numeric_value_history"][(df["creatinine_numeric_value_history"].notnull()) & (df["creatinine_numeric_value_history"]>0) & (df["ckd_primis_stage"]>=4) & ((df["ukrr_ckd2020_creat"].notnull())&(df["ukrr_ckd2020_creat"]>0))
 ]
 
 # sns.violinplot(data=ukrr_latest_creatinine,inner=None)
