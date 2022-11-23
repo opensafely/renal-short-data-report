@@ -244,7 +244,7 @@ def plot_violin_numeric_value(x, title, filename, cut=0, combined=False):
 
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=x, q=percentiles)
-    figure_output = sns.violinplot(data=percentile_values, cut=cut)
+    figure_output = sns.violinplot(data=percentile_values, cut=cut, whis=[25, 75])
     plt.title(title)
     plt.ylabel("numeric value")
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
@@ -262,7 +262,7 @@ def plot_violin_numeric_value_combined(x, title, filename, cut=0):
     
     # violin plot with boxplot
 
-    figure_output = sns.violinplot(data=x, x ="test", y = "value",cut=cut, inner='box')
+    figure_output = sns.violinplot(data=x, x ="test", y = "value",cut=cut, inner='box', whis=[25, 75])
 
    
     # no legend
