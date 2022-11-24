@@ -1,4 +1,4 @@
-from cohortextractor import StudyDefinition, patients
+from cohortextractor import StudyDefinition, patients, Measure
 
 from codelists import *
 
@@ -42,6 +42,14 @@ study = StudyDefinition(
             }
         ),
     ),
+    ckd_primis=patients.with_these_clinical_events(
+        codelist=primis_ckd_stage,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={
+            "incidence": 0.5,
+        },  
+    ),
     ckd_primis_stage=patients.with_these_clinical_events(
         codelist=primis_ckd_stage,
         between=["index_date", "last_day_of_month(index_date)"],
@@ -60,4 +68,13 @@ study = StudyDefinition(
         },
     ),
 )
+
+measures = [
+    Measure(
+        id="incident_ckd_primis_stage_rate",
+        numerator="ckd_primis",
+        denominator="population",
+        group_by=["ckd_primis_stage"],
+    ),
+]
 
