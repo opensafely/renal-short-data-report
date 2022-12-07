@@ -168,7 +168,7 @@ actions:
 
   generate_study_population_ukrr_1:
     run: cohortextractor:latest generate_cohort
-      --study-definition study_definition_ukrr
+      --study-definition study_definition_ukrr_short
       --index-date-range "2021-01-01"
       --output-format csv.gz
       --with-end-date-fix
@@ -178,7 +178,7 @@ actions:
 
   generate_study_population_ukrr_2:
     run: cohortextractor:latest generate_cohort
-      --study-definition study_definition_ukrr
+      --study-definition study_definition_ukrr_short
       --index-date-range "2022-01-01"
       --output-format csv.gz
       --with-end-date-fix

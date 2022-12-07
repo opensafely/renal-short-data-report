@@ -195,3 +195,5 @@ rrt_variables = dict(
         },
     ),
 )
+renal = {'latest_renal_status', 'latest_renal_date'}
+rrt_variables_no_renal = {i:rrt_variables[i] for i in rrt_variables if i not in renal}
