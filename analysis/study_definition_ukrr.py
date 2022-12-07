@@ -267,6 +267,10 @@ study = StudyDefinition(
         ),
     ),
 
+    **demographic_variables,
+    **comorbidity_variables,
+    **test_variables,
+    **ckd_variables,
     **rrt_variables,
     **secondary_care_variables,
     **ukrr_variables,
