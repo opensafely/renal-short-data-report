@@ -322,6 +322,14 @@ actions:
       moderately_sensitive:
         report: output/notebooks/ukrr-tables-figures-2021.html
 
+  generate_ukrr_tables_figures_2:
+    run: r:latest -e 'rmarkdown::render("analysis/ukrr-analysis/ukrr-tables-figures-2022.Rmd", knit_root_dir = "/workspace", output_dir = "output/notebooks")'
+    needs: [generate_study_population_ukrr_2]
+    outputs:
+      moderately_sensitive:
+        report: output/notebooks/ukrr-tables-figures-2022.html
+
+
 
 
   # generate_pc_sc_codes1a:
