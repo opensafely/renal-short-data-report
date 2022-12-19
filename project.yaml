@@ -164,7 +164,7 @@ actions:
       --with-end-date-fix
     outputs:
       highly_sensitive:
-        cohort: output/ukrr/input_ukrr*.csv.gz
+        cohort: output/ukrr/input_ukrr_2020-12-01.csv.gz
 
   generate_study_population_ukrr:
     run: cohortextractor:latest generate_cohort
