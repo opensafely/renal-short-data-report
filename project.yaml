@@ -156,15 +156,15 @@ actions:
       highly_sensitive:
         counts: output/joined/inpu*.csv.gz
 
-  generate_study_population_ukrr_dec_20:
+  generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_ukrr
-      --index-date-range "2020-12-01"
+      --index-date-range "2022-07-01"
       --output-format csv.gz
       --with-end-date-fix
     outputs:
       highly_sensitive:
-        cohort: output/ukrr/input_ukrr_2020-12-01.csv.gz
+        cohort: output/ukrr/input_ukrr_2022-07-01.csv.gz
 
   generate_study_population_ukrr:
     run: cohortextractor:latest generate_cohort
