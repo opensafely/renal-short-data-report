@@ -3,7 +3,10 @@ from variable_definitions.demographic_variables import demographic_variables
 from variable_definitions.test_variables import test_variables, path_tests
 from variable_definitions.ckd_variables import ckd_variables
 from variable_definitions.comorbidity_variables import comorbidity_variables
+from variable_definitions.rrt_variables import rrt_variables
 from scripts.variables import demographics
+
+from codelists import dialysis_codelist
 
 
 study = StudyDefinition(
@@ -40,6 +43,27 @@ study = StudyDefinition(
     **test_variables,
     **comorbidity_variables,
     **ckd_variables,
+
+    dialysis=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        on_or_before="last_day_of_month(index_date)",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    dialysis_code=patients.with_these_clinical_events(
+        codelist=dialysis_codelist,
+        on_or_before="last_day_of_month(index_date)",
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"7A602": 0.5, "7A600": 0.5}},
+            "incidence": 0.2,
+        },
+    ),
 )
 
 

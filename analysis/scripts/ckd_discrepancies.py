@@ -11,6 +11,7 @@ df = pd.read_csv(OUTPUT_DIR / "joined/input_2022-07-01.csv.gz")
 egfr_subset = df.loc[:, ["ckd_primis_stage", "ckd_egfr_category"]]
 acr_subset = df.loc[:, ["ckd_primis_stage", "ckd_acr_category"]]
 egfr_acr_subset = df.loc[:, ["ckd_egfr_category", "ckd_acr_category"]]
+dialysis_subset = df.loc[:, ["ckd_primis_stage", "ckd_egfr_category", "dialysis"]]
 
 
 combined = df.loc[:, ["ckd_primis_stage", "ckd_egfr_category", "ckd_acr_category"]]
@@ -44,6 +45,11 @@ combined_encoded = combined_encoded.rename(
 
 counts = combined_encoded.groupby(by=combined_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
+
+# count of the number of people with ckd_egfr_category g4 or g5 and those with dialysis
+counts_dialysis = dialysis_subset.groupby(by=dialysis_subset.columns.tolist()).grouper.size()
+counts_dialysis = drop_and_round(counts_dialysis)
+counts_dialysis.to_csv(OUTPUT_DIR / f"ckd_dialysis_upset.csv")
 
 counts.to_csv(OUTPUT_DIR / f"ckd_staging_upset_combined.csv")
 
