@@ -309,7 +309,7 @@ actions:
       moderately_sensitive:
         upset: output/ukrr*overlap_stage.png
         upset_csv: output/ukrr*overlap_stage.csv
-        violin: output/violin_*.png
+        distribution: output/dist_*.png
 
   
   # generate_kidney_week:
