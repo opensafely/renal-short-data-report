@@ -1,0 +1,258 @@
+---
+title: "CKD stage of people with KRT codes not in UKRR"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+This document describes the latest CKD stage of people who had a KRT code in primary or secondary care but are not in the UKRR data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+#read in dataset
+#pick up 1st Jan cohort as latest renal status is on or before index date
+ df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
+ 
+ #only keep incident data for 2020 for PC and SC
+df<-df %>%
+  mutate(incident_rrt_status=ifelse(grepl("2020",incident_rrt_date), incident_rrt_status, "" )) %>%
+  mutate(incident_rrt_status_secondary=ifelse(grepl("2020",incident_rrt_date_secondary), incident_rrt_status_secondary, "" ))
+
+#add variable for dialysis/tx for UKRR
+df<- df %>%
+  mutate(ukrr_dtx = ifelse(ukrr_2019_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_2019_mod == "Tx", "Transplant", "Not on RRT"))) %>%
+  mutate(ukrr_dtx_inc = ifelse(ukrr_inc2020_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_inc2020_mod == "Tx", "Transplant", "Not on RRT"))) %>%
+  mutate(region = replace(region, region=="", "Missing"))
+# order factor
+df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
+df$ukrr_dtx_inc<-factor(df$ukrr_dtx_inc, levels=c("Not on RRT", "Dialysis", "Transplant"))
+
+# add variable for source
+df <- df %>%
+  mutate(source_prev_rrt = case_when(ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "UPS",
+                                      ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "PS",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "US",
+                                     ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "UP",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "U",
+                                     ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "P",
+                                     ukrr_2019!=1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "S")) %>%
+  mutate(source_prev_dialysis = case_when(ukrr_dtx=="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "UPS",
+                                      ukrr_dtx!="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "PS",
+                                     ukrr_dtx=="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "US",
+                                     ukrr_dtx=="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "UP",
+                                     ukrr_dtx=="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "U",
+                                     ukrr_dtx!="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "P",
+                                     ukrr_dtx!="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "S")) %>%  
+    mutate(source_prev_transplant = case_when(ukrr_dtx=="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      latest_rrt_status_secondary =="Transplant" ~ "UPS",
+                                      ukrr_dtx!="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      latest_rrt_status_secondary =="Transplant" ~ "PS",
+                                     ukrr_dtx=="Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      latest_rrt_status_secondary =="Transplant" ~ "US",
+                                     ukrr_dtx=="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "UP",
+                                     ukrr_dtx == "Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "U",
+                                     ukrr_dtx!="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "P",
+                                     ukrr_dtx!="Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      latest_rrt_status_secondary =="Transplant" ~ "S")) %>%  
+    mutate(source_inc_rrt = case_when(ukrr_inc2020==1 & 
+                                      incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      incident_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "UPS",
+                                      ukrr_inc2020!=1 & 
+                                      incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      incident_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "PS",
+                                     ukrr_inc2020==1 & 
+                                      !(incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      incident_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "US",
+                                     ukrr_inc2020==1 & 
+                                      incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(incident_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "UP",
+                                     ukrr_inc2020==1 & 
+                                      !(incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      !(incident_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "U",
+                                     ukrr_inc2020!=1 & 
+                                      incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(incident_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "P",
+                                     ukrr_inc2020!=1 & 
+                                      !(incident_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      incident_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "S")) %>%
+  mutate(source_inc_dialysis = case_when(ukrr_dtx_inc=="Dialysis" & 
+                                      incident_rrt_status  =="Dialysis" &
+                                      incident_rrt_status_secondary =="Dialysis" ~ "UPS",
+                                      ukrr_dtx_inc!="Dialysis" & 
+                                      incident_rrt_status  =="Dialysis" &
+                                      incident_rrt_status_secondary =="Dialysis" ~ "PS",
+                                     ukrr_dtx_inc=="Dialysis" & 
+                                      !(incident_rrt_status  =="Dialysis") &
+                                      incident_rrt_status_secondary =="Dialysis" ~ "US",
+                                     ukrr_dtx_inc=="Dialysis" & 
+                                      incident_rrt_status  =="Dialysis" &
+                                      !(incident_rrt_status_secondary =="Dialysis") ~ "UP",
+                                     ukrr_dtx_inc == "Dialysis" & 
+                                      !(incident_rrt_status  =="Dialysis") &
+                                      !(incident_rrt_status_secondary =="Dialysis") ~ "U",
+                                     ukrr_dtx_inc!="Dialysis" & 
+                                      incident_rrt_status  =="Dialysis" &
+                                      !(incident_rrt_status_secondary =="Dialysis") ~ "P",
+                                     ukrr_dtx_inc!="Dialysis" & 
+                                      !(incident_rrt_status  =="Dialysis") &
+                                      incident_rrt_status_secondary =="Dialysis" ~ "S")) %>%  
+    mutate(source_inc_transplant = case_when(ukrr_dtx_inc=="Transplant" & 
+                                      incident_rrt_status  =="Transplant" &
+                                      incident_rrt_status_secondary =="Transplant" ~ "UPS",
+                                      ukrr_dtx_inc!="Transplant" & 
+                                      incident_rrt_status  =="Transplant" &
+                                      incident_rrt_status_secondary =="Transplant" ~ "PS",
+                                     ukrr_dtx_inc=="Transplant" & 
+                                      !(incident_rrt_status  =="Transplant") &
+                                      incident_rrt_status_secondary =="Transplant" ~ "US",
+                                     ukrr_dtx_inc=="Transplant" & 
+                                      incident_rrt_status  =="Transplant" &
+                                      !(incident_rrt_status_secondary =="Transplant") ~ "UP",
+                                     ukrr_dtx_inc == "Transplant" & 
+                                      !(incident_rrt_status  =="Transplant") &
+                                      !(incident_rrt_status_secondary =="Transplant") ~ "U",
+                                     ukrr_dtx_inc!="Transplant" & 
+                                      incident_rrt_status  =="Transplant" &
+                                      !(incident_rrt_status_secondary =="Transplant") ~ "P",
+                                     ukrr_dtx_inc!="Transplant" & 
+                                      !(incident_rrt_status  =="Transplant") &
+                                      incident_rrt_status_secondary =="Transplant" ~ "S"))
+
+# pick out latest RRT code for primary care
+df<-df %>%
+    mutate(latest_rrt_code = ifelse(latest_rrt_status=="None", "None",
+                                  ifelse(latest_rrt_status=="Dialysis", dialysis_code,
+                                      ifelse(latest_rrt_status=="Transplant", kidney_tx_code,
+                                             ifelse(latest_rrt_status=="RRT_unknown", RRT_code,"Uncategorised")))))
+
+
+# order factor
+source_levels<-c("UPS", "UP", "US", "PS", "U", "P", "S")
+df$source_prev_rrt<-factor(df$source_prev_rrt, levels=source_levels)
+df$source_prev_dialysis<-factor(df$source_prev_dialysis, levels=source_levels)
+df$source_prev_transplant<-factor(df$source_prev_transplant, levels=source_levels)
+df$source_inc_rrt<-factor(df$source_inc_rrt, levels=source_levels)
+df$source_inc_dialysis<-factor(df$source_inc_dialysis, levels=source_levels)
+df$source_inc_transplant<-factor(df$source_inc_transplant, levels=source_levels)
+
+#calculate latest CKD stage in secondary care (the variable latest_ckd_status_secondary includes RRT which we don't want here)
+#we have the dates of each ICD10 code for the CKD stages, so want to pick the latest one
+#first get the dates of the ckd stages in secondary care
+
+ckd_secondary_dates1<-df[,c("ip_ckd1_diagnosis_date", "ip_ckd2_diagnosis_date", "ip_ckd3_diagnosis_date",
+                           "ip_ckd4_diagnosis_date", "ip_ckd5_diagnosis_date")]  %>%
+  mutate_all( function(x) as.Date(x))  #convert to date
+
+#vector of where there are no CKD codes at all
+no_ckd<-rowSums(is.na(ckd_secondary_dates1))==5
+
+#making changes needed to use max.col function
+ckd_secondary_dates2<-ckd_secondary_dates1 %>%
+         replace(is.na(.), as.Date("1900-01-01")) %>%  # replace missing with earliest date for max.col
+          mutate_all(function(x) as.numeric(x))  #convert to numeric for max.col
+
+#get which column has the latest date - the fist col is stage 1, second is stage 2 etc
+ckd_stage_secondary<-max.col(ckd_secondary_dates2, ties.method="last")
+#repalce with missing when all there is no ckd code (as earlier we replace the missings with an early date "1900-01-01")
+ckd_stage_secondary[no_ckd]<-NA
+
+#setting as a column
+df$ckd_stage_sec<-ckd_stage_secondary
+
+
+#apply disclosure control - redact if less than 7, then round to nearest 5
+disclosure <-function(x, whichmargins=0){
+  redact <- 0<x & x<=7  #flag redacted values for later
+  x[redact] <- 0  # set redacted to 0
+  x<-round(x/5)*5 # round to nearest 5
+  if(whichmargins!=0){
+    x<-addmargins(x,whichmargins) #add totals
+  }
+  if(whichmargins==1){
+    redact<-rbind(redact, rep(FALSE,ncol(redact))) #add extra row to redaction, otherwise won't blank correctly
+  }
+  if(whichmargins==2){
+    redact<-cbind(redact, rep(FALSE,nrow(redact))) #add extra col to redaction, otherwise won't blank correctly
+  }
+  x[redact]<-"<=7"  # flag redacted values
+  return(x)
+}
+
+```
+
+
+# Section 5 - CKD codes in PC/SC care for people in UKRR and not PC/SC, by modality  
+## Prevalent 1/1/2020
+### in PC and not UKRR by modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("P", "PS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("P", "PS"),]$ckd_primis_stage)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
+### in SC and not UKRR
+```{r, echo=FALSE, results='asis', error=TRUE}
+print(length(df[df$source_prev_rrt %in% c("S", "PS"),]$latest_rrt_status_secondary))
+print(length(df[df$source_prev_rrt %in% c("S", "PS"),]$ckd_stage_sec))
+k<-disclosure(table(df[df$source_prev_rrt %in% c("S", "PS"),]$latest_rrt_status_secondary,
+      df[df$source_prev_rrt %in% c("S", "PS"),]$ckd_stage_sec) ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage"  = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
+
+ 
+
