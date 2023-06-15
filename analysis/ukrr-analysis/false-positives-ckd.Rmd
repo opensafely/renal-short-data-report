@@ -242,8 +242,6 @@ print(k2)
 
 ### in SC and not UKRR
 ```{r, echo=FALSE, results='asis', error=TRUE}
-print(length(df[df$source_prev_rrt %in% c("S", "PS"),]$latest_rrt_status_secondary))
-print(length(df[df$source_prev_rrt %in% c("S", "PS"),]$ckd_stage_sec))
 k<-disclosure(table(df[df$source_prev_rrt %in% c("S", "PS"),]$latest_rrt_status_secondary,
       df[df$source_prev_rrt %in% c("S", "PS"),]$ckd_stage_sec) ,1)
 k2<-k%>%
