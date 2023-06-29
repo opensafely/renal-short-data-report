@@ -1,11 +1,11 @@
 ---
-title: "CKD stage of people with KRT codes not in UKRR"
+title: "Checking CKD stage with eGFR"
 author: "Shalini Santhakumaran"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 
-This document describes the latest CKD stage of people who had a KRT code in primary or secondary care but are not in the UKRR data
+This document describes the latest CKD stage of people who had a KRT code in primary or secondary care but are not in the UKRR data, first using CKD codes and then (for primary care only) eGFR data.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -22,9 +22,85 @@ fs::dir_create(here::here("output", "notebooks"))
  df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
 
 #subset variable to reduce memory demands
-df<-df[,c("ukrr_2019", "latest_rrt_status", "latest_rrt_status_secondary", "ckd_primis_stage",
+df<-df[,c("ukrr_2019", "latest_rrt_status", "latest_rrt_status_secondary", "ckd_primis_stage", 
+        "ckd_egfr_category", "egfr_numeric_value_history", "egfr_numeric_value_history_operator",
           "ip_ckd1_diagnosis_date", "ip_ckd2_diagnosis_date", "ip_ckd3_diagnosis_date","ip_ckd4_diagnosis_date", "ip_ckd5_diagnosis_date")] 
  
+
+# add variable for eGFR based on last value
+df<- df %>%
+  mutate(ckd_egfr_category_lastvalue = case_when (
+    egfr_numeric_value_history >= 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=") |
+         is.na(egfr_numeric_value_history_operator)) ~ "G1" ,
+    egfr_numeric_value_history >= 60 &
+      egfr_numeric_value_history < 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" ) |
+         is.na(egfr_numeric_value_history_operator)) ~ "G2" ,
+    egfr_numeric_value_history >= 45 &
+      egfr_numeric_value_history < 60 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3a" ,
+    egfr_numeric_value_history >= 30 &
+      egfr_numeric_value_history < 45 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3b" ,
+    egfr_numeric_value_history >= 15 &
+      egfr_numeric_value_history < 30 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G4" ,
+    egfr_numeric_value_history > 0 &
+      egfr_numeric_value_history < 15 &
+      ((! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G5" 
+  ))
+
+  
+# add variable for eGFR based on last value, but assuming the highest CKD stage from the numeric values when there is a > or >= operator (not many with < or  <= operator)
+# so if a person has >60 they will be stage G2 but becuase of the category boundaries
+df<- df %>%
+  mutate(ckd_egfr_category_operator = case_when (
+    egfr_numeric_value_history >= 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=") |
+         is.na(egfr_numeric_value_history_operator)) ~ "G1" ,
+    egfr_numeric_value_history >= 60 &
+      egfr_numeric_value_history < 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" ) |
+         is.na(egfr_numeric_value_history_operator)) ~ "G2" ,
+    egfr_numeric_value_history >= 45 &
+      egfr_numeric_value_history < 60 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3a" ,
+    egfr_numeric_value_history >= 30 &
+      egfr_numeric_value_history < 45 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3b" ,
+    egfr_numeric_value_history >= 15 &
+      egfr_numeric_value_history < 30 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G4" ,
+    egfr_numeric_value_history > 0 &
+      egfr_numeric_value_history < 15  ~ "G5" 
+  ))
 
 # add variable for source
 df <- df %>%
@@ -102,10 +178,28 @@ disclosure <-function(x, whichmargins=0){
 
 ```
 
+## Checking eGFR  
+### eGFR category from Louis vs eGFR calculated on last value only
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<- table(df$ckd_egfr_category, df$ckd_egfr_category_lastvalue)
+k2<-k%>%
+  kbl() %>%
+  kable_styling()
+print(k2)
+```
+### eGFR category assuming highest CKD stage when there is > or >= operator vs eGFR calculated on last value only
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<- table(df$ckd_egfr_category_operator, df$ckd_egfr_category_lastvalue)
+k2<-k%>%
+  kbl() %>%
+  kable_styling()
+print(k2)
+```
 
-# Section 5 - CKD codes in PC/SC care for people in UKRR and not PC/SC, by modality  
+
+# 1a - Latest CKD codes in PC/SC care for people on KRT in PC/SC and not UKRR, by modality  
 ## Prevalent 1/1/2020
-### in PC and not UKRR by modality
+### in PC and not UKRR by PC modality
 ```{r, echo=FALSE, results='asis', error=TRUE}
 k<-disclosure(table(df[df$source_prev_rrt %in% c("P", "PS"),]$latest_rrt_status,
       df[df$source_prev_rrt %in% c("P", "PS"),]$ckd_primis_stage)  ,1)
@@ -116,7 +210,7 @@ k2<-k%>%
 print(k2)
 ```
 
-### in SC and not UKRR
+### in SC and not UKRR by SC modality
 ```{r, echo=FALSE, results='asis', error=TRUE}
 k<-disclosure(table(df[df$source_prev_rrt %in% c("S", "PS"),]$latest_rrt_status_secondary,
       df[df$source_prev_rrt %in% c("S", "PS"),]$ckd_stage_sec) ,1)
@@ -127,6 +221,104 @@ k2<-k%>%
 print(k2)
 ```
 
+# 1b - For comparison, CKD codes in PC/SC care for people on KRT in PC/SC and also UKRR, by modality  
+## Prevalent 1/1/2020
+### in PC and UKRR by PC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$ckd_primis_stage)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
 
+### in SC and UKRR, by SC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("US", "UPS"),]$latest_rrt_status_secondary,
+      df[df$source_prev_rrt %in% c("US", "UPS"),]$ckd_stage_sec) ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage"  = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
+# 2a - CKD staging by eGFR in PC for people on KRT in UKRR and not PC, by modality  
+## Prevalent 1/1/2020
+### in PC and not UKRR by PC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("P", "PS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("P", "PS"),]$ckd_egfr_category)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
+# 2b - For comparison, CKD staging by eGFR in PC for people on KRT in PC and also UKRR, by modality  
+## Prevalent 1/1/2020
+### in PC and UKRR by PC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$ckd_egfr_category)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+# 3a - CKD staging by eGFR (last only) in PC for people on KRT in UKRR and not PC, by modality  
+## Prevalent 1/1/2020
+### in PC and not UKRR by PC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("P", "PS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("P", "PS"),]$ckd_egfr_category_lastvalue)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+
+# 3b - For comparison, CKD staging by eGFR (last only) in PC for people on KRT in PC and also UKRR, by modality  
+## Prevalent 1/1/2020
+### in PC and UKRR by PC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$ckd_egfr_category_lastvalue)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
  
+# 4a - CKD staging by eGFR (highest stage in presence of > or >= operator) in PC for people on KRT in UKRR and not PC, by modality  
+## Prevalent 1/1/2020
+### in PC and not UKRR by PC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("P", "PS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("P", "PS"),]$ckd_egfr_category_operator)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
 
+# 4b - For comparison, CKD staging by eGFR  (highest stage in presence of > or >= operator) in PC for people on KRT in PC and also UKRR, by modality  
+## Prevalent 1/1/2020
+### in PC and UKRR by PC modality
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status,
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$ckd_egfr_category_operator)  ,1)
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("KRT status", "CKD stage" = ncol(k))) %>%
+  kable_styling()
+print(k2)
+```
+ 
