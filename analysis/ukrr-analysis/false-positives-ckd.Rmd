@@ -5,7 +5,7 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 
-This document describes the latest CKD stage of people who had a KRT code in primary or secondary care but are not in the UKRR data, first using CKD codes and then (for primary care only) eGFR data.
+This document describes the latest CKD stage of people who had a KRT code in primary or secondary care but are not in the UKRR data, first using CKD codes and then (for primary care only) eGFR data (prevalent cohort on 1st Jan 2020).
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -177,29 +177,7 @@ disclosure <-function(x, whichmargins=0){
 }
 
 ```
-
-## Checking eGFR  
-### tabulate operators
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<- table(df$egfr_numeric_value_history_operator)
-k2<-k%>%
-  kbl() %>%
-  kable_styling()
-print(k2)
-```
-### summarise numeric value by operator
-```{r, echo=FALSE, results='asis', error=TRUE}
-k<- do.call(rbind, tapply(df$egfr_numeric_value_history, df$egfr_numeric_value_history_operator, summary))
-k2<-k%>%
-  kbl() %>%
-#  add_header_above(c("Min." ,"1st Qu." , "Median"  , "Mean" ,"3rd Qu." , " Max." )) %>%
-  kable_styling()
-print(k2)
-```
-
-
-# 1a - Latest CKD codes in PC/SC care for people on KRT in PC/SC and not UKRR, by modality  
-## Prevalent 1/1/2020
+## 1a - Latest CKD codes in PC/SC care for people on KRT in PC/SC and not UKRR, by modality  
 ### in PC and not UKRR by PC modality
 ```{r, echo=FALSE, results='asis', error=TRUE}
 k<-disclosure(table(df[df$source_prev_rrt %in% c("P", "PS"),]$latest_rrt_status,
@@ -222,8 +200,7 @@ k2<-k%>%
 print(k2)
 ```
 
-# 1b - For comparison, CKD codes in PC/SC care for people on KRT in PC/SC and also UKRR, by modality  
-## Prevalent 1/1/2020
+## 1b - For comparison, CKD codes in PC/SC care for people on KRT in PC/SC and also UKRR, by modality  
 ### in PC and UKRR by PC modality
 ```{r, echo=FALSE, results='asis', error=TRUE}
 k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status,
@@ -247,8 +224,7 @@ print(k2)
 ```
 
 
-# 2a - CKD staging by eGFR (last only) in PC for people on KRT in UKRR and not PC, by modality  
-## Prevalent 1/1/2020
+## 2a - CKD staging by eGFR (last only) in PC for people on KRT in UKRR and not PC, by modality  
 ### in PC and not UKRR by PC modality
 ```{r, echo=FALSE, results='asis', error=TRUE}
 k<-disclosure(table(df[df$source_prev_rrt %in% c("P", "PS"),]$latest_rrt_status,
@@ -260,8 +236,7 @@ k2<-k%>%
 print(k2)
 ```
 
-# 2b - For comparison, CKD staging by eGFR (last only) in PC for people on KRT in PC and also UKRR, by modality  
-## Prevalent 1/1/2020
+## 2b - For comparison, CKD staging by eGFR (last only) in PC for people on KRT in PC and also UKRR, by modality  
 ### in PC and UKRR by PC modality
 ```{r, echo=FALSE, results='asis', error=TRUE}
 k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status,
@@ -274,13 +249,18 @@ print(k2)
 ```
 
  
-# 3 - Numbers needed to calculate sensitivity and specificity 
+## 3 - Numbers needed to calculate sensitivity and specificity 
 
-Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.  Restricted to the latest PC eGFR is <15
-## Prevalent at 1/1/2021, overall and by modality
-### All RRT
+Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.
+### Any KRT, eGFR<15
 ```{r, echo=FALSE, results='asis', error=TRUE}
 disclosure(table(df$source_prev_rrt[df$ckd_egfr_category_lastvalue=="G5"], useNA="ifany"),0) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Any KRT, eGFR>=15 or missing
+```{r, echo=FALSE, results='asis', error=TRUE}
+disclosure(table(df$source_prev_rrt[(df$ckd_egfr_category_lastvalue!="G5" | is.na(df$ckd_egfr_category_lastvalue)) ], useNA="ifany"),0) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
