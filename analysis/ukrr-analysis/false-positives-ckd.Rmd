@@ -158,79 +158,6 @@ ckd_stage_secondary[no_ckd]<-NA
 df$ckd_stage_sec<-ckd_stage_secondary
 
 
-# add variable for source
-df <- df %>%
-  mutate(source_prev_rrt = case_when(ukrr_2020==1 & 
-                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
-                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "UPS",
-                                      ukrr_2020!=1 & 
-                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
-                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "PS",
-                                     ukrr_2020==1 & 
-                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
-                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "US",
-                                     ukrr_2020==1 & 
-                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
-                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "UP",
-                                     ukrr_2020==1 & 
-                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
-                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "U",
-                                     ukrr_2020!=1 & 
-                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
-                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "P",
-                                     ukrr_2020!=1 & 
-                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
-                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "S")) %>%
-  mutate(source_prev_dialysis = case_when(ukrr_dtx=="Dialysis" & 
-                                      latest_rrt_status  =="Dialysis" &
-                                      latest_rrt_status_secondary =="Dialysis" ~ "UPS",
-                                      ukrr_dtx!="Dialysis" & 
-                                      latest_rrt_status  =="Dialysis" &
-                                      latest_rrt_status_secondary =="Dialysis" ~ "PS",
-                                     ukrr_dtx=="Dialysis" & 
-                                      !(latest_rrt_status  =="Dialysis") &
-                                      latest_rrt_status_secondary =="Dialysis" ~ "US",
-                                     ukrr_dtx=="Dialysis" & 
-                                      latest_rrt_status  =="Dialysis" &
-                                      !(latest_rrt_status_secondary =="Dialysis") ~ "UP",
-                                     ukrr_dtx=="Dialysis" & 
-                                      !(latest_rrt_status  =="Dialysis") &
-                                      !(latest_rrt_status_secondary =="Dialysis") ~ "U",
-                                     ukrr_dtx!="Dialysis" & 
-                                      latest_rrt_status  =="Dialysis" &
-                                      !(latest_rrt_status_secondary =="Dialysis") ~ "P",
-                                     ukrr_dtx!="Dialysis" & 
-                                      !(latest_rrt_status  =="Dialysis") &
-                                      latest_rrt_status_secondary =="Dialysis" ~ "S")) %>%  
-    mutate(source_prev_transplant = case_when(ukrr_dtx=="Transplant" & 
-                                      latest_rrt_status  =="Transplant" &
-                                      latest_rrt_status_secondary =="Transplant" ~ "UPS",
-                                      ukrr_dtx!="Transplant" & 
-                                      latest_rrt_status  =="Transplant" &
-                                      latest_rrt_status_secondary =="Transplant" ~ "PS",
-                                     ukrr_dtx=="Transplant" & 
-                                      !(latest_rrt_status  =="Transplant") &
-                                      latest_rrt_status_secondary =="Transplant" ~ "US",
-                                     ukrr_dtx=="Transplant" & 
-                                      latest_rrt_status  =="Transplant" &
-                                      !(latest_rrt_status_secondary =="Transplant") ~ "UP",
-                                     ukrr_dtx == "Transplant" & 
-                                      !(latest_rrt_status  =="Transplant") &
-                                      !(latest_rrt_status_secondary =="Transplant") ~ "U",
-                                     ukrr_dtx!="Transplant" & 
-                                      latest_rrt_status  =="Transplant" &
-                                      !(latest_rrt_status_secondary =="Transplant") ~ "P",
-                                     ukrr_dtx!="Transplant" & 
-                                      !(latest_rrt_status  =="Transplant") &
-                                      latest_rrt_status_secondary =="Transplant" ~ "S")) 
-
-# order factor
-source_levels<-c("UPS", "UP", "US", "PS", "U", "P", "S")
-df$source_prev_rrt<-factor(df$source_prev_rrt, levels=source_levels)
-df$source_prev_dialysis<-factor(df$source_prev_dialysis, levels=source_levels)
-df$source_prev_transplant<-factor(df$source_prev_transplant, levels=source_levels)
-
-
 #apply disclosure control - redact if less than 7, then round to nearest 5
 disclosure <-function(x, whichmargins=0){
   redact <- 0<x & x<=7  #flag redacted values for later
@@ -262,9 +189,10 @@ print(k2)
 ```
 ### summarise numeric value by operator
 ```{r, echo=FALSE, results='asis', error=TRUE}
-k<- tapply(df$egfr_numeric_value_history, df$egfr_numeric_value_history_operator, summary)
+k<- do.call(rbind, tapply(df$egfr_numeric_value_history, df$egfr_numeric_value_history_operator, summary))
 k2<-k%>%
   kbl() %>%
+#  add_header_above(c("Min." ,"1st Qu." , "Median"  , "Mean" ,"3rd Qu." , " Max." )) %>%
   kable_styling()
 print(k2)
 ```
@@ -348,24 +276,11 @@ print(k2)
  
 # 3 - Numbers needed to calculate sensitivity and specificity 
 
-Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.  
-
+Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.  Restricted to the latest PC eGFR is <15
 ## Prevalent at 1/1/2021, overall and by modality
 ### All RRT
 ```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_rrt, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Dialysis
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_dialysis, useNA="ifany"),0) %>%
-  kbl(col.names=c("Source", "N")) %>%
-  kable_styling()
-```
-### Transplant
-```{r, echo=FALSE, results='asis', error=TRUE}
-disclosure(table(df$source_prev_transplant, useNA="ifany"),0) %>%
+disclosure(table(df$source_prev_rrt[df$ckd_egfr_category_lastvalue=="G5"], useNA="ifany"),0) %>%
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
