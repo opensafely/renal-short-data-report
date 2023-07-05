@@ -2,7 +2,14 @@
 title: "Checking CKD stage with eGFR"
 author: "Shalini Santhakumaran"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: html_document
+output: 
+  html_document:
+    theme: null
+    highlight: null
+    mathjax: null
+    toc: false
+    fig_caption: false
+    df_print: default
 ---
 
 This document describes the latest CKD stage of people who had a KRT code in primary or secondary care but are not in the UKRR data, first using CKD codes and then (for primary care only) eGFR data (prevalent cohort on 1st Jan 2020).
