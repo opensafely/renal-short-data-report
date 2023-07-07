@@ -1,0 +1,263 @@
+---
+title: "Agreement of data sources by eGFR"
+author: "Shalini Santhakumaran"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    theme: null
+    highlight: null
+    mathjax: null
+    toc: false
+    fig_caption: false
+    df_print: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Load libraries
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Create directory if it doesnt exist
+fs::dir_create(here::here("output", "notebooks"))
+
+#read in dataset
+#pick up 1st Jan cohort as latest renal status is on or before index date
+ df<-read.csv(here::here("output", "ukrr", "input_ukrr_2020-01-01.csv.gz")) 
+
+#subset variable to reduce memory demands
+df<-df[,c("ukrr_2019", "ukrr_2019_mod","latest_rrt_status", "latest_rrt_status_secondary", "ckd_primis_stage", 
+        "ckd_egfr_category", "egfr_numeric_value_history", "egfr_numeric_value_history_operator",
+          "ip_ckd1_diagnosis_date", "ip_ckd2_diagnosis_date", "ip_ckd3_diagnosis_date","ip_ckd4_diagnosis_date", "ip_ckd5_diagnosis_date")] 
+ 
+
+# add variable for eGFR based on last value
+df<- df %>%
+  mutate(ckd_egfr_category_lastvalue = case_when (
+    egfr_numeric_value_history >= 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=") |
+         is.na(egfr_numeric_value_history_operator)) ~ "G1" ,
+    egfr_numeric_value_history >= 60 &
+      egfr_numeric_value_history < 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" ) |
+         is.na(egfr_numeric_value_history_operator)) ~ "G2" ,
+    egfr_numeric_value_history >= 45 &
+      egfr_numeric_value_history < 60 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3a" ,
+    egfr_numeric_value_history >= 30 &
+      egfr_numeric_value_history < 45 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3b" ,
+    egfr_numeric_value_history >= 15 &
+      egfr_numeric_value_history < 30 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" &
+          ! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G4" ,
+    egfr_numeric_value_history > 0 &
+      egfr_numeric_value_history < 15 &
+      ((! egfr_numeric_value_history_operator == ">" &
+          ! egfr_numeric_value_history_operator == ">=" )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G5" 
+  ))
+
+  
+# add variable for eGFR based on last value, but assuming the highest CKD stage from the numeric values when there is a > or >= operator (not many with < or  <= operator)
+# so if a person has >60 they will be stage G2 but becuase of the category boundaries
+df<- df %>%
+  mutate(ckd_egfr_category_operator = case_when (
+    egfr_numeric_value_history >= 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=") |
+         is.na(egfr_numeric_value_history_operator)) ~ "G1" ,
+    egfr_numeric_value_history >= 60 &
+      egfr_numeric_value_history < 90 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<=" ) |
+         is.na(egfr_numeric_value_history_operator)) ~ "G2" ,
+    egfr_numeric_value_history >= 45 &
+      egfr_numeric_value_history < 60 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3a" ,
+    egfr_numeric_value_history >= 30 &
+      egfr_numeric_value_history < 45 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G3b" ,
+    egfr_numeric_value_history >= 15 &
+      egfr_numeric_value_history < 30 &
+      ((! egfr_numeric_value_history_operator == "<" &
+          ! egfr_numeric_value_history_operator == "<="  )|
+         is.na(egfr_numeric_value_history_operator)) ~ "G4" ,
+    egfr_numeric_value_history > 0 &
+      egfr_numeric_value_history < 15  ~ "G5" 
+  ))
+
+#add variable for dialysis/tx for UKRR
+df<- df %>%
+  mutate(ukrr_dtx = ifelse(ukrr_2019_mod %in% c("ICHD", "HD", "HHD", "PD") , "Dialysis", ifelse(ukrr_2019_mod == "Tx", "Transplant", "Not on RRT")))
+# order factor
+df$ukrr_dtx<-factor(df$ukrr_dtx, levels=c("Not on RRT", "Dialysis", "Transplant"))
+
+# add variable for source
+df <- df %>%
+  mutate(source_prev_rrt = case_when(ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "UPS",
+                                      ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "PS",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "US",
+                                     ukrr_2019==1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "UP",
+                                     ukrr_2019==1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "U",
+                                     ukrr_2019!=1 & 
+                                      latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown") &
+                                      !(latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown")) ~ "P",
+                                     ukrr_2019!=1 & 
+                                      !(latest_rrt_status  %in%  c("Dialysis", "Transplant", "RRT_unknown")) &
+                                      latest_rrt_status_secondary %in% c("Dialysis","Transplant", "RRT_unknown") ~ "S")) %>%
+  mutate(source_prev_dialysis = case_when(ukrr_dtx=="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "UPS",
+                                      ukrr_dtx!="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "PS",
+                                     ukrr_dtx=="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "US",
+                                     ukrr_dtx=="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "UP",
+                                     ukrr_dtx=="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "U",
+                                     ukrr_dtx!="Dialysis" & 
+                                      latest_rrt_status  =="Dialysis" &
+                                      !(latest_rrt_status_secondary =="Dialysis") ~ "P",
+                                     ukrr_dtx!="Dialysis" & 
+                                      !(latest_rrt_status  =="Dialysis") &
+                                      latest_rrt_status_secondary =="Dialysis" ~ "S")) %>%  
+    mutate(source_prev_transplant = case_when(ukrr_dtx=="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      latest_rrt_status_secondary =="Transplant" ~ "UPS",
+                                      ukrr_dtx!="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      latest_rrt_status_secondary =="Transplant" ~ "PS",
+                                     ukrr_dtx=="Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      latest_rrt_status_secondary =="Transplant" ~ "US",
+                                     ukrr_dtx=="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "UP",
+                                     ukrr_dtx == "Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "U",
+                                     ukrr_dtx!="Transplant" & 
+                                      latest_rrt_status  =="Transplant" &
+                                      !(latest_rrt_status_secondary =="Transplant") ~ "P",
+                                     ukrr_dtx!="Transplant" & 
+                                      !(latest_rrt_status  =="Transplant") &
+                                      latest_rrt_status_secondary =="Transplant" ~ "S")) 
+
+
+
+# order factor
+source_levels<-c("UPS", "UP", "US", "PS", "U", "P", "S")
+df$source_prev_rrt<-factor(df$source_prev_rrt, levels=source_levels)
+
+
+#calculate latest CKD stage in secondary care (the variable latest_ckd_status_secondary includes RRT which we don't want here)
+#we have the dates of each ICD10 code for the CKD stages, so want to pick the latest one
+#first get the dates of the ckd stages in secondary care
+
+ckd_secondary_dates1<-df[,c("ip_ckd1_diagnosis_date", "ip_ckd2_diagnosis_date", "ip_ckd3_diagnosis_date",
+                           "ip_ckd4_diagnosis_date", "ip_ckd5_diagnosis_date")]  %>%
+  mutate_all( function(x) as.Date(x))  #convert to date
+
+#vector of where there are no CKD codes at all
+no_ckd<-rowSums(is.na(ckd_secondary_dates1))==5
+
+#making changes needed to use max.col function
+ckd_secondary_dates2<-ckd_secondary_dates1 %>%
+         replace(is.na(.), as.Date("1900-01-01")) %>%  # replace missing with earliest date for max.col
+          mutate_all(function(x) as.numeric(x))  #convert to numeric for max.col
+
+#get which column has the latest date - the fist col is stage 1, second is stage 2 etc
+ckd_stage_secondary<-max.col(ckd_secondary_dates2, ties.method="last")
+#repalce with missing when all there is no ckd code (as earlier we replace the missings with an early date "1900-01-01")
+ckd_stage_secondary[no_ckd]<-NA
+
+#setting as a column
+df$ckd_stage_sec<-ckd_stage_secondary
+
+
+#apply disclosure control - redact if less than 7, then round to nearest 5
+disclosure <-function(x, whichmargins=0){
+  redact <- 0<x & x<=7  #flag redacted values for later
+  x[redact] <- 0  # set redacted to 0
+  x<-round(x/5)*5 # round to nearest 5
+  if(whichmargins!=0){
+    x<-addmargins(x,whichmargins) #add totals
+  }
+  if(whichmargins==1){
+    redact<-rbind(redact, rep(FALSE,ncol(redact))) #add extra row to redaction, otherwise won't blank correctly
+  }
+  if(whichmargins==2){
+    redact<-cbind(redact, rep(FALSE,nrow(redact))) #add extra col to redaction, otherwise won't blank correctly
+  }
+  x[redact]<-"<=7"  # flag redacted values
+  return(x)
+}
+```
+
+ 
+## Numbers needed to calculate sensitivity and specificity by modality
+
+Agreement is indicated by the data source, defined as UPS = in the **U**KRR, **P**rimary care and **S**econdary care data; UP = in **U**KRR and **P**rimary care only; U = in **U**KRR only etc.
+
+### Dialysis, eGFR<15
+```{r, echo=FALSE, results='asis', error=TRUE}
+disclosure(table(df$source_prev_dialysis[df$ckd_egfr_category_lastvalue=="G5"], useNA="ifany"),0) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Transplant, eGFR<15
+```{r, echo=FALSE, results='asis', error=TRUE}
+disclosure(table(df$source_prev_transplant[df$ckd_egfr_category_lastvalue=="G5"], useNA="ifany"),0) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+
+
+### Dialysis, eGFR>=15 or missing
+```{r, echo=FALSE, results='asis', error=TRUE}
+disclosure(table(df$source_prev_dialysis[(df$ckd_egfr_category_lastvalue!="G5" | is.na(df$ckd_egfr_category_lastvalue)) ], useNA="ifany"),0) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
+### Transplant, eGFR>=15 or missing
+```{r, echo=FALSE, results='asis', error=TRUE}
+disclosure(table(df$source_prev_transplant[(df$ckd_egfr_category_lastvalue!="G5" | is.na(df$ckd_egfr_category_lastvalue)) ], useNA="ifany"),0) %>%
+  kbl(col.names=c("Source", "N")) %>%
+  kable_styling()
+```
