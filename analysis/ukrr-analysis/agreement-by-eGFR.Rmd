@@ -261,3 +261,16 @@ disclosure(table(df$source_prev_transplant[(df$ckd_egfr_category_lastvalue!="G5"
   kbl(col.names=c("Source", "N")) %>%
   kable_styling()
 ```
+
+
+## CKD staging by eGFR (last only) in PC for people on KRT in PC and also UKRR, by PC and UKRR modality  
+```{r, echo=FALSE, results='asis', error=TRUE}
+k<-disclosure(table(df[df$source_prev_rrt %in% c("UP", "UPS"),]$latest_rrt_status,
+       df[df$source_prev_rrt %in% c("UP", "UPS"),]$ckd_egfr_category_lastvalue, 
+      df[df$source_prev_rrt %in% c("UP", "UPS"),]$ukrr_dtx, useNA = "always")  )
+k2<-k%>%
+  kbl() %>%
+  add_header_above(c("PC status", "CKD stage", "UKRR status", "Freq")) %>%
+  kable_styling()
+print(k2)
+```
