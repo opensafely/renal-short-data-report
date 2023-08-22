@@ -95,6 +95,7 @@ ckd_variables = dict(
             on_or_before="last_day_of_month(index_date)",
             returning="numeric_value",
             date_format="YYYY-MM-DD",
+            find_last_match_in_period=True,
             include_date_of_match=True,
             return_expectations={
                 "incidence": 0.5,
@@ -132,6 +133,7 @@ ckd_variables = dict(
             },
         },
     ),
+    
     creatinine_numeric_value_history=patients.with_these_clinical_events(
         codelist=creatinine_numeric_value_codelist,
         on_or_before="last_day_of_month(index_date)",
@@ -149,6 +151,7 @@ ckd_variables = dict(
         on_or_before="last_day_of_month(index_date)",
         returning="numeric_value",
         date_format="YYYY-MM-DD",
+        find_last_match_in_period=True,
         include_date_of_match=True,
         return_expectations={
             "incidence": 0.5,
@@ -176,9 +179,10 @@ ckd_variables = dict(
     ),
     egfr_numeric_value_90_before=patients.with_these_clinical_events(
         codelist=eGFR_numeric_value_codelist,
-        on_or_before="egfr_numeric_value_history_date",
+        on_or_before="egfr_numeric_value_history_date - 90 days",
         returning="numeric_value",
         date_format="YYYY-MM-DD",
+        find_last_match_in_period=True,
         include_date_of_match=True,
         return_expectations={
             "incidence": 0.5,
