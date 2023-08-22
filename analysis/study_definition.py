@@ -6,7 +6,10 @@ from variable_definitions.comorbidity_variables import comorbidity_variables
 from variable_definitions.rrt_variables import rrt_variables
 from scripts.variables import demographics
 
+
 from codelists import dialysis_codelist
+
+
 
 
 study = StudyDefinition(

@@ -119,43 +119,6 @@ actions:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
 
-
-  generate_study_population_acr:
-    run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_acr
-      --index-date-range "2019-01-01 to 2023-05-01 by month" 
-      --output-dir=output
-      --output-format csv.gz
-      --with-end-date-fix
-    outputs:
-      highly_sensitive:
-        cohort: output/input_acr_*.csv.gz
-
-  join_acr:
-    run: python:latest python analysis/scripts/join_acr.py
-    needs: [join_cohorts, generate_study_population_acr]
-    outputs:
-      highly_sensitive:
-        counts: output/joined/input*.csv.gz
-
-  generate_study_population_numeric_value:
-    run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_numeric_values_full
-      --index-date-range "2019-01-01 to 2023-05-01 by month" 
-      --output-dir=output
-      --output-format csv.gz
-      --with-end-date-fix
-    outputs:
-      highly_sensitive:
-        cohort: output/input_numeric_values_full_*.csv.gz
-
-  join_numeric_value:
-    run: python:latest python analysis/scripts/join_numeric_value.py
-    needs: [join_acr, generate_study_population_numeric_value]
-    outputs:
-      highly_sensitive:
-        counts: output/joined/inpu*.csv.gz
-
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_ukrr
@@ -208,16 +171,15 @@ actions:
 
   generate_table_1:
     run: python:latest python analysis/scripts/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
-    needs: [join_numeric_value]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         counts: output/table_1.csv
         at_risk: output/table_1_at_risk.csv
 
-
   get_counts:
     run: python:latest python analysis/scripts/combine_operators.py
-    needs: [join_numeric_value]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         counts: output/*_count.csv
@@ -243,7 +205,7 @@ actions:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
       --output-dir=output/joined
-    needs: [join_numeric_value]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
@@ -258,14 +220,14 @@ actions:
 
   generate_plots_numeric_values:
     run: python:latest python analysis/scripts/plot_numeric_values.py
-    needs: [join_numeric_value]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         figures: output/*dis*.jpeg
 
   generate_upset_plots:
     run: python:latest python analysis/scripts/ckd_discrepancies.py
-    needs: [join_numeric_value]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         figures: output/ckd_staging_upset_*.png
@@ -304,7 +266,7 @@ actions:
 
   ukrr_vs_prim_care_ckd:
     run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
-    needs: [join_numeric_value]
+    needs: [join_cohorts]
     outputs:
       moderately_sensitive:
         upset: output/ukrr*overlap_stage.png
