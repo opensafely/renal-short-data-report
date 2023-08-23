@@ -8,7 +8,7 @@ actions:
   generate_study_population_ckd:
     run: cohortextractor:latest generate_cohort 
       --study-definition study_definition_ckd
-      --index-date-range "2019-01-01 to 2023-05-01 by month" 
+      --index-date-range "2019-01-01 to 2023-07-01 by month" 
       --output-dir=output
       --output-format csv.gz
       --with-end-date-fix
