@@ -233,7 +233,7 @@ actions:
         figures: output/ckd_staging_upset_*.png
         tables: output/ckd_staging_upset_*.csv
         time: output/time_diff_ckd.jpeg
-        dialysis: output/ckd_dialysis_upset.csv
+        dialysis: output/ckd_rrt_upset.csv
 
   # generate_notebook:
   #   run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input

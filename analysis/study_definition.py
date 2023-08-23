@@ -7,7 +7,7 @@ from variable_definitions.rrt_variables import rrt_variables
 from scripts.variables import demographics
 
 
-from codelists import dialysis_codelist
+from codelists import dialysis_codelist, RRT_codelist, kidney_tx_codelist
 
 
 
@@ -65,6 +65,80 @@ study = StudyDefinition(
         return_expectations={
             "category": {"ratios": {"7A602": 0.5, "7A600": 0.5}},
             "incidence": 0.2,
+        },
+    ),
+    RRT=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        on_or_before="last_day_of_month(index_date)",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    RRT_code=patients.with_these_clinical_events(
+        codelist=RRT_codelist,
+        on_or_before="last_day_of_month(index_date)",
+        returning="code",
+        return_expectations={
+            "category": {"ratios": {"14S2.": 0.5, "7A600": 0.5}},
+            "incidence": 0.2,
+        },
+    ),
+
+    kidney_tx=patients.with_these_clinical_events(
+        codelist=kidney_tx_codelist,
+        on_or_before="last_day_of_month(index_date)",
+        returning="binary_flag",
+        date_format="YYYY-MM-DD",
+        include_date_of_match=True,
+        return_expectations={
+            "incidence": 0.2,
+            "date": {"earliest": "1900-01-01", "latest": "today"},
+        },
+    ),
+    
+    latest_rrt_date=patients.maximum_of("dialysis_date", "kidney_tx_date", "RRT_date"),
+
+    latest_rrt_status=patients.categorised_as(
+        {
+            "None": """
+                        (NOT dialysis) 
+                        AND (NOT kidney_tx) 
+                        AND (NOT RRT)
+                        """,
+            "Dialysis": """
+                        dialysis_date=latest_rrt_date 
+                        AND
+                        kidney_tx_date!=latest_rrt_date
+                        """,
+            "Transplant": """
+                        kidney_tx_date=latest_rrt_date
+                        AND
+                        dialysis_date!=latest_rrt_date 
+                        """,
+            "RRT_unknown": """
+                        dialysis_date=latest_rrt_date 
+                        OR
+                        kidney_tx_date=latest_rrt_date
+                        OR
+                        RRT_date=latest_rrt_date
+                        """,
+            "Uncategorised": "DEFAULT",
+        },
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "None": 0.39,
+                    "Dialysis": 0.25,
+                    "Transplant": 0.25,
+                    "RRT_unknown": 0.1,
+                    "Uncategorised": 0.01,
+                }
+            },
         },
     ),
 )
