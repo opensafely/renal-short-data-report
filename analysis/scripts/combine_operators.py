@@ -26,6 +26,7 @@ for test in tests:
 for file in (OUTPUT_DIR / "joined").iterdir():
     if match_input_files(file.name):
         df = pd.read_csv((OUTPUT_DIR / "joined") / file.name)
+        
         date = get_date_input_file(file.name)
 
         # replace null operator with missing
@@ -36,8 +37,8 @@ for file in (OUTPUT_DIR / "joined").iterdir():
             num_with_numeric_value_and_operator = (
                 df.loc[
                     (
-                        (df[f"{test}_numeric_value_full"].notnull())
-                        & (df[f"{test}_numeric_value_full"] > 0)
+                        (df[f"{test}_numeric_value"].notnull())
+                        & (df[f"{test}_numeric_value"] > 0)
                     ),
                     :,
                 ]
@@ -50,23 +51,23 @@ for file in (OUTPUT_DIR / "joined").iterdir():
             )
 
             # combine value with operator (after rounding to nearest int)
-            df[f"{test}_numeric_value_full"] = round_column(df[f"{test}_numeric_value_full"], 1)
+            df[f"{test}_numeric_value"] = round_column(df[f"{test}_numeric_value"], 1)
 
-            combine_value_with_operator(df, f"{test}_numeric_value_full", f"{test}_operator")
+            combine_value_with_operator(df, f"{test}_numeric_value", f"{test}_operator")
             print(df.columns)
             
 
 
             numeric_value_operator_counts[test].append(
-                df[f"{test}_numeric_value_full_with_operator"].value_counts(sort=True)
+                df[f"{test}_numeric_value_with_operator"].value_counts(sort=True)
             )
 
             # find codes where attached numeric value
             numeric_value_counts[test].append(
                 df.loc[
                     (
-                        (df[f"{test}_numeric_value_full"].notnull())
-                        & (df[f"{test}_numeric_value_full"] > 0)
+                        (df[f"{test}_numeric_value"].notnull())
+                        & (df[f"{test}_numeric_value"] > 0)
                     ),
                     f"{test}_code",
                 ].value_counts()
