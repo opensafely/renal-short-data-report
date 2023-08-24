@@ -252,9 +252,8 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        upset: output/ukrr*overlap_stage.png
+        upset: output/*.png
         upset_csv: output/ukrr*overlap_stage.csv
-        distribution: output/dist_*.png
 
   
   # generate_kidney_week:
