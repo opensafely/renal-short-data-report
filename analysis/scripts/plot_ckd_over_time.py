@@ -10,10 +10,10 @@ if not (OUTPUT_DIR / "figures").exists():
 
 
 df = pd.read_csv(
-    OUTPUT_DIR / f"measure_incident_ckd_primis_stage_rate.csv", parse_dates=["date"]
+    OUTPUT_DIR / f"joined/measure_incident_ckd_primis_stage_rate.csv", parse_dates=["date"]
 )
 
-df = redact_small_numbers(df, 7, 5, "ckd_primis", "population", "value", "date")
+df = redact_small_numbers(df, 7, 5, "ckd_primis_inc", "population", "value", "date")
 
 plot_measures(
     df=df,
@@ -22,7 +22,7 @@ plot_measures(
     column_to_plot="value",
     y_label="Proportion",
     as_bar=False,
-    category="ckd_primis_stage",
+    category="ckd_primis_stage_inc",
 )
 
 

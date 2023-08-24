@@ -5,33 +5,6 @@ expectations:
 
 actions:
 
-  generate_study_population_ckd:
-    run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_ckd
-      --index-date-range "2019-01-01 to 2023-07-01 by month" 
-      --output-dir=output
-      --output-format csv.gz
-      --with-end-date-fix
-    outputs:
-      highly_sensitive:
-        cohort: output/input_ckd_*.csv.gz
-
-  generate_measures_ckd:
-    run: cohortextractor:latest generate_measures 
-      --study-definition study_definition_ckd
-      --output-dir=output
-    needs: [generate_study_population_ckd]
-    outputs:
-      moderately_sensitive:
-        measure_csv: output/measure_*_rate.csv
-
-  plot_ckd:
-    run: python:latest python analysis/scripts/plot_ckd_over_time.py
-    needs: [generate_measures_ckd]
-    outputs:
-      moderately_sensitive:
-        plots: output/figures/plot_incident_ckd.jpeg
-
   generate_study_population_calculators:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_calculators
@@ -91,7 +64,7 @@ actions:
   generate_study_population_4:
     run: cohortextractor:latest generate_cohort 
       --study-definition study_definition 
-      --index-date-range "2022-02-01 to 2023-05-01 by month" 
+      --index-date-range "2022-02-01 to 2023-07-01 by month" 
       --output-format csv.gz
       --with-end-date-fix
     outputs:
@@ -118,6 +91,69 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/joined/input_20*.csv.gz
+
+  generate_table_1:
+    run: python:latest python analysis/scripts/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        counts: output/table_1.csv
+        at_risk: output/table_1_at_risk.csv
+
+  get_counts:
+    run: python:latest python analysis/scripts/combine_operators.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        counts: output/*_count.csv
+        operator_counts: output/*_count_*.csv
+
+  generate_top_5_tables:
+    run: python:latest python analysis/scripts/top_codes.py
+    needs: [get_counts]
+    outputs:
+      moderately_sensitive:
+        counts: output/top_5_code_table_*.csv
+
+  generate_measures:
+    run: cohortextractor:latest generate_measures 
+      --study-definition study_definition
+      --output-dir=output/joined
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        measure_csv: output/joined/measure_*_rate.csv
+  
+  plot_ckd:
+    run: python:latest python analysis/scripts/plot_ckd_over_time.py
+    needs: [generate_measures]
+    outputs:
+      moderately_sensitive:
+        plots: output/figures/plot_incident_ckd.jpeg
+  
+  generate_plots:
+    run: python:latest python analysis/scripts/plot_measures.py
+    needs: [generate_measures]
+    outputs:
+      moderately_sensitive:
+        counts: output/figures/plot_*.jpeg
+
+  generate_plots_numeric_values:
+    run: python:latest python analysis/scripts/plot_numeric_values.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        figures: output/*dis*.jpeg
+
+  generate_upset_plots:
+    run: python:latest python analysis/scripts/ckd_discrepancies.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        figures: output/ckd_staging_upset_*.png
+        tables: output/ckd_staging_upset_*.csv
+        time: output/time_diff_ckd.jpeg
+        dialysis: output/ckd_rrt_upset.csv
 
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
@@ -169,28 +205,7 @@ actions:
         cohort: output/input_paeds.csv.gz
 
 
-  generate_table_1:
-    run: python:latest python analysis/scripts/table_1.py --study_def_paths="output/joined/input_*.csv.gz" --demographics="age_band,sex,region,imd,ethnicity"
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        counts: output/table_1.csv
-        at_risk: output/table_1_at_risk.csv
-
-  get_counts:
-    run: python:latest python analysis/scripts/combine_operators.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        counts: output/*_count.csv
-        operator_counts: output/*_count_*.csv
-
-  generate_top_5_tables:
-    run: python:latest python analysis/scripts/top_codes.py
-    needs: [get_counts]
-    outputs:
-      moderately_sensitive:
-        counts: output/top_5_code_table_*.csv
+  
 
   generate_study_population_check_SC:
     run: cohortextractor:latest generate_cohort
@@ -201,39 +216,7 @@ actions:
       highly_sensitive:
         cohort: output/input_check_SC.csv.gz
 
-  generate_measures:
-    run: cohortextractor:latest generate_measures 
-      --study-definition study_definition
-      --output-dir=output/joined
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        measure_csv: output/joined/measure_*_rate.csv
-        
   
-  generate_plots:
-    run: python:latest python analysis/scripts/plot_measures.py
-    needs: [generate_measures]
-    outputs:
-      moderately_sensitive:
-        counts: output/figures/plot_*.jpeg
-
-  generate_plots_numeric_values:
-    run: python:latest python analysis/scripts/plot_numeric_values.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        figures: output/*dis*.jpeg
-
-  generate_upset_plots:
-    run: python:latest python analysis/scripts/ckd_discrepancies.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        figures: output/ckd_staging_upset_*.png
-        tables: output/ckd_staging_upset_*.csv
-        time: output/time_diff_ckd.jpeg
-        dialysis: output/ckd_rrt_upset.csv
 
   # generate_notebook:
   #   run: jupyter:latest jupyter nbconvert /workspace/analysis/report.ipynb --execute --to html --template basic --output-dir=/workspace/output --ExecutePreprocessor.timeout=86400 --no-input
