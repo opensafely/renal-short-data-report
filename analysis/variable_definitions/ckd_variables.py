@@ -51,8 +51,6 @@ ckd_variables = dict(
         codelist=primis_ckd_stage,
         on_or_before="last_day_of_month(index_date)",
         include_date_of_match=True,
-        date_format="YYYY-MM-DD",
-        returning="category",
         return_expectations={
             "rate": "universal",
             "category": {
@@ -66,6 +64,8 @@ ckd_variables = dict(
             },
         },
     ),
+    ckd_primis_stage_date=patients.date_of("ckd_primis_1_5", date_format="YYYY-MM-DD"),
+
     ckd_primis_inc=patients.with_these_clinical_events(
         codelist=primis_ckd_stage,
         between=["index_date", "last_day_of_month(index_date)"],
