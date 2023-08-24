@@ -241,25 +241,31 @@ for pop in ["population", "at_risk"]:
                 denominator=pop,
                 group_by=["sex", "ckd_primis_stage"],
             ),
+        ]
+    )
 
+    if pop == "population":
+        measures.extend([
+            Measure(
+                id=f"weight_before_creatinine_{pop}_rate",
+                numerator="weight_before_creatinine",
+                denominator=pop,
+                group_by=pop,
+            ),
+            Measure(
+                id="incident_ckd_primis_stage_rate",
+                numerator="ckd_primis_inc",
+                denominator="population",
+                group_by=["ckd_primis_stage_inc"],
+            ),
             Measure(
                 id=f"weight_before_creatinine_stage_rate",
                 numerator="weight_before_creatinine",
                 denominator="population",
                 group_by="ckd_primis_stage",
             ),
-        ]
-    )
-
-    if pop == "population":
-        measures.append(
-            Measure(
-                id=f"weight_before_creatinine_{pop}_rate",
-                numerator="weight_before_creatinine",
-                denominator=pop,
-                group_by=pop,
-            )
-        )
+        ])
+        
     else:
         measures.append(
             Measure(

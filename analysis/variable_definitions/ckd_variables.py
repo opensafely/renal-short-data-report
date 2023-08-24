@@ -50,7 +50,7 @@ ckd_variables = dict(
     ckd_primis_stage=patients.with_these_clinical_events(
         codelist=primis_ckd_stage,
         on_or_before="last_day_of_month(index_date)",
-        returning="category",
+        include_date_of_match=True,
         return_expectations={
             "rate": "universal",
             "category": {
@@ -65,6 +65,32 @@ ckd_variables = dict(
         },
     ),
     ckd_primis_stage_date=patients.date_of("ckd_primis_1_5", date_format="YYYY-MM-DD"),
+
+    ckd_primis_inc=patients.with_these_clinical_events(
+        codelist=primis_ckd_stage,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        return_expectations={
+            "incidence": 0.5,
+        },  
+    ),
+    ckd_primis_stage_inc=patients.with_these_clinical_events(
+        codelist=primis_ckd_stage,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="category",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "1": 0.2,
+                    "2": 0.2,
+                    "3": 0.2,
+                    "4": 0.2,
+                    "5": 0.2,
+                }
+            },
+        },
+    ),
     ckd_acr_category=patients.categorised_as(
         {
             "A1": """

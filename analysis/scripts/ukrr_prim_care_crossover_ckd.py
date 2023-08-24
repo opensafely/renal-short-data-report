@@ -79,42 +79,67 @@ ukrr_latest_egfr = df["ukrr_ckd2020_egfr"][(df["ukrr_ckd2020_egfr"].notnull()) &
 # prim care latest egfr in (for patients in UKRR)
 prim_care_latest_egfr = df["egfr_numeric_value_history"][(df["ukrr_2020"].notnull()) & (df["egfr_numeric_value_history"].notnull()) & (df["egfr_numeric_value_history"]>0) & (df["ckd_primis_stage"]>=4) & ((df["ukrr_ckd2020_egfr"].notnull()) & (df["ukrr_ckd2020_egfr"]>0))]
 
-
 percentiles = np.arange(0.01, 0.99, 0.01)
-percentile_values_ukrr = np.quantile(a=ukrr_latest_egfr, q=percentiles)
-percentile_values_pc = np.quantile(a=prim_care_latest_egfr, q=percentiles)
 
-violin_df = pd.DataFrame({
-    f"UKRR (n={round_values(len(ukrr_latest_egfr))})": pd.Series(percentile_values_ukrr),
-    f"Primary Care (n={round_values(len(prim_care_latest_egfr))})": pd.Series(percentile_values_pc)
-})
+if len(ukrr_latest_egfr) > 0:
+
+    percentile_values_ukrr = np.quantile(a=ukrr_latest_egfr, q=percentiles)
+else:
+    percentile_values_ukrr = []
+
+if len(prim_care_latest_egfr) > 0:
+    percentile_values_pc = np.quantile(a=prim_care_latest_egfr, q=percentiles)
+else:
+    percentile_values_pc = []
+
+if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
+
+
+    violin_df = pd.DataFrame({
+        f"UKRR (n={round_values(len(ukrr_latest_egfr))})": pd.Series(percentile_values_ukrr),
+        f"Primary Care (n={round_values(len(prim_care_latest_egfr))})": pd.Series(percentile_values_pc)
+    })
 
 
 
 
-sns.kdeplot(violin_df.iloc[0], shade=True, cut=0)
-sns.kdeplot(violin_df.iloc[1], shade=True, cut=0)
-plt.title("eGFR UKRR vs Primary Care")
-plt.xlabel("numeric value")
-plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_egfr.png")
-plt.clf()
+    sns.kdeplot(violin_df.iloc[0], shade=True, cut=0)
+    sns.kdeplot(violin_df.iloc[1], shade=True, cut=0)
+    plt.title("eGFR UKRR vs Primary Care")
+    plt.xlabel("numeric value")
+    plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_egfr.png")
+    plt.clf()
 
 ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][(df["ukrr_ckd2020_creat"].notnull())&(df["ukrr_ckd2020_creat"]>0)]
 prim_care_latest_creatinine = df["creatinine_numeric_value_history"][(df["ukrr_2020"].notnull()) & (df["creatinine_numeric_value_history"].notnull()) & (df["creatinine_numeric_value_history"]>0) & (df["ckd_primis_stage"]>=4) & ((df["ukrr_ckd2020_creat"].notnull())&(df["ukrr_ckd2020_creat"]>0))
 ]
 
 percentiles = np.arange(0.01, 0.99, 0.01)
-percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
-percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
 
-df = pd.DataFrame({
-    f"UKRR (n={round_values(len(ukrr_latest_creatinine))})": pd.Series(percentile_values_ukrr),
-    f"Primary Care (n={round_values(len(prim_care_latest_creatinine))})": pd.Series(percentile_values_pc)
-})
+if len(ukrr_latest_creatinine) > 0:
 
-sns.kdeplot(df.iloc[0], shade=True, cut=0)
-sns.kdeplot(df.iloc[1], shade=True, cut=0)
-plt.title("Creatinine UKRR vs Primary Care")
-plt.xlabel("numeric value")
-plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_creatinine.png")
-plt.clf()
+    percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
+else:
+    percentile_values_ukrr = []
+
+if len(prim_care_latest_creatinine) > 0:
+    percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
+else:
+    percentile_values_pc = []
+
+if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
+
+    percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
+    percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
+
+    df = pd.DataFrame({
+        f"UKRR (n={round_values(len(ukrr_latest_creatinine))})": pd.Series(percentile_values_ukrr),
+        f"Primary Care (n={round_values(len(prim_care_latest_creatinine))})": pd.Series(percentile_values_pc)
+    })
+
+    sns.kdeplot(df.iloc[0], shade=True, cut=0)
+    sns.kdeplot(df.iloc[1], shade=True, cut=0)
+    plt.title("Creatinine UKRR vs Primary Care")
+    plt.xlabel("numeric value")
+    plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_creatinine.png")
+    plt.clf()
