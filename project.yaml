@@ -150,10 +150,11 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        figures: output/ckd_staging_upset_*.png
-        tables: output/ckd_staging_upset_*.csv
+        figures: output/ckd_staging_*.png
+        tables: output/ckd_staging_*.csv
         time: output/time_diff_ckd.jpeg
         dialysis: output/ckd_rrt_upset.csv
+        dialysis45: output/biochem_4_5_not_coded.csv
 
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
