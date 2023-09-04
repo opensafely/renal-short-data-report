@@ -183,7 +183,7 @@ def plot_measures(
     """
     plt.figure(figsize=(15, 8))
     if category:
-        df[category] = df[category].fillna("Missing")
+        df[category] = df[category].fillna("Missing").astype(str)
         for unique_category in sorted(df[category].unique()):
 
             # subset on category column and sort by date
