@@ -266,5 +266,66 @@ for test in tests:
 
 
 
+# plot rate of each test fop those biochem stage 3-5, vs primis recorded 3-5 vs single reduced egfr
 
+for test in tests:
+
+    single_egfr = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_{test}_single_egfr_population_rate.csv",
+        parse_dates=["date"],
+    )
+    single_egfr = single_egfr.loc[single_egfr["single_egfr"]==1,:]
+    single_egfr = single_egfr.drop(["single_egfr",], axis=1)
+
+    primis_stage = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_{test}_stage_population_rate.csv",
+        parse_dates=["date"],
+    )
+    primis_stage = primis_stage.loc[primis_stage["ckd_primis_stage"].isin([3, 4, 5]), :]
+    primis_stage = primis_stage.groupby(by=["date"])[[test, "population"]].sum().reset_index()
+    primis_stage["value"] = (primis_stage[test]/primis_stage["population"])
+
+
+
+    ckd_stage = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
+        parse_dates=["date"],
+    )
+    ckd_stage = ckd_stage.loc[ckd_stage["ckd_egfr_category"].isin(["G3a", "G3b", "G4", "G5"]), :]
+    ckd_stage = ckd_stage.groupby(by=["date"])[[test, "population"]].sum().reset_index()
+    ckd_stage["value"] = (ckd_stage[test]/ckd_stage["population"])
+
+    # now plot on the same axis
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.plot(
+        single_egfr["date"],
+        single_egfr["value"]*1000,
+        label="Single reduced eGFR",
+        color="red",
+    )
+    ax.plot(
+        primis_stage["date"],
+        primis_stage["value"]*1000,
+        label="CKD stage (PRIMIS)",
+        color="blue",
+    )
+    ax.plot(
+        ckd_stage["date"],
+        ckd_stage["value"]*1000,
+        label="CKD stage (biochemical)",
+        color="green",
+    )
+
+    x_labels = sorted(single_egfr["date"].dt.strftime("%Y-%m-%d").unique())
+    ax.set_xticks(x_labels)
+    ax.set_xticklabels(x_labels, rotation='vertical')
+    ax.set_ylabel("Rate per 1000")
+    ax.set_xlabel("Date")
+    ax.margins(x=0)
+    ax.grid(True)
+
+    ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+    plt.tight_layout()
+    plt.savefig(f"output/figures/plot_{test}_single_biochem_stage.jpeg")
+    plt.close()
 
