@@ -1,52 +1,53 @@
 import pandas as pd
 import argparse
-import glob
 import pathlib
 from utilities import OUTPUT_DIR, update_df
 from redaction_utils import redact_table_1
-from collections import Counter
 
 
-def create_table_1(paths, demographics):
+def process_data(path, columns, condition_column=None):
+    """
+    Process the data from the given path with specified columns.
+    Optionally filter data based on the condition_column.
+    """
+    if condition_column is None:
+        cols_to_read = columns + ["patient_id"]
+    else:
+        cols_to_read = columns + ["patient_id", condition_column]
 
-    for i, path in enumerate(paths):
-        if i ==0:
-            df = pd.read_csv(path, usecols=demographics + ["patient_id", "at_risk"])
-           
-            #fill in missing values
-            df.loc[:,demographics] = df.loc[:,demographics].fillna("missing")
-            df_at_risk = df.loc[df["at_risk"]==1,:]
-            df = df.drop("at_risk", axis=1)
-            df_at_risk = df_at_risk.drop("at_risk", axis=1)
-           
+    df = pd.read_csv(path, usecols=cols_to_read)
+    
+    if condition_column:
+        df = df[df[condition_column] == 1]
+        df.drop(condition_column, axis=1, inplace=True)
         
+    df.loc[:, columns] = df.loc[:, columns].fillna("missing")
+    return df
+
+def create_table_from_paths(paths, columns, condition_column=None):
+    for i, path in enumerate(paths):
+        updated_df = process_data(path, columns, condition_column)
+        
+        if i == 0:
+            df = updated_df
         else:
-            updated_df = pd.read_csv(path, usecols=demographics + ["patient_id", "at_risk"])
-            
-            updated_df.loc[:,demographics] = updated_df.loc[:,demographics].fillna("missing")
-            updated_df_at_risk = updated_df.loc[updated_df["at_risk"]==1,:]
-            updated_df = updated_df.drop("at_risk", axis=1)
-            updated_df_at_risk = updated_df_at_risk.drop("at_risk", axis=1)
-
-
-            
-            df = update_df(df, updated_df, columns=demographics)
-            df_at_risk = update_df(df_at_risk, updated_df_at_risk, columns=demographics)
+            df = update_df(df, updated_df, columns=columns)
     
     df = df.drop("patient_id", axis=1)
-
-    
-
     df_counts = df.apply(lambda x: x.value_counts()).T.stack()
     df_counts = redact_table_1(df_counts)
+    df_counts.index.names = ["condition", "condition_value"]
+    df_counts.name = "count"
 
-    df_at_risk = df_at_risk.drop("patient_id", axis=1)
+    return df_counts
 
-    df_counts_at_risk = df_at_risk.apply(lambda x: x.value_counts()).T.stack()
-    df_counts_at_risk = redact_table_1(df_counts_at_risk)
-
-    return df_counts, df_counts_at_risk
-   
+def create_tables(paths, demographics):
+    df_counts_all = create_table_from_paths(paths, demographics)
+    df_counts_at_risk = create_table_from_paths(paths, demographics, "at_risk")
+    df_counts_diabetes = create_table_from_paths(paths, demographics, "diabetes")
+    df_counts_hypertension = create_table_from_paths(paths, demographics, "hypertension")
+    
+    return df_counts_all, df_counts_at_risk, df_counts_diabetes, df_counts_hypertension
 
 
 def get_path(*args):
@@ -54,7 +55,7 @@ def get_path(*args):
 
 
 def match_paths(pattern):
-    return [get_path(x) for x in sorted(glob.glob(pattern))]
+    return sorted(pathlib.Path().glob(pattern))
 
 
 def parse_args():
@@ -83,9 +84,17 @@ def main():
     paths = args.study_def_paths
     demographics = args.demographics.split(",")
 
-    table_1, at_risk = create_table_1(paths, demographics)
-    table_1.to_csv(OUTPUT_DIR / "table_1.csv")
-    at_risk.to_csv(OUTPUT_DIR / "table_1_at_risk.csv")
+    table_total, table_at_risk, table_diabetes, table_hypertension = create_tables(paths, demographics)
+    
+    tables = {
+        "total": table_total,
+        "at_risk": table_at_risk,
+        "diabetes": table_diabetes,
+        "hypertension": table_hypertension
+    }
 
+    for table_name, table in tables.items():
+        table.to_csv(get_path(OUTPUT_DIR, f"table_1_{table_name}.csv"))
 
-main()
+if __name__ == "__main__":
+    main()
