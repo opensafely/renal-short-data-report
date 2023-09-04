@@ -51,6 +51,7 @@ ckd_variables = dict(
         codelist=primis_ckd_stage,
         on_or_before="last_day_of_month(index_date)",
         include_date_of_match=True,
+        returning="category",
         return_expectations={
             "rate": "universal",
             "category": {
