@@ -1,6 +1,5 @@
 import pandas as pd
 import argparse
-import glob
 import pathlib
 from utilities import OUTPUT_DIR, update_df
 from redaction_utils import redact_table_1
@@ -54,7 +53,7 @@ def get_path(*args):
 
 
 def match_paths(pattern):
-    return [get_path(x) for x in sorted(glob.glob(pattern))]
+    return sorted(pathlib.Path().glob(pattern))
 
 
 def parse_args():
