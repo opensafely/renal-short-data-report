@@ -215,6 +215,8 @@ def plot_measures(
         )
 
     plt.tight_layout()
+    plt.margins(x=0)
+    plt.grid(True)
 
     plt.savefig(OUTPUT_DIR / f"figures/{filename}.jpeg")
     plt.close()
