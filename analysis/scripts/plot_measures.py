@@ -329,3 +329,107 @@ for test in tests:
     plt.savefig(f"output/figures/plot_{test}_single_biochem_stage.jpeg")
     plt.close()
 
+
+# plot rate of testing in those at risk in the general pop not in UKRR vs those that are in UKRR
+
+
+# 2019_prevalence a prevalence cohort of patients alive and on RRT in December 2019
+# 2020_prevalence a prevalence cohort of patients alive and on RRT in December 2020
+# 2021_prevalence a prevalence cohort of patients alive and on RRT in December 2021
+# 2020_incidence an incidence cohort of patients who started RRT in 2020
+# 2020_ckd a snapshot prevalence cohort of patient with Stage 4 or 5 CKD who were reported to the UKRR to be under renal care in December 2020
+
+
+
+measures = {
+
+}
+
+for path in Path("output/joined").glob("input_20*.csv.gz"):
+
+    df = pd.read_csv(path)
+    date = get_date_input_file(path.name)
+
+    # if the file is between Jan 2020 and end of Dec 2020,
+    # should flag as in UKRR if flag is 1 in 2019_prevalence
+
+    # if the file is between Jan 2021 and end of Dec 2021,
+    # should flag as in UKRR if flag is 1 in 2020_prevalence
+
+    # if the file is between Jan 2022 and end of Dec 2022,
+    # should flag as in UKRR if flag is 1 in 2021_prevalence
+    year = date.split('-')[0]
+ 
+    if year in ["2020", "2021", "2022"]:
+
+        if year == "2020":
+            df["in_ukrr"] = df["ukrr_2019"]
+        
+        elif year == "2021":
+            df["in_ukrr"] = df["ukrr_2020"]
+
+        elif year == "2022":
+            df["in_ukrr"] = df["ukrr_2021"]
+
+   
+        df = df.loc[(df["at_risk"]==1),:]
+
+ 
+        for test in tests:
+            if test not in measures:
+                measures[test] = {"not_ukrr": {}, "ukrr": {}}
+
+            measures[test]["not_ukrr"][date] = (df.loc[df["in_ukrr"]==0, test].sum(), len(df.loc[df["in_ukrr"]==0, :]))
+            measures[test]["ukrr"][date] = (df.loc[df["in_ukrr"]==1, test].sum(), len(df.loc[df["in_ukrr"]==1, :]))
+
+# convert measures to 3 dataframes - one for each test. columns = numerator, denominator, date, group
+
+for test in tests:
+    df_total = pd.DataFrame()
+    df_ukrr = pd.DataFrame()
+
+    for date in measures[test]["not_ukrr"].keys():
+    
+        df_total = pd.concat(
+            [
+                df_total,
+                pd.DataFrame(
+                    {
+                        "numerator": measures[test]["not_ukrr"][date][0],
+                        "denominator": measures[test]["not_ukrr"][date][1],
+                        "date": date,
+                        "group": "not_ukrr",
+                    },
+                    index=[0],
+                ),
+            ]
+        )
+
+        df_ukrr = pd.concat(
+            [
+                df_ukrr,
+                pd.DataFrame(
+                    {
+                        "numerator": measures[test]["ukrr"][date][0],
+                        "denominator": measures[test]["ukrr"][date][1],
+                        "date": date,
+                        "group": "ukrr",
+                    },
+                    index=[0],
+                ),
+            ]
+        )
+
+        combined = pd.concat([df_total, df_ukrr])
+
+        combined.to_csv(f"output/figures/plot_{test}_total_ukrr.csv", index=False)
+
+        plot_measures(
+            df=combined,
+            filename=f"plot_{test}_total_ukrr",
+            title=f"",
+            column_to_plot="numerator",
+            y_label="Proportion",
+            as_bar=False,
+            category="group",
+        )
