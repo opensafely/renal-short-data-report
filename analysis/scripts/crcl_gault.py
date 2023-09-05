@@ -26,15 +26,21 @@ percentiles = np.arange(0.01, 0.99, 0.01)
 percentile_values_crcl_calculated = np.quantile(a=latest_crcl_calculated, q=percentiles)
 percentile_values_crcl_recorded = np.quantile(a=latest_crcl_recorded, q=percentiles)
 
-violin_df = pd.DataFrame({
+dist_df = pd.DataFrame({
     "Calculated": pd.Series(percentile_values_crcl_calculated),
     "Recorded": pd.Series(percentile_values_crcl_recorded)
 })
 
-sns.violinplot(data=violin_df, cut=0, inner=None)
+
+sns.kdeplot(dist_df.iloc[0], shade=True)
+sns.kdeplot(dist_df.iloc[1], shade=True) 
+plt.legend(["Calculated", "Recorded"])
 plt.title("CrCl Calculated vs Recorded")
-plt.ylabel("numeric value")
-plt.savefig(OUTPUT_DIR / f"violin_plot_crcl_recorded_vs_calculated.png")
+plt.ylabel("Density")
+plt.xlabel("Numeric value")
+plt.margins(x=0)
+plt.grid(True)
+plt.savefig(OUTPUT_DIR / f"dist_plot_crcl_recorded_vs_calculated.png")
 plt.clf()
 
 

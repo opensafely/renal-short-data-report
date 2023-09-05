@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from upsetplot import plot as upset_plot
 
-from utilities import OUTPUT_DIR, plot_violin_numeric_value
+from utilities import OUTPUT_DIR, plot_distribution_numeric_value
 from redaction_utils import drop_and_round
 
 
@@ -199,6 +199,8 @@ df_subset["time_diff"] = (
 ).dt.days
 time_diff = df_subset["time_diff"].dropna()
 
-plot_violin_numeric_value(
-    time_diff, "time between biochemical and recorded", "time_diff_ckd", cut=1000
+
+
+plot_distribution_numeric_value(
+    time_diff, "time between biochemical and recorded", "time_diff_ckd"
 )

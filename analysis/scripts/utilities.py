@@ -233,50 +233,43 @@ def plot_boxplot_numeric_value(x, title, filename):
 
 
 
-def plot_violin_numeric_value(x, title, filename, cut=0, combined=False):
-    """Plots a violin plot from an array of numeric values. Controls for disclosure by
-    calculating percentiles and using this to generate the plots rather than the raw values.
-    This will be sufficient for large the majority of populations. Limits the range of plotted data
-    to the top and bottom quantile using `cut=0`.
+def plot_distribution_numeric_value(x, title, filename, combined=False, bins=20):
+    """Plots a distribution plot from an array of numeric values.
+    If combined is True, it will plot multiple distributions on the same axis.
+
+    Args:
+        x (array-like): Numeric values to be plotted.
+        title (str): Title of the plot.
+        filename (str): Output filename.
+        combined (bool): If True, multiple distributions can be combined in the same plot.
+        bins (int): Number of bins for the histogram.
 
     """
-    if not combined:
-        # remove values of 0
-        x = x[x > 0]
 
+    if not combined:
+        # Remove values of 0
+        x = x[x > 0]
+    
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=x, q=percentiles)
-    figure_output = sns.violinplot(data=percentile_values, cut=cut, whis=[25, 75])
-    plt.title(title)
-    plt.ylabel("numeric value")
-    plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
-   
-    plt.clf()
 
 
-def plot_violin_numeric_value_combined(x, title, filename, cut=0):
-    """Plots a violin plot from an array of numeric values. Controls for disclosure by
-    calculating percentiles and using this to generate the plots rather than the raw values.
-    This will be sufficient for large the majority of populations. Limits the range of plotted data
-    to the top and bottom quantile using `cut=0`.
-
-    """
+    plt.figure(figsize=(10, 6))
     
-    # violin plot with boxplot
-
-    figure_output = sns.violinplot(data=x, x ="test", y = "value",cut=cut, inner='box', whis=[25, 75])
-
-   
-    # no legend
-    # figure_output.get_legend().remove()
+    if combined:
+        for label, data in percentile_values.items():
+            sns.kdeplot(data, label=label, shade=True, alpha=0.5)
+    else:
+        sns.kdeplot(percentile_values, shade=True, alpha=0.5)
 
     plt.title(title)
-    plt.ylabel("numeric value")
+    plt.xlabel("Numeric Value")
+    plt.ylabel("Density")
+    plt.legend()
+    plt.grid(True)
+    plt.margins(x=0)
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
-   
     plt.clf()
-
-
 
 
 
