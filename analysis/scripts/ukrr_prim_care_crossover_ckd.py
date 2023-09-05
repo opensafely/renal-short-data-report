@@ -95,7 +95,7 @@ else:
 if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
 
 
-    violin_df = pd.DataFrame({
+    dist_df = pd.DataFrame({
         f"UKRR (n={round_values(len(ukrr_latest_egfr))})": pd.Series(percentile_values_ukrr),
         f"Primary Care (n={round_values(len(prim_care_latest_egfr))})": pd.Series(percentile_values_pc)
     })
@@ -103,10 +103,13 @@ if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
 
 
 
-    sns.kdeplot(violin_df.iloc[0], shade=True, cut=0)
-    sns.kdeplot(violin_df.iloc[1], shade=True, cut=0)
+    sns.kdeplot(dist_df.iloc[0], shade=True, cut=0)
+    sns.kdeplot(dist_df.iloc[1], shade=True, cut=0)
     plt.title("eGFR UKRR vs Primary Care")
     plt.xlabel("numeric value")
+    plt.margins(x=0)
+    plt.grid(True)
+    plt.legend(["UKRR", "Primary Care"])
     plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_egfr.png")
     plt.clf()
 
@@ -140,6 +143,9 @@ if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
     sns.kdeplot(df.iloc[0], shade=True, cut=0)
     sns.kdeplot(df.iloc[1], shade=True, cut=0)
     plt.title("Creatinine UKRR vs Primary Care")
-    plt.xlabel("numeric value")
+    plt.xlabel("Numeric value")
+    plt.margins(x=0)
+    plt.grid(True)
+    plt.legend(["UKRR", "Primary Care"])
     plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_creatinine.png")
     plt.clf()

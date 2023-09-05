@@ -27,7 +27,7 @@ actions:
     needs: [calculate_calculators]
     outputs:
       moderately_sensitive:
-        plots: output/violi*.png
+        plots: output/dist*.png
         venn: output/venn*.png
         counts: output/creatinine_vs_crlc.json
 
