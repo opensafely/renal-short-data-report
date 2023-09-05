@@ -102,10 +102,11 @@ actions:
   
   generate_plots:
     run: python:latest python analysis/scripts/plot_measures.py
-    needs: [generate_measures]
+    needs: [generate_measures, join_cohorts]
     outputs:
       moderately_sensitive:
         counts: output/figures/plot_*.jpeg
+        csv: output/figures/plot_*.csv
 
   generate_plots_numeric_values:
     run: python:latest python analysis/scripts/plot_numeric_values.py
