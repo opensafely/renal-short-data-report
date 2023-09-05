@@ -4,6 +4,7 @@ from pathlib import Path
 from utilities import *
 from redaction_utils import compute_redact_deciles, redact_small_numbers
 from variables import tests
+import matplotlib.dates as mdates
 
 if not (OUTPUT_DIR / "figures").exists():
     Path.mkdir(OUTPUT_DIR / "figures")
@@ -316,9 +317,11 @@ for test in tests:
         color="green",
     )
 
-    x_labels = sorted(single_egfr["date"].dt.strftime("%Y-%m-%d").unique())
+    x_labels = sorted(single_egfr["date"])
+
     ax.set_xticks(x_labels)
     ax.set_xticklabels(x_labels, rotation='vertical')
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
     ax.set_ylabel("Rate per 1000")
     ax.set_xlabel("Date")
     ax.margins(x=0)
