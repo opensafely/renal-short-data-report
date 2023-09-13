@@ -103,11 +103,12 @@ if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
 
 
 
-    sns.kdeplot(dist_df.iloc[0], shade=True, cut=0)
-    sns.kdeplot(dist_df.iloc[1], shade=True, cut=0)
+    sns.kdeplot(dist_df.iloc[0], shade=True)
+    sns.kdeplot(dist_df.iloc[1], shade=True)
     plt.title("eGFR UKRR vs Primary Care")
     plt.xlabel("numeric value")
     plt.margins(x=0)
+    plt.xlim(left=0)
     plt.grid(True)
     plt.legend(["UKRR", "Primary Care"])
     plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_egfr.png")
