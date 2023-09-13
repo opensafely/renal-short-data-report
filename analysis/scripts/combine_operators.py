@@ -7,9 +7,21 @@ from utilities import (
     get_date_input_file,
     combine_value_with_operator,
 )
-from redaction_utils import (group_low_values,group_low_values_series, 
-    drop_and_round,
-    round_column,)
+from redaction_utils import (
+    group_low_values,group_low_values_series, 
+    drop_and_round
+)
+
+
+def round_value(x, divisor=None):
+    if divisor:
+        return int(round(x / divisor) * divisor)
+    return int(round(x))
+
+def apply_condition(df, test, condition, divisor=None):
+    mask = (df[f"{test}_operator"] == "=") & condition(df[f"{test}_numeric_value"])
+    df.loc[mask, f"{test}_numeric_value"] = df.loc[mask, f"{test}_numeric_value"].apply(lambda x: round_value(x, divisor))
+    df.loc[df[f"{test}_operator"] != "=", f"{test}_numeric_value"] = df.loc[df[f"{test}_operator"] != "=", f"{test}_numeric_value"].apply(round_value)
 
 numeric_value_operator_counts = {}
 numeric_value_counts = {}
@@ -50,11 +62,21 @@ for file in (OUTPUT_DIR / "joined").iterdir():
                 num_with_numeric_value_and_operator.replace(np.nan, "missing")
             )
 
-            # combine value with operator (after rounding to nearest int)
-            df[f"{test}_numeric_value"] = round_column(df[f"{test}_numeric_value"], 1)
+            test_conditions = {
+                "albumin": [(lambda x: x > 50, 5), (lambda x: x <= 50, None)],
+                "creatinine": [(lambda x: x > 150, 10), (lambda x: x <= 150, None)],
+                "eGFR": [(lambda x: x > 100, 10), (lambda x: x <= 100, None)]
+            }
+
+            if test in test_conditions:
+                for condition, divisor in test_conditions[test]:
+                    apply_condition(df, test, condition, divisor)
+            else:
+                df[f"{test}_numeric_value"] = df[f"{test}_numeric_value"].apply(round_value)
+
 
             combine_value_with_operator(df, f"{test}_numeric_value", f"{test}_operator")
-            print(df.columns)
+
             
 
 
@@ -84,6 +106,12 @@ operator_names = {
     "=": "equal"
 }
 
+operator_value_pairs = {
+    "albumin": {},
+    "creatinine": {},
+    "eGFR": {},
+}
+
 for test in tests:
     # combine numeric value operator counts
    
@@ -96,12 +124,16 @@ for test in tests:
     for operator in ["<", ">", "<=", ">=", "~", "="]:
         subset = test_count.loc[test_count["value"].str.startswith(operator),:]
 
+    
+
         subset = group_low_values(subset, "count", "value", 100, 5)
         subset = subset.sort_values(by="count")
     
         subset.to_csv(
             OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator_names[operator]}.csv", index=False
         )
+
+        operator_value_pairs[test][operator] = subset
  
 
     # combine numeric value counts
@@ -135,3 +167,13 @@ for test in tests:
     test_operators = pd.concat(operator_counts[test], axis=1, sort=False).sum(axis=1)
     test_operators = group_low_values_series(test_operators)
     drop_and_round(test_operators).to_csv(OUTPUT_DIR / f"{test}_operators_count.csv", index=False)
+
+
+# combine operator value pairs
+for test in tests:
+    dfs = []
+    for operator in ["<", ">", "<=", ">=", "~", "="]:
+        df = operator_value_pairs[test][operator]
+        dfs.append(df)
+    combined = pd.concat(dfs).reset_index(drop=True)
+    combined.to_csv(OUTPUT_DIR / f"{test}_numeric_value_operator_count.csv", index=False)
