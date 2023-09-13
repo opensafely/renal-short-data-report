@@ -268,6 +268,7 @@ def plot_distribution_numeric_value(x, title, filename, combined=False, bins=20)
     plt.legend()
     plt.grid(True)
     plt.margins(x=0)
+    plt.xlim(left=0)
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
 
