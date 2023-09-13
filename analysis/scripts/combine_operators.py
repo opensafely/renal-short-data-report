@@ -166,7 +166,7 @@ for test in tests:
 
     test_operators = pd.concat(operator_counts[test], axis=1, sort=False).sum(axis=1)
     test_operators = group_low_values_series(test_operators)
-    drop_and_round(test_operators).to_csv(OUTPUT_DIR / f"{test}_operators_count.csv", index=False)
+    drop_and_round(test_operators).to_csv(OUTPUT_DIR / f"{test}_operators_count.csv")
 
 
 # combine operator value pairs
