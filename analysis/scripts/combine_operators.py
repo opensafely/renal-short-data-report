@@ -128,7 +128,10 @@ for test in tests:
 
         subset = group_low_values(subset, "count", "value", 100, 5)
         subset = subset.sort_values(by="count")
-    
+
+        # replace any rows where Other with operatorOther
+        subset.loc[subset["value"] == "Other", "value"] = f"{operator}Other"
+
         subset.to_csv(
             OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator_names[operator]}.csv", index=False
         )
