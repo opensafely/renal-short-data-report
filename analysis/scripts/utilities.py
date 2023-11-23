@@ -133,7 +133,7 @@ def deciles_chart(
     ax.set_ylim(
         [0, 100 if df[column].isnull().values.all() else df[column].max() * 1.05]
     )
-    ax.tick_params(labelsize=12)
+    ax.tick_params(labelsize=8)
     ax.set_xlim(
         [df[period_column].min(), df[period_column].max()]
     )  # set x axis range as full date range
