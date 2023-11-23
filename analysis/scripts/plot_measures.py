@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from utilities import *
-from redaction_utils import compute_redact_deciles, redact_small_numbers
+from redaction_utils import compute_deciles, redact_small_numbers
 from variables import tests
 import matplotlib.dates as mdates
 
@@ -55,7 +55,9 @@ for i in [
             df = df.drop(["value"], axis=1)
             df = df.replace(np.inf, np.nan)
             
-            df_deciles = compute_redact_deciles(df, "date", i, "rate")
+            df_deciles = compute_deciles(df, "date", i)
+
+            df_deciles.to_csv(f"output/figures/plot_{i}_{j}_{k}_deciles.csv", index=False)
 
             deciles_chart(
                 df,

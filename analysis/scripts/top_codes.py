@@ -39,7 +39,8 @@ for test in tests:
     code_df_numeric = pd.read_csv(f"output/{test}_numeric_value_count.csv")
     codelist_numeric = pd.read_csv(codelist_dict_numeric[test])
 
-    code_df_numeric.loc[code_df_numeric["code"]!="Other","code"] = code_df_numeric.loc[code_df_numeric["code"]!="Other","code"].astype(int).astype(str)
+    if test != "albumin":
+        code_df_numeric.loc["code"] = code_df_numeric["code"].astype(int).astype(str)
     
     top_5_code_table_numeric = create_top_5_code_table(
         df=code_df_numeric,

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from redaction_utils import group_low_values, compute_redact_deciles
+from redaction_utils import group_low_values, compute_deciles
 
 BASE_DIR = Path(__file__).parents[1]
 OUTPUT_DIR = BASE_DIR / "../output"
@@ -74,11 +74,8 @@ def deciles_chart(
     ylabel="",
 ):
     """period_column must be dates / datetimes"""
-    if count_column:
-        df = compute_redact_deciles(df, period_column, count_column, column)
-
-    else:
-        df = compute_deciles(df, period_column, column, has_outer_percentiles=False)
+    
+    df = compute_deciles(df, period_column, column, has_outer_percentiles=False)
 
     """period_column must be dates / datetimes"""
     sns.set_style("whitegrid", {"grid.color": ".9"})
@@ -136,7 +133,7 @@ def deciles_chart(
     ax.set_ylim(
         [0, 100 if df[column].isnull().values.all() else df[column].max() * 1.05]
     )
-    ax.tick_params(labelsize=12)
+    ax.tick_params(labelsize=8)
     ax.set_xlim(
         [df[period_column].min(), df[period_column].max()]
     )  # set x axis range as full date range
