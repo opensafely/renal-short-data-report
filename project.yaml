@@ -84,6 +84,13 @@ actions:
       moderately_sensitive:
         counts: output/pub/top_5_tables/top_5_code_table_*.csv
 
+  ckd_discrepancies:
+    run: python:latest python analysis/scripts/ckd_discrepancies.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        tables: output/pub/ckd_overlap/ckd_staging_*.csv
+
   generate_measures:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
@@ -115,16 +122,6 @@ actions:
       moderately_sensitive:
         figures: output/*dis*.jpeg
 
-  generate_upset_plots:
-    run: python:latest python analysis/scripts/ckd_discrepancies.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        figures: output/ckd_staging_*.png
-        tables: output/ckd_staging_*.csv
-        time: output/time_diff_ckd.jpeg
-        dialysis: output/ckd_rrt_upset.csv
-        dialysis45: output/biochem_4_5_not_coded.csv
 
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
