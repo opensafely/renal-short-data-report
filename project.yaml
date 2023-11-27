@@ -82,7 +82,7 @@ actions:
     needs: [get_counts]
     outputs:
       moderately_sensitive:
-        counts: output/top_5_code_table_*.csv
+        counts: output/pub/top_5_tables/top_5_code_table_*.csv
 
   generate_measures:
     run: cohortextractor:latest generate_measures 
