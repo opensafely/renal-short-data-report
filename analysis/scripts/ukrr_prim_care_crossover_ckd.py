@@ -33,6 +33,9 @@ stage_subset_encoded = stage_subset_encoded.rename(
 
 counts = stage_subset_encoded.groupby(by=stage_subset_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
+
+# restrict to those in ukrr
+counts = counts.loc[:,(counts.loc["In UKRR"]==1)]
 counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_stage.csv")
 
 
@@ -60,6 +63,9 @@ stage_subset_rrt_encoded = stage_subset_rrt_encoded.rename(
 
 counts = stage_subset_rrt_encoded.groupby(by=stage_subset_rrt_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
+
+# restrict to those in ukrr
+counts = counts.loc[:,(counts.loc["In UKRR"]==1)]
 counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_rrt_overlap_stage.csv")
 
 
