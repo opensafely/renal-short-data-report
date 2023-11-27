@@ -1,12 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
-from upsetplot import plot as upset_plot
 from utilities import OUTPUT_DIR
 from redaction_utils import drop_and_round, round_values
 import seaborn as sns
 import numpy as np
 
+Path.mkdir(OUTPUT_DIR / "pub/ukrr_pc_overlap", parents=True, exist_ok=True)
 
 df = pd.read_csv(OUTPUT_DIR / "joined/input_2020-12-01.csv.gz", usecols=["ckd_primis_stage", "ukrr_2020","ukrr_ckd2020", "ukrr_ckd2020_creat", "ukrr_ckd2020_egfr", "egfr_numeric_value_history", "creatinine_numeric_value_history"])
 
@@ -33,11 +33,7 @@ stage_subset_encoded = stage_subset_encoded.rename(
 
 counts = stage_subset_encoded.groupby(by=stage_subset_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
-counts.to_csv(OUTPUT_DIR / "ukrr_overlap_stage.csv")
-
-plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
-plt.savefig(OUTPUT_DIR / "ukrr_overlap_stage.png")
-plt.clf()
+counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_stage.csv")
 
 
 
@@ -64,12 +60,7 @@ stage_subset_rrt_encoded = stage_subset_rrt_encoded.rename(
 
 counts = stage_subset_rrt_encoded.groupby(by=stage_subset_rrt_encoded.columns.tolist()).grouper.size()
 counts = drop_and_round(counts)
-counts.to_csv(OUTPUT_DIR / "ukrr_rrt_overlap_stage.csv")
-
-plot = upset_plot(counts, show_counts=True, sort_by="cardinality")
-plt.savefig(OUTPUT_DIR / "ukrr_overlap_stage.png")
-plt.clf()
-
+counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_rrt_overlap_stage.csv")
 
 
 #ukrr latest egfr where not null or 0
@@ -101,8 +92,6 @@ if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
     })
 
 
-
-
     sns.kdeplot(dist_df.iloc[0], shade=True)
     sns.kdeplot(dist_df.iloc[1], shade=True)
     plt.title("eGFR UKRR vs Primary Care")
@@ -111,7 +100,7 @@ if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
     plt.xlim(left=0)
     plt.grid(True)
     plt.legend(["UKRR", "Primary Care"])
-    plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_egfr.png")
+    plt.savefig(OUTPUT_DIR / f"pub/ukrr_pc_overlap/dist_plot_ukrr_pc_egfr.png")
     plt.clf()
 
 ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][(df["ukrr_ckd2020_creat"].notnull())&(df["ukrr_ckd2020_creat"]>0)]
@@ -148,5 +137,5 @@ if len(percentile_values_ukrr)> 0 and len(percentile_values_pc) > 0:
     plt.margins(x=0)
     plt.grid(True)
     plt.legend(["UKRR", "Primary Care"])
-    plt.savefig(OUTPUT_DIR / f"dist_plot_ukrr_pc_creatinine.png")
+    plt.savefig(OUTPUT_DIR / f"pub/ukrr_pc_overlap/dist_plot_ukrr_pc_creatinine.png")
     plt.clf()
