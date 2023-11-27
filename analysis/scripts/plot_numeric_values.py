@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
 from utilities import (
     OUTPUT_DIR,
     match_input_files,
@@ -7,6 +8,7 @@ from utilities import (
 )
 from variables import tests
 
+Path.mkdir(OUTPUT_DIR / f"pub/numeric_values", parents=True, exist_ok=True)
 
 for test in tests:
     numeric_values = []
@@ -31,10 +33,9 @@ for test in tests:
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=numeric_values_combined, q=percentiles)
 
-   
     # distribution plot
     plot_distribution_numeric_value(
         percentile_values,
         f"{test} numeric value distribution",
-        f"{test}_dist",
+        f"pub/numeric_values/{test}_dist",
     )

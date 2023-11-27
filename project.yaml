@@ -91,6 +91,14 @@ actions:
       moderately_sensitive:
         tables: output/pub/ckd_overlap/ckd_staging_*.csv
 
+  ukrr_vs_prim_care_ckd:
+    run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        upset: output/pub/ukrr_pc_overlap/*.png
+        upset_csv: output/pub/ukrr_pc_overlap/ukrr*overlap_stage.csv
+
   generate_measures:
     run: cohortextractor:latest generate_measures 
       --study-definition study_definition
@@ -123,8 +131,7 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        figures: output/*dis*.jpeg
-
+        figures: output/pub/numeric_values/*dis*.jpeg
 
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
@@ -218,13 +225,7 @@ actions:
   #     moderately_sensitive:
   #       report: output/notebooks/ukrr-discrepancies.html
 
-  ukrr_vs_prim_care_ckd:
-    run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        upset: output/*.png
-        upset_csv: output/ukrr*overlap_stage.csv
+
 
   
   # generate_kidney_week:
