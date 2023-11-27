@@ -185,16 +185,7 @@ for pop in ["population", "at_risk"]:
             ]
         )
 
-        for d in demographics:
-
-            m_dem = Measure(
-                id=f"{test}_{d}_{pop}_rate",
-                numerator=test,
-                denominator=pop,
-                group_by=[d],
-            )
-
-            measures.extend([m_dem])
+       
 
 
     measures.extend(
