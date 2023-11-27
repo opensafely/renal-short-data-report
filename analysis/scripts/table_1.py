@@ -16,23 +16,24 @@ def process_data(path, columns, condition_column=None):
         cols_to_read = columns + ["patient_id", condition_column]
 
     df = pd.read_csv(path, usecols=cols_to_read)
-    
+
     if condition_column:
         df = df[df[condition_column] == 1]
         df.drop(condition_column, axis=1, inplace=True)
-        
+
     df.loc[:, columns] = df.loc[:, columns].fillna("missing")
     return df
+
 
 def create_table_from_paths(paths, columns, condition_column=None):
     for i, path in enumerate(paths):
         updated_df = process_data(path, columns, condition_column)
-        
+
         if i == 0:
             df = updated_df
         else:
             df = update_df(df, updated_df, columns=columns)
-    
+
     df = df.drop("patient_id", axis=1)
     df_counts = df.apply(lambda x: x.value_counts()).T.stack()
     df_counts = redact_table_1(df_counts)
@@ -41,12 +42,15 @@ def create_table_from_paths(paths, columns, condition_column=None):
 
     return df_counts
 
+
 def create_tables(paths, demographics):
     df_counts_all = create_table_from_paths(paths, demographics)
     df_counts_at_risk = create_table_from_paths(paths, demographics, "at_risk")
     df_counts_diabetes = create_table_from_paths(paths, demographics, "diabetes")
-    df_counts_hypertension = create_table_from_paths(paths, demographics, "hypertension")
-    
+    df_counts_hypertension = create_table_from_paths(
+        paths, demographics, "hypertension"
+    )
+
     return df_counts_all, df_counts_at_risk, df_counts_diabetes, df_counts_hypertension
 
 
@@ -84,17 +88,25 @@ def main():
     paths = args.study_def_paths
     demographics = args.demographics.split(",")
 
-    table_total, table_at_risk, table_diabetes, table_hypertension = create_tables(paths, demographics)
-    
+    table_total, table_at_risk, table_diabetes, table_hypertension = create_tables(
+        paths, demographics
+    )
+
     tables = {
         "total": table_total,
         "at_risk": table_at_risk,
         "diabetes": table_diabetes,
-        "hypertension": table_hypertension
+        "hypertension": table_hypertension,
     }
 
     for table_name, table in tables.items():
-        table.to_csv(get_path(OUTPUT_DIR, f"table_1_{table_name}.csv"))
+        pathlib.Path(get_path(OUTPUT_DIR, "pub/descriptive_tables")).mkdir(
+            parents=True, exist_ok=True
+        )
+        table.to_csv(
+            get_path(OUTPUT_DIR, f"pub/descriptive_tables/table_1_{table_name}.csv")
+        )
+
 
 if __name__ == "__main__":
     main()

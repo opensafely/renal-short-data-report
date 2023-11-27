@@ -67,22 +67,37 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        tables: output/table_1*.csv
+        tables: output/pub/descriptive_tables/table_1*.csv
 
   get_counts:
     run: python:latest python analysis/scripts/combine_operators.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/*_count.csv
-        operator_counts: output/*_count_*.csv
+        counts_pub: output/pub/operator_counts/*.csv
+  
 
   generate_top_5_tables:
     run: python:latest python analysis/scripts/top_codes.py
     needs: [get_counts]
     outputs:
       moderately_sensitive:
-        counts: output/top_5_code_table_*.csv
+        counts: output/pub/top_5_tables/top_5_code_table_*.csv
+
+  ckd_discrepancies:
+    run: python:latest python analysis/scripts/ckd_discrepancies.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        tables: output/pub/ckd_overlap/ckd_staging_*.csv
+
+  ukrr_vs_prim_care_ckd:
+    run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
+    needs: [join_cohorts]
+    outputs:
+      moderately_sensitive:
+        upset: output/pub/ukrr_pc_overlap/*.png
+        upset_csv: output/pub/ukrr_pc_overlap/ukrr*overlap_stage.csv
 
   generate_measures:
     run: cohortextractor:latest generate_measures 
@@ -92,39 +107,25 @@ actions:
     outputs:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
-  
-  plot_ckd:
-    run: python:latest python analysis/scripts/plot_ckd_over_time.py
-    needs: [generate_measures]
-    outputs:
-      moderately_sensitive:
-        plots: output/figures/plot_incident_ckd.jpeg
+
   
   generate_plots:
     run: python:latest python analysis/scripts/plot_measures.py
     needs: [generate_measures, join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/figures/plot_*.jpeg
-        csv: output/figures/plot_*.csv
+        counts: output/pub/deciles/figures/plot_*.jpeg
+        csv: output/pub/deciles/data/plot_*.csv
+        ckd_stage: output/pub/ckd_stage/plot_ckd_stage.jpeg
+        tests_ckd_stage: output/pub/tests_by_ckd_stage/*.jpeg
+        ukrr: output/pub/ukrr_testing/*.jpeg
 
   generate_plots_numeric_values:
     run: python:latest python analysis/scripts/plot_numeric_values.py
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        figures: output/*dis*.jpeg
-
-  generate_upset_plots:
-    run: python:latest python analysis/scripts/ckd_discrepancies.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        figures: output/ckd_staging_*.png
-        tables: output/ckd_staging_*.csv
-        time: output/time_diff_ckd.jpeg
-        dialysis: output/ckd_rrt_upset.csv
-        dialysis45: output/biochem_4_5_not_coded.csv
+        figures: output/pub/numeric_values/*dis*.jpeg
 
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
@@ -218,13 +219,7 @@ actions:
   #     moderately_sensitive:
   #       report: output/notebooks/ukrr-discrepancies.html
 
-  ukrr_vs_prim_care_ckd:
-    run: python:latest python analysis/scripts/ukrr_prim_care_crossover_ckd.py
-    needs: [join_cohorts]
-    outputs:
-      moderately_sensitive:
-        upset: output/*.png
-        upset_csv: output/ukrr*overlap_stage.csv
+
 
   
   # generate_kidney_week:

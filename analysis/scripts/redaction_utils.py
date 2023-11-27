@@ -197,15 +197,15 @@ def create_top_5_code_table(
     code_df[code_column] = code_df[code_column].astype(str)
 
     # sum event counts over patients
-    event_counts = df.sort_values(ascending=False, by="num")
+    event_counts = df.sort_values(ascending=False, by="count")
     event_counts = group_low_values(
-        event_counts, "num", code_column, low_count_threshold, rounding_base
+        event_counts, "count", code_column, low_count_threshold, rounding_base
     )
 
     # calculate % makeup of each code
-    total_events = event_counts["num"].sum()
+    total_events = event_counts["count"].sum()
     event_counts["Proportion of codes (%)"] = round(
-        (event_counts["num"] / total_events) * 100, 2
+        (event_counts["count"] / total_events) * 100, 2
     )
 
     # Gets the human-friendly description of the code for the given row
@@ -221,7 +221,7 @@ def create_top_5_code_table(
     event_counts.loc[event_counts[code_column] == "Other", "Description"] = "-"
 
     # Rename the code column to something consistent
-    event_counts.rename(columns={code_column: "Code", "num": "Events"}, inplace=True)
+    event_counts.rename(columns={code_column: "Code", "count": "Events"}, inplace=True)
 
     # drop events column
     event_counts = event_counts.loc[
