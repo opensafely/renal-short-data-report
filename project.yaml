@@ -107,13 +107,7 @@ actions:
     outputs:
       moderately_sensitive:
         measure_csv: output/joined/measure_*_rate.csv
-  
-  plot_ckd:
-    run: python:latest python analysis/scripts/plot_ckd_over_time.py
-    needs: [generate_measures]
-    outputs:
-      moderately_sensitive:
-        plots: output/figures/plot_incident_ckd.jpeg
+
   
   generate_plots:
     run: python:latest python analysis/scripts/plot_measures.py
