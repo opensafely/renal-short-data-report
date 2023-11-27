@@ -74,8 +74,8 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/*_count.csv
-        operator_counts: output/*_count_*.csv
+        counts_pub: output/pub/operator_counts/*.csv
+  
 
   generate_top_5_tables:
     run: python:latest python analysis/scripts/top_codes.py

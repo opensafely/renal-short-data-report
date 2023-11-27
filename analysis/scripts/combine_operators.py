@@ -1,51 +1,170 @@
 import pandas as pd
 import numpy as np
-from variables import tests
+from pathlib import Path
+from variables import tests_extended
 from utilities import (
     OUTPUT_DIR,
     match_input_files,
     get_date_input_file,
-    combine_value_with_operator,
+    round_value,
 )
-from redaction_utils import (
-    group_low_values,group_low_values_series, 
-    drop_and_round
-)
+from redaction_utils import group_low_values, group_low_values_series, drop_and_round
 
 
-def round_value(x, divisor=None):
-    if divisor:
-        return int(round(x / divisor) * divisor)
-    return int(round(x))
+Path(OUTPUT_DIR / f"pub/operator_counts").mkdir(parents=True, exist_ok=True)
 
-def apply_condition(df, test, condition, divisor=None):
-    mask = (df[f"{test}_operator"] == "=") & condition(df[f"{test}_numeric_value"])
-    df.loc[mask, f"{test}_numeric_value"] = df.loc[mask, f"{test}_numeric_value"].apply(lambda x: round_value(x, divisor))
-    df.loc[df[f"{test}_operator"] != "=", f"{test}_numeric_value"] = df.loc[df[f"{test}_operator"] != "=", f"{test}_numeric_value"].apply(round_value)
 
-numeric_value_operator_counts = {}
-numeric_value_counts = {}
+# 1. A count of each code
 code_counts = {}
+
+# 2. A count of each code with associated numeric value
+numeric_value_counts = {}
+
+
+# 3. A count of each operator
 operator_counts = {}
 
-for test in tests:
-    numeric_value_operator_counts[test] = []
-    numeric_value_counts[test] = []
+
+# 4. A count of each numeric value-operator pair
+numeric_value_operator_counts = {}
+
+
+for test in tests_extended:
     code_counts[test] = []
+    numeric_value_counts[test] = []
     operator_counts[test] = []
+    numeric_value_operator_counts[test] = {}
+
+
+numeric_value_mappings = {
+    "albumin": {
+        (-float("inf"), 0): -1,
+        (16, 20): 20,
+        (21, 30): 30,
+        (31, 40): 40,
+        (41, 50): 50,
+        (51, 100): 100,
+        (101, float("inf")): 101,
+    },
+    "creatinine": {
+        (-float("inf"), 0): -1,
+        (0, 10): 50,
+        (11, 20): 20,
+        (21, 30): 30,
+        (31, 40): 40,
+        (41, 50): 50,
+        (51, 60): 60,
+        (61, 70): 70,
+        (71, 80): 80,
+        (81, 90): 90,
+        (91, 100): 100,
+        (101, 110): 110,
+        (111, 120): 120,
+        (121, 130): 130,
+        (131, 140): 140,
+        (141, 150): 150,
+        (151, 200): 200,
+        (201, 500): 500,
+        (501, 1000): 1000,
+        (1001, float("inf")): 1001,
+    },
+    "eGFR": {
+        (-float("inf"), 0): -1,
+        (0, 5): 5,
+        (6, 10): 10,
+        (11, 15): 15,
+        (16, 20): 20,
+        (21, 25): 25,
+        (26, 30): 30,
+        (31, 35): 35,
+        (36, 40): 40,
+        (41, 45): 45,
+        (46, 50): 50,
+        (51, 55): 55,
+        (56, 60): 60,
+        (61, 65): 65,
+        (66, 70): 70,
+        (71, 75): 75,
+        (76, 80): 80,
+        (81, 85): 85,
+        (86, 90): 90,
+        (91, 95): 95,
+        (96, 100): 100,
+        (101, 105): 105,
+        (106, 110): 110,
+        (111, 115): 115,
+        (116, 120): 120,
+        (121, float("inf")): 121,
+    },
+    "acr": {
+        (-float("inf"), 0): -1,
+        (11, 15): 15,
+        (16, 20): 20,
+        (21, 25): 25,
+        (26, 30): 30,
+        (31, 35): 35,
+        (36, 40): 40,
+        (41, 45): 45,
+        (46, 50): 50,
+        (51, 100): 100,
+        (101, float("inf")): 101,
+    },
+    "cr_cl": {
+        (-float("inf"), 0): -1,
+        (21, 25): 25,
+        (26, 30): 30,
+        (31, float("inf")): 31,
+    },
+}
+
+
+def map_numeric_values(value, mapping):
+    for (lower, upper), mapped_value in mapping.items():
+        if lower <= value <= upper:
+            return mapped_value
+    return value
 
 
 for file in (OUTPUT_DIR / "joined").iterdir():
     if match_input_files(file.name):
         df = pd.read_csv((OUTPUT_DIR / "joined") / file.name)
-        
+
         date = get_date_input_file(file.name)
 
-        # replace null operator with missing
-        for test in tests:
+        for test in tests_extended:
             df[f"{test}_operator"].fillna("missing", inplace=True)
 
-            # how many numeric values have a matched operator?
+            # 1 A count of each code
+            code_counts[test].append(df[f"{test}_code"].value_counts())
+
+            # subset with a numeric value >0 OR where numeric value is 0 but operator is not missing
+            df_subset_with_numeric_value = df.loc[
+                (
+                    (df[f"{test}_numeric_value"].notnull())
+                    & (df[f"{test}_numeric_value"] > 0)
+                )
+                | (
+                    (df[f"{test}_numeric_value"] == 0)
+                    & (df[f"{test}_operator"] != "missing")
+                ),
+                :,
+            ]
+
+            # 2. A count of each code with associated numeric value
+            numeric_value_counts[test].append(
+                df_subset_with_numeric_value.loc[
+                    :,
+                    f"{test}_code",
+                ].value_counts()
+            )
+
+            # 3. A count of each operator
+            operator_counts[test].append(
+                df_subset_with_numeric_value[f"{test}_operator"].value_counts()
+            )
+
+            # 4. A count of each numeric value-operator pair
+
             num_with_numeric_value_and_operator = (
                 df.loc[
                     (
@@ -58,125 +177,96 @@ for file in (OUTPUT_DIR / "joined").iterdir():
                 .sum()
             )
 
-            operator_counts[test].append(
-                num_with_numeric_value_and_operator.replace(np.nan, "missing")
+            df[f"{test}_numeric_value"] = df[f"{test}_numeric_value"].apply(
+                lambda x: round_value(x)
             )
 
-            test_conditions = {
-                "albumin": [(lambda x: x > 50, 5), (lambda x: x <= 50, None)],
-                "creatinine": [(lambda x: x > 150, 10), (lambda x: x <= 150, None)],
-                "eGFR": [(lambda x: x > 100, 10), (lambda x: x <= 100, None)]
-            }
-
-            if test in test_conditions:
-                for condition, divisor in test_conditions[test]:
-                    apply_condition(df, test, condition, divisor)
-            else:
-                df[f"{test}_numeric_value"] = df[f"{test}_numeric_value"].apply(round_value)
-
-
-            combine_value_with_operator(df, f"{test}_numeric_value", f"{test}_operator")
-
-            
-
-
-            numeric_value_operator_counts[test].append(
-                df[f"{test}_numeric_value_with_operator"].value_counts(sort=True)
+            df[f"{test}_numeric_value"] = df[f"{test}_numeric_value"].apply(
+                lambda x: map_numeric_values(x, numeric_value_mappings[test])
             )
 
-            # find codes where attached numeric value
-            numeric_value_counts[test].append(
-                df.loc[
-                    (
-                        (df[f"{test}_numeric_value"].notnull())
-                        & (df[f"{test}_numeric_value"] > 0)
-                    ),
-                    f"{test}_code",
-                ].value_counts()
-            )
+            for operator in ["<", ">", "<=", ">=", "~", "=", "missing"]:
+                numeric_value_operator_counts[test][operator] = []
+                subset = df.loc[df[f"{test}_operator"] == operator, :]
 
-            code_counts[test].append(df[f"{test}_code"].value_counts())
 
-operator_names = {
-    "<": "lt",
-    ">": "gt",
-    "<=": "lte", 
-    ">=": "gte", 
-    "~": "tild", 
-    "=": "equal"
-}
+                numeric_value_operator_counts[test][operator].append(
+                    subset.loc[
+                        (
+                            (subset[f"{test}_numeric_value"].notnull())
+                            & (subset[f"{test}_numeric_value"] > 0)
+                        ),
+                        [f"{test}_numeric_value", f"{test}_operator"],
+                    ]
+                    .groupby([f"{test}_numeric_value", f"{test}_operator"])
+                    .size()
+                )
 
-operator_value_pairs = {
-    "albumin": {},
-    "creatinine": {},
-    "eGFR": {},
-}
 
-for test in tests:
-    # combine numeric value operator counts
-   
-    combined_values = pd.concat(numeric_value_operator_counts[test])
-    test_count = combined_values.groupby(combined_values.index).sum()
-    test_count = test_count.reset_index(name="count")
-  
-    test_count.rename(columns={"index": "value"}, inplace=True)
+for test in tests_extended:
+    # 1 A count of each code
+    test_codes = pd.concat(code_counts[test], axis=1, sort=False).sum(axis=1)
+    test_codes = group_low_values_series(test_codes)
+    test_codes.rename("count", inplace=True)
+    test_codes = test_codes.reset_index()
+    test_codes.rename(columns={"index": "code"}, inplace=True)
     
-    for operator in ["<", ">", "<=", ">=", "~", "="]:
-        subset = test_count.loc[test_count["value"].str.startswith(operator),:]
+    test_codes["count"] = drop_and_round(test_codes["count"])
 
-    
-
-        subset = group_low_values(subset, "count", "value", 100, 5)
-        subset = subset.sort_values(by="count")
-
-        # replace any rows where Other with operatorOther
-        subset.loc[subset["value"] == "Other", "value"] = f"{operator}Other"
-
-        subset.to_csv(
-            OUTPUT_DIR / f"{test}_numeric_value_operator_count_{operator_names[operator]}.csv", index=False
-        )
-
-        operator_value_pairs[test][operator] = subset
- 
-
-    # combine numeric value counts
-    test_codes = pd.concat(numeric_value_counts[test])
-    test_codes_count = test_codes.groupby(test_codes.index).sum().reset_index()
-
-    
-    test_codes_count = group_low_values(test_codes_count, f"{test}_code","index", 7, 5)
-    test_codes_count = test_codes_count.sort_values(by=f"{test}_code")
-
-    test_codes_count.rename(columns={"index": "code", f"{test}_code": "num"}, inplace=True)
-    test_codes_count.to_csv(
-        OUTPUT_DIR / f"{test}_numeric_value_count.csv", index=False
+    test_codes.to_csv(
+        OUTPUT_DIR / f"pub/operator_counts/{test}_codes_count.csv", index=False
     )
 
-    # combine code counts
+    # 2. A count of each code with associated numeric value
+    test_codes_with_numeric_value = pd.concat(
+        numeric_value_counts[test], axis=1, sort=False
+    ).sum(axis=1)
+    test_codes_with_numeric_value = group_low_values_series(
+        test_codes_with_numeric_value
+    )
+    test_codes_with_numeric_value.rename("count", inplace=True)
+    test_codes_with_numeric_value = test_codes_with_numeric_value.reset_index()
+    test_codes_with_numeric_value.rename(columns={"index": "code"}, inplace=True)
+    test_codes_with_numeric_value["count"] = drop_and_round(
+        test_codes_with_numeric_value["count"]
+    )
+    test_codes_with_numeric_value.to_csv(
+        OUTPUT_DIR / f"pub/operator_counts/{test}_codes_with_numeric_value_count.csv", index=False
+    )
 
-    test_codes_all = pd.concat(code_counts[test])
-    test_codes_count_all = test_codes_all.groupby(test_codes_all.index).sum().reset_index()
-
-    test_codes_count_all = group_low_values(test_codes_count_all, f"{test}_code","index", 7, 5)
-    test_codes_count_all = test_codes_count_all.sort_values(by=f"{test}_code")
-
-    test_codes_count_all.rename(columns={"index": "code", f"{test}_code": "num"}, inplace=True)
-    
-
-    test_codes_count_all.to_csv(OUTPUT_DIR / f"{test}_codes_count.csv", index=False)
-
-    # combine operator counts
+    # 3. A count of each operator
 
     test_operators = pd.concat(operator_counts[test], axis=1, sort=False).sum(axis=1)
     test_operators = group_low_values_series(test_operators)
-    drop_and_round(test_operators).to_csv(OUTPUT_DIR / f"{test}_operators_count.csv")
+    drop_and_round(test_operators).to_csv(
+        OUTPUT_DIR / f"pub/operator_counts/{test}_operators_count.csv"
+    )
 
+    # 4. A count of each numeric value-operator pair
 
-# combine operator value pairs
-for test in tests:
-    dfs = []
-    for operator in ["<", ">", "<=", ">=", "~", "="]:
-        df = operator_value_pairs[test][operator]
-        dfs.append(df)
-    combined = pd.concat(dfs).reset_index(drop=True)
-    combined.to_csv(OUTPUT_DIR / f"{test}_numeric_value_operator_count.csv", index=False)
+    combined_values = []
+    for operator in ["<", ">", "<=", ">=", "~", "=", "missing"]:
+        operator_combined = pd.concat(
+            numeric_value_operator_counts[test][operator]
+        ).reset_index()
+
+ 
+        operator_combined.rename(
+            columns={
+                0: "count",
+            },
+            inplace=True,
+        )
+
+        operator_combined.sort_values(by=f"{test}_numeric_value", inplace=True)
+
+        combined_values.append(operator_combined)
+
+    combined_values = pd.concat(combined_values)
+
+    combined_values["count"] = combined_values["count"].apply(round_value, args=(5,))
+
+    combined_values.to_csv(
+        OUTPUT_DIR / f"pub/operator_counts/{test}_numeric_value_operator_count.csv",
+        index=False,
+    )

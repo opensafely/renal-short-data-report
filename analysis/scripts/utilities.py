@@ -42,12 +42,6 @@ def get_date_input_file(file: str) -> str:
         return date.group(1)
 
 
-def combine_value_with_operator(df, value_column, operator_column):
-    df[f"{value_column}_with_operator"] = df[operator_column].str.cat(
-        df[value_column].astype("str")
-    )
-
-
 def drop_irrelevant_practices(df):
     """Drops irrelevant practices from the given measure table.
     An irrelevant practice has zero events during the study period.
@@ -60,10 +54,6 @@ def drop_irrelevant_practices(df):
     return df[df.practice.isin(is_relevant[is_relevant == True].index)]
 
 
-
-
-
-
 def deciles_chart(
     df,
     filename,
@@ -74,7 +64,7 @@ def deciles_chart(
     ylabel="",
 ):
     """period_column must be dates / datetimes"""
-    
+
     df = compute_deciles(df, period_column, column, has_outer_percentiles=False)
 
     """period_column must be dates / datetimes"""
@@ -182,7 +172,6 @@ def plot_measures(
     if category:
         df[category] = df[category].fillna("Missing").astype(str)
         for unique_category in sorted(df[category].unique()):
-
             # subset on category column and sort by date
             df_subset = df[df[category] == unique_category].sort_values("date")
 
@@ -219,7 +208,6 @@ def plot_measures(
     plt.close()
 
 
-
 def plot_boxplot_numeric_value(x, title, filename):
     plt.boxplot(x, showfliers=False)
     plt.title(title)
@@ -227,7 +215,6 @@ def plot_boxplot_numeric_value(x, title, filename):
     plt.xlabel("numeric_value")
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
-
 
 
 def plot_distribution_numeric_value(x, title, filename, combined=False, bins=20):
@@ -246,13 +233,12 @@ def plot_distribution_numeric_value(x, title, filename, combined=False, bins=20)
     if not combined:
         # Remove values of 0
         x = x[x > 0]
-    
+
     percentiles = np.arange(0.01, 0.99, 0.01)
     percentile_values = np.quantile(a=x, q=percentiles)
 
-
     plt.figure(figsize=(10, 6))
-    
+
     if combined:
         for label, data in percentile_values.items():
             sns.kdeplot(data, label=label, shade=True, alpha=0.5)
@@ -270,22 +256,17 @@ def plot_distribution_numeric_value(x, title, filename, combined=False, bins=20)
     plt.clf()
 
 
-
-
 def write_csv(df, path, **kwargs):
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, **kwargs)
 
 
-
 def cockcroft_gault(
     sex, age, weight, weight_date, creatinine, creatinine_date, date_lim
 ):
-
     date_lim = pd.to_datetime(date_lim)
 
     if date_lim < weight_date and date_lim < creatinine_date:
-
         if sex == "F":
             multiplier = 0.85
         elif sex == "M":
@@ -303,11 +284,9 @@ def cockcroft_gault(
 
 
 def ckd_epi(sex, age, creatinine, creatinine_date, date_lim):
-
     date_lim = pd.to_datetime(date_lim)
 
     if date_lim < creatinine_date:
-
         if sex == "F":
             multiplier = (0.7, -0.241)
         elif sex == "M":
@@ -336,10 +315,15 @@ def update_df(original_df, new_df, columns=[], on="patient_id"):
     )
 
     for c in columns:
-
         updated[c] = np.nan
         updated.loc[updated["_merge"] == "left_only", c] = updated[f"{c}_old"]
         updated.loc[updated["_merge"] != "left_only", c] = updated[f"{c}_new"]
         updated = updated.drop([f"{c}_old", f"{c}_new"], axis=1)
     updated = updated.drop(["_merge"], axis=1)
     return updated
+
+
+def round_value(x, divisor=None):
+    if divisor:
+        return int(round(x / divisor) * divisor)
+    return int(round(x))
