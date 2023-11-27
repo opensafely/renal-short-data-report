@@ -112,8 +112,11 @@ actions:
     needs: [generate_measures, join_cohorts]
     outputs:
       moderately_sensitive:
-        counts: output/figures/plot_*.jpeg
-        csv: output/figures/plot_*.csv
+        counts: output/pub/deciles/figures/plot_*.jpeg
+        csv: output/pub/deciles/data/plot_*.csv
+        ckd_stage: output/pub/ckd_stage/plot_ckd_stage.jpeg
+        tests_ckd_stage: output/pub/tests_by_ckd_stage/*.jpeg
+        ukrr: output/pub/ukrr_testing/*.jpeg
 
   generate_plots_numeric_values:
     run: python:latest python analysis/scripts/plot_numeric_values.py

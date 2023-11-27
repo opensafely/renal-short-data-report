@@ -204,7 +204,7 @@ def plot_measures(
     plt.margins(x=0)
     plt.grid(True)
 
-    plt.savefig(OUTPUT_DIR / f"figures/{filename}.jpeg")
+    plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.close()
 
 
