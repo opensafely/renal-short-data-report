@@ -118,6 +118,7 @@ actions:
         counts: output/pub/deciles/figures/plot_*.jpeg
         csv: output/pub/deciles/data/plot_*.csv
         ckd_stage: output/pub/ckd_stage/plot_ckd_stage.jpeg
+        ckd_stage_csv: output/pub/ckd_stage/plot_ckd_stage.csv
         tests_ckd_stage: output/pub/tests_by_ckd_stage/*.jpeg
         ukrr: output/pub/ukrr_testing/*.jpeg
 
