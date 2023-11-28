@@ -24,9 +24,9 @@ df = pd.read_csv(
 # Overlap between those in ukkr_ckd2020 and those with ckd stage using primis
 stage_subset = df.loc[:, ["ckd_primis_stage", "ukrr_ckd2020"]]
 stage_subset = stage_subset.fillna("Missing")
+stage_subset = stage_subset.loc[stage_subset["ukrr_ckd2020"] == 1]
 stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
 stage_subset["ukrr_ckd2020"] = stage_subset["ukrr_ckd2020"].astype(str)
-stage_subset = stage_subset.loc[stage_subset["ukrr_ckd2020"] == "1"]
 stage_subset_encoded = pd.get_dummies(stage_subset)
 
 stage_subset_encoded = stage_subset_encoded.rename(
@@ -54,9 +54,9 @@ counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_stage.csv")
 # Overlap between those in ukkr_2020 and those with ckd stage using primis
 stage_subset_rrt = df.loc[:, ["ckd_primis_stage", "ukrr_2020"]]
 stage_subset_rrt = stage_subset_rrt.fillna("Missing")
+stage_subset_rrt = stage_subset_rrt.loc[stage_subset_rrt["ukrr_2020"] == 1]
 stage_subset_rrt["ckd_primis_stage"] = stage_subset_rrt["ckd_primis_stage"].astype(str)
 stage_subset_rrt["ukrr_2020"] = stage_subset_rrt["ukrr_2020"].astype(str)
-stage_subset_rrt = stage_subset_rrt.loc[stage_subset_rrt["ukrr_2020"] == "1"]
 stage_subset_rrt_encoded = pd.get_dummies(stage_subset_rrt)
 
 stage_subset_rrt_encoded = stage_subset_rrt_encoded.rename(
