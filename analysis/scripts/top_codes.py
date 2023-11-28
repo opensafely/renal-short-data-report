@@ -24,7 +24,7 @@ for test in tests_extended:
     code_df = pd.read_csv(f"output/pub/operator_counts/{test}_codes_count.csv")
     codelist = pd.read_csv(codelist_dict[test])
     
-    code_df["code"] = code_df["code"].astype(int).astype(str)
+    code_df["code"] = code_df["code"].astype(str)
     top_5_code_table = create_top_5_code_table(
         df=code_df,
         code_df=codelist,
@@ -42,7 +42,7 @@ for test in tests_extended:
     codelist_numeric = pd.read_csv(codelist_dict_numeric[test])
 
     
-    code_df_numeric.loc["code"] = code_df_numeric["code"].astype(int).astype(str)
+    code_df_numeric.loc["code"] = code_df_numeric["code"].astype(str)
     
     top_5_code_table_numeric = create_top_5_code_table(
         df=code_df_numeric,
