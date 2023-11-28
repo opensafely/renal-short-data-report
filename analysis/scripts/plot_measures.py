@@ -20,35 +20,18 @@ for i in [
     "albumin",
     "acr",
     "cr_cl",
-    "ckd",
-    "ckd_primis_1_5",
 ]:
     for j in ["population", "at_risk"]:
-        if i == "ckd_primis_1_5":
-            df = pd.read_csv(
-                OUTPUT_DIR / f"joined/measure_{i}_stage_{j}_practice_rate.csv",
-                parse_dates=["date"],
-            )
-
-        else:
-            df = pd.read_csv(
-                OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
-            )
+        
+        df = pd.read_csv(
+            OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
+        )
 
         df = drop_irrelevant_practices(df)
 
         dfs = {}
 
-        if i == "ckd_primis_1_5":
-            # plot rate separarely for stage 1-2 and 3-5
-            df_subset_1_2 = df.loc[df["ckd_primis_stage"].isin([1, 2]), :]
-            df_subset_3_5 = df.loc[df["ckd_primis_stage"].isin([3, 4, 5]), :]
-
-            dfs["stage_1_2"] = df_subset_1_2
-            dfs["stage_3_5"] = df_subset_3_5
-
-        else:
-            dfs["all"] = df
+        dfs["all"] = df
 
         for k, df in dfs.items():
             df["rate"] = df[f"value"] * 100
@@ -75,38 +58,41 @@ for i in [
 # 2. ckd by stage
 
 df_ckd_stage = pd.read_csv(
-    OUTPUT_DIR / f"joined/measure_ckd_primis_1_5_stage_population_rate.csv",
-    parse_dates=["date"],
+    OUTPUT_DIR / "joined/input_2023-07-01.csv.gz",
+    usecols=[
+        "ckd_primis_1_5",
+        "ckd_primis_stage",
+    ],
 )
-pop = df_ckd_stage.groupby(by=["date"])[["population"]].sum()
 
-df_ckd_stage = df_ckd_stage.drop("population", axis=1)
+df_ckd_stage = df_ckd_stage.loc[df_ckd_stage["ckd_primis_1_5"] == 1, :]
 
-df_ckd_stage = df_ckd_stage.merge(pop, on="date")
+ckd_stage  = df_ckd_stage["ckd_primis_stage"]
+
+ckd_stage_count = ckd_stage.value_counts()
+ckd_stage_count.rename("count", inplace=True)
+
+ckd_stage_count = ckd_stage_count.apply(lambda x: round(x / 5) * 5)
+
+ckd_proportion = ckd_stage_count / ckd_stage_count.sum()
+ckd_proportion.rename("proportion", inplace=True)
 
 
-df_ckd_stage["rate"] = df_ckd_stage["ckd_primis_1_5"] / df_ckd_stage["population"]
-
-df_ckd_stage = df_ckd_stage.drop(["value"], axis=1)
-
-df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
-
-
-df_ckd_stage = redact_small_numbers(
-    df_ckd_stage, 7, 5, "ckd_primis_1_5", "population", "rate", "date"
-)
-df_ckd_stage["ckd_primis_stage"] = df_ckd_stage["ckd_primis_stage"].astype(str)
+df_ckd_stage = pd.concat([ckd_stage_count, ckd_proportion], axis=1)
+df_ckd_stage = df_ckd_stage.reset_index()
+df_ckd_stage.rename(columns={"index": "ckd_primis_stage"}, inplace=True)
 
 Path.mkdir(OUTPUT_DIR / "pub/ckd_stage", parents=True, exist_ok=True)
-plot_measures(
-    df=df_ckd_stage,
-    filename=f"pub/ckd_stage/plot_ckd_stage",
-    title=f"CKD stage",
-    column_to_plot="rate",
-    y_label="Proportion",
-    as_bar=False,
-    category="ckd_primis_stage",
-)
+
+df_ckd_stage.to_csv(OUTPUT_DIR / f"pub/ckd_stage/plot_ckd_stage.csv", index=False)
+
+plt.figure(figsize=(12, 8))
+plt.bar(df_ckd_stage["ckd_primis_stage"], df_ckd_stage["proportion"] * 100)
+plt.xlabel("CKD stage")
+plt.ylabel("Proportion")
+plt.title("CKD stage")
+plt.tight_layout()
+plt.savefig(f"output/pub/ckd_stage/plot_ckd_stage.jpeg")
 
 
 # 3. testing rate by ckd stage
@@ -266,12 +252,9 @@ for test in tests_extended:
 # # 2020_ckd a snapshot prevalence cohort of patient with Stage 4 or 5 CKD who were reported to the UKRR to be under renal care in December 2020
 
 
-measures = {
-
-}
+measures = {}
 
 for path in Path("output/joined").glob("input_20*.csv.gz"):
-
     df = pd.read_csv(path)
     date = get_date_input_file(path.name)
 
@@ -283,10 +266,9 @@ for path in Path("output/joined").glob("input_20*.csv.gz"):
 
     # if the file is between Jan 2022 and end of Dec 2022,
     # should flag as in UKRR if flag is 1 in 2021_prevalence
-    year = date.split('-')[0]
+    year = date.split("-")[0]
 
     if year in ["2020", "2021", "2022"]:
-
         if year == "2020":
             df["in_ukrr"] = df["ukrr_2019"]
 
@@ -296,16 +278,20 @@ for path in Path("output/joined").glob("input_20*.csv.gz"):
         elif year == "2022":
             df["in_ukrr"] = df["ukrr_2021"]
 
-
-        df = df.loc[(df["at_risk"]==1),:]
-
+        df = df.loc[(df["at_risk"] == 1), :]
 
         for test in tests_extended:
             if test not in measures:
                 measures[test] = {"not_ukrr": {}, "ukrr": {}}
 
-            measures[test]["not_ukrr"][date] = (df.loc[df["in_ukrr"]==0, test].sum(), len(df.loc[df["in_ukrr"]==0, :]))
-            measures[test]["ukrr"][date] = (df.loc[df["in_ukrr"]==1, test].sum(), len(df.loc[df["in_ukrr"]==1, :]))
+            measures[test]["not_ukrr"][date] = (
+                df.loc[df["in_ukrr"] == 0, test].sum(),
+                len(df.loc[df["in_ukrr"] == 0, :]),
+            )
+            measures[test]["ukrr"][date] = (
+                df.loc[df["in_ukrr"] == 1, test].sum(),
+                len(df.loc[df["in_ukrr"] == 1, :]),
+            )
 
 # convert measures to 3 dataframes - one for each test. columns = numerator, denominator, date, group
 
@@ -314,7 +300,6 @@ for test in tests_extended:
     df_ukrr = pd.DataFrame()
 
     for date in measures[test]["not_ukrr"].keys():
-
         df_total = pd.concat(
             [
                 df_total,
@@ -347,7 +332,9 @@ for test in tests_extended:
 
         combined = pd.concat([df_total, df_ukrr])
 
-        combined.to_csv(f"output/pub/ukrr_testing/plot_{test}_total_ukrr.csv", index=False)
+        combined.to_csv(
+            f"output/pub/ukrr_testing/plot_{test}_total_ukrr.csv", index=False
+        )
 
         plot_measures(
             df=combined,

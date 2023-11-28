@@ -9,13 +9,11 @@ df = pd.read_csv(
     usecols=[
         "ckd_primis_stage",
         "ckd_egfr_category",
-        "ckd_acr_category",
         "latest_rrt_status",
     ],
     dtype={
         "ckd_primis_stage": "str",
         "ckd_egfr_category": "str",
-        "ckd_acr_category": "str",
         "latest_rrt_status": "str",
     },
 )
@@ -37,10 +35,6 @@ mapping = columns = {
     "ckd_egfr_category_G3b": "Biochemical G3b",
     "ckd_egfr_category_G4": "Biochemical G4",
     "ckd_egfr_category_G5": "Biochemical G5",
-    "ckd_acr_category_A1": "A1",
-    "ckd_acr_category_A2": "A2",
-    "ckd_acr_category_A3": "A3",
-    "ckd_acr_category_Uncategorised": "ACR Undefined",
     "latest_rrt_status": "Latest RRT status",
 }
 

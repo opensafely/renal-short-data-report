@@ -96,9 +96,8 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        upset: output/pub/ukrr_pc_overlap/*.png
-        upset_csv: output/pub/ukrr_pc_overlap/ukrr*overlap_stage.csv
-        count_table: output/pub/ukrr_pc_overlap/ukrr_pc_counts_table.csv
+        upset: output/pub/ukrr_pc_overlap/*.jpeg
+        table: output/pub/ukrr_pc_overlap/*.csv
 
   generate_measures:
     run: cohortextractor:latest generate_measures 
@@ -118,6 +117,7 @@ actions:
         counts: output/pub/deciles/figures/plot_*.jpeg
         csv: output/pub/deciles/data/plot_*.csv
         ckd_stage: output/pub/ckd_stage/plot_ckd_stage.jpeg
+        ckd_stage_csv: output/pub/ckd_stage/plot_ckd_stage.csv
         tests_ckd_stage: output/pub/tests_by_ckd_stage/*.jpeg
         ukrr: output/pub/ukrr_testing/*.jpeg
 
@@ -127,6 +127,7 @@ actions:
     outputs:
       moderately_sensitive:
         figures: output/pub/numeric_values/*dis*.jpeg
+        tables: output/pub/numeric_values/*dis*.csv
 
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort
