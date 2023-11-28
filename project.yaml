@@ -128,6 +128,7 @@ actions:
     outputs:
       moderately_sensitive:
         figures: output/pub/numeric_values/*dis*.jpeg
+        tables: output/pub/numeric_values/*dis*.csv
 
   generate_study_population_ukrr_jul_22:
     run: cohortextractor:latest generate_cohort

@@ -217,43 +217,70 @@ def plot_boxplot_numeric_value(x, title, filename):
     plt.clf()
 
 
-def plot_distribution_numeric_value(x, title, filename, combined=False, bins=20):
-    """Plots a distribution plot from an array of numeric values.
-    If combined is True, it will plot multiple distributions on the same axis.
+def plot_distribution_numeric_value(
+    x, title, filename, start, end, bin_width, combined=False
+):
+    """Plots a histogram from an array of numeric values, showing relative frequencies,
+    and returns a DataFrame with counts and relative frequencies for each bin.
 
     Args:
         x (array-like): Numeric values to be plotted.
         title (str): Title of the plot.
         filename (str): Output filename.
+        start (float): Start value of the bins.
+        end (float): End value of the bins.
+        bin_width (float): Width of each bin.
         combined (bool): If True, multiple distributions can be combined in the same plot.
-        bins (int): Number of bins for the histogram.
 
+    Returns:
+        DataFrame: A DataFrame with columns for bin edges, counts, and relative frequencies.
     """
-
-    if not combined:
-        # Remove values of 0
-        x = x[x > 0]
-
-    percentiles = np.arange(0.01, 0.99, 0.01)
-    percentile_values = np.quantile(a=x, q=percentiles)
-
     plt.figure(figsize=(10, 6))
 
+    # Define bin edges based on start, end, and bin_width
+    bins = np.arange(start, end + bin_width, bin_width)
+
+    # remove any values outside of the range
+    x = x[(x >= start) & (x <= end)]
+
     if combined:
-        for label, data in percentile_values.items():
-            sns.kdeplot(data, label=label, shade=True, alpha=0.5)
+        for label, data in x.items():
+            counts, bin_edges = np.histogram(data, bins=bins)
+            counts[counts <= 7] = 0
+            counts = 5 * np.round(counts / 5)
+            plt.hist(data, bins=bin_edges, alpha=0.5, label=label, density=True)
     else:
-        sns.kdeplot(percentile_values, shade=True, alpha=0.5)
+        counts, bin_edges = np.histogram(x, bins=bins)
+        counts[counts <= 7] = 0
+        counts = 5 * np.round(counts / 5)
+        plt.hist(x, bins=bin_edges, alpha=0.5, density=True)
 
     plt.title(title)
     plt.xlabel("Numeric Value")
-    plt.ylabel("Density")
+    plt.ylabel("Relative Frequency")
     plt.legend()
     plt.grid(True)
     plt.margins(x=0)
-    plt.xlim(left=0)
+    plt.xlim(left=start)
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
+
+    # Calculating relative frequencies
+    relative_frequencies = counts / counts.sum()
+
+    # Creating a DataFrame
+    df = pd.DataFrame(
+        {
+            "Bin_Edges": bin_edges[:-1],
+            "Counts": counts,
+            "Relative_Frequencies": relative_frequencies,
+        }
+    )
+
+    # Optional: Save the DataFrame as a CSV
+    df.to_csv(OUTPUT_DIR / f"{filename}_data.csv", index=False)
+
+    return df
 
 
 def write_csv(df, path, **kwargs):
