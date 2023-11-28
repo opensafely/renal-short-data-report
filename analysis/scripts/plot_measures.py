@@ -20,35 +20,18 @@ for i in [
     "albumin",
     "acr",
     "cr_cl",
-    "ckd",
-    "ckd_primis_1_5",
 ]:
     for j in ["population", "at_risk"]:
-        if i == "ckd_primis_1_5":
-            df = pd.read_csv(
-                OUTPUT_DIR / f"joined/measure_{i}_stage_{j}_practice_rate.csv",
-                parse_dates=["date"],
-            )
-
-        else:
-            df = pd.read_csv(
-                OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
-            )
+        
+        df = pd.read_csv(
+            OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
+        )
 
         df = drop_irrelevant_practices(df)
 
         dfs = {}
 
-        if i == "ckd_primis_1_5":
-            # plot rate separarely for stage 1-2 and 3-5
-            df_subset_1_2 = df.loc[df["ckd_primis_stage"].isin([1, 2]), :]
-            df_subset_3_5 = df.loc[df["ckd_primis_stage"].isin([3, 4, 5]), :]
-
-            dfs["stage_1_2"] = df_subset_1_2
-            dfs["stage_3_5"] = df_subset_3_5
-
-        else:
-            dfs["all"] = df
+        dfs["all"] = df
 
         for k, df in dfs.items():
             df["rate"] = df[f"value"] * 100
