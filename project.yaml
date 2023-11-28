@@ -96,9 +96,8 @@ actions:
     needs: [join_cohorts]
     outputs:
       moderately_sensitive:
-        upset: output/pub/ukrr_pc_overlap/*.png
-        upset_csv: output/pub/ukrr_pc_overlap/ukrr*overlap_stage.csv
-        count_table: output/pub/ukrr_pc_overlap/ukrr_pc_counts_table.csv
+        upset: output/pub/ukrr_pc_overlap/*.jpeg
+        table: output/pub/ukrr_pc_overlap/*.csv
 
   generate_measures:
     run: cohortextractor:latest generate_measures 

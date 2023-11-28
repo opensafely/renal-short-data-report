@@ -232,8 +232,6 @@ def plot_distribution_numeric_value(
         bin_width (float): Width of each bin.
         combined (bool): If True, multiple distributions can be combined in the same plot.
 
-    Returns:
-        DataFrame: A DataFrame with columns for bin edges, counts, and relative frequencies.
     """
     plt.figure(figsize=(10, 6))
 
@@ -241,19 +239,54 @@ def plot_distribution_numeric_value(
     bins = np.arange(start, end + bin_width, bin_width)
 
     # remove any values outside of the range
-    x = x[(x >= start) & (x <= end)]
 
     if combined:
         for label, data in x.items():
+            data = data[(data >= start) & (data <= end)]
             counts, bin_edges = np.histogram(data, bins=bins)
             counts[counts <= 7] = 0
             counts = 5 * np.round(counts / 5)
             plt.hist(data, bins=bin_edges, alpha=0.5, label=label, density=True)
+
+            if counts.sum() > 0:
+                relative_frequencies = np.zeros(len(counts))
+            
+            else:
+                relative_frequencies = np.zeros(len(counts))
+            # Creating a DataFrame
+            df = pd.DataFrame(
+                {
+                    "Bin_Edges": bin_edges[:-1],
+                    "Counts": counts,
+                    "Relative_Frequencies": relative_frequencies,
+                }
+            )
+
+            # Optional: Save the DataFrame as a CSV
+            df.to_csv(OUTPUT_DIR / f"{filename}_{label}_data.csv", index=False)
     else:
+        x = x[(x >= start) & (x <= end)]
         counts, bin_edges = np.histogram(x, bins=bins)
         counts[counts <= 7] = 0
         counts = 5 * np.round(counts / 5)
         plt.hist(x, bins=bin_edges, alpha=0.5, density=True)
+
+        if counts.sum() > 0:
+            relative_frequencies = np.zeros(len(counts))
+        
+        else:
+            relative_frequencies = np.zeros(len(counts))
+        # Creating a DataFrame
+        df = pd.DataFrame(
+            {
+                "Bin_Edges": bin_edges[:-1],
+                "Counts": counts,
+                "Relative_Frequencies": relative_frequencies,
+            }
+        )
+
+        # Optional: Save the DataFrame as a CSV
+        df.to_csv(OUTPUT_DIR / f"{filename}_data.csv", index=False)
 
     plt.title(title)
     plt.xlabel("Numeric Value")
@@ -265,22 +298,8 @@ def plot_distribution_numeric_value(
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
 
-    # Calculating relative frequencies
-    relative_frequencies = counts / counts.sum()
 
-    # Creating a DataFrame
-    df = pd.DataFrame(
-        {
-            "Bin_Edges": bin_edges[:-1],
-            "Counts": counts,
-            "Relative_Frequencies": relative_frequencies,
-        }
-    )
-
-    # Optional: Save the DataFrame as a CSV
-    df.to_csv(OUTPUT_DIR / f"{filename}_data.csv", index=False)
-
-    return df
+    
 
 
 def write_csv(df, path, **kwargs):

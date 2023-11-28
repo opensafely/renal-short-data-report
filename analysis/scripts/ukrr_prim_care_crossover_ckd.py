@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
-from utilities import OUTPUT_DIR
+from utilities import OUTPUT_DIR, plot_distribution_numeric_value
 from redaction_utils import drop_and_round, round_values
 import seaborn as sns
 import numpy as np
@@ -98,40 +98,18 @@ prim_care_latest_egfr = df["egfr_numeric_value_history"][
 ]
 
 
-percentiles = np.arange(0.01, 0.99, 0.01)
+#ukrr_latest_egfr, prim_care_latest_egfr
 
-if len(ukrr_latest_egfr) > 0:
-    percentile_values_ukrr = np.quantile(a=ukrr_latest_egfr, q=percentiles)
-else:
-    percentile_values_ukrr = []
 
-if len(prim_care_latest_egfr) > 0:
-    percentile_values_pc = np.quantile(a=prim_care_latest_egfr, q=percentiles)
-else:
-    percentile_values_pc = []
-
-if len(percentile_values_ukrr) > 0 and len(percentile_values_pc) > 0:
-    dist_df = pd.DataFrame(
-        {
-            f"UKRR (n={round_values(len(ukrr_latest_egfr))})": pd.Series(
-                percentile_values_ukrr
-            ),
-            f"Primary Care (n={round_values(len(prim_care_latest_egfr))})": pd.Series(
-                percentile_values_pc
-            ),
-        }
-    )
-
-    sns.kdeplot(dist_df.iloc[0], shade=True)
-    sns.kdeplot(dist_df.iloc[1], shade=True)
-    plt.title("eGFR UKRR vs Primary Care")
-    plt.xlabel("numeric value")
-    plt.margins(x=0)
-    plt.xlim(left=0)
-    plt.grid(True)
-    plt.legend(["UKRR", "Primary Care"])
-    plt.savefig(OUTPUT_DIR / f"pub/ukrr_pc_overlap/dist_plot_ukrr_pc_egfr.png")
-    plt.clf()
+plot_distribution_numeric_value(
+    {"UKRR": ukrr_latest_egfr, "Primary Care": prim_care_latest_egfr},
+    "eGFR UKRR vs Primary Care",
+    "pub/ukrr_pc_overlap/dist_plot_ukrr_pc_egfr",
+    0,
+    120,
+    10,
+    True
+)
 
 ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][
     (df["ukrr_ckd2020_creat"].notnull()) & (df["ukrr_ckd2020_creat"] > 0)
@@ -147,51 +125,24 @@ prim_care_latest_creatinine = df["creatinine_numeric_value_history"][
 # table with the number of results in each category
 counts_table = pd.DataFrame(
     {
-        "egfr UKRR (n=)": [len(ukrr_latest_egfr)],
-        "egfr Primary Care (n=)": [len(prim_care_latest_egfr)],
-        "creatinine UKRR (n=)": [len(ukrr_latest_creatinine)],
-        "creatinine Primary Care (n=)": [len(prim_care_latest_creatinine)],
+        "egfr UKRR (n=)": [round(len(ukrr_latest_egfr) / 5) * 5],
+        "egfr Primary Care (n=)": [round(len(prim_care_latest_egfr) / 5) * 5],
+        "creatinine UKRR (n=)": [round(len(ukrr_latest_creatinine) / 5) * 5],
+        "creatinine Primary Care (n=)": [round(len(prim_care_latest_creatinine) / 5) * 5],
     }
 )
+
 
 counts_table.to_csv(
     OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_pc_counts_table.csv", index=False
 )
 
-
-percentiles = np.arange(0.01, 0.99, 0.01)
-
-if len(ukrr_latest_creatinine) > 0:
-    percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
-else:
-    percentile_values_ukrr = []
-
-if len(prim_care_latest_creatinine) > 0:
-    percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
-else:
-    percentile_values_pc = []
-
-if len(percentile_values_ukrr) > 0 and len(percentile_values_pc) > 0:
-    percentile_values_ukrr = np.quantile(a=ukrr_latest_creatinine, q=percentiles)
-    percentile_values_pc = np.quantile(a=prim_care_latest_creatinine, q=percentiles)
-
-    df = pd.DataFrame(
-        {
-            f"UKRR (n={round_values(len(ukrr_latest_creatinine))})": pd.Series(
-                percentile_values_ukrr
-            ),
-            f"Primary Care (n={round_values(len(prim_care_latest_creatinine))})": pd.Series(
-                percentile_values_pc
-            ),
-        }
-    )
-
-    sns.kdeplot(df.iloc[0], shade=True, cut=0)
-    sns.kdeplot(df.iloc[1], shade=True, cut=0)
-    plt.title("Creatinine UKRR vs Primary Care")
-    plt.xlabel("Numeric value")
-    plt.margins(x=0)
-    plt.grid(True)
-    plt.legend(["UKRR", "Primary Care"])
-    plt.savefig(OUTPUT_DIR / f"pub/ukrr_pc_overlap/dist_plot_ukrr_pc_creatinine.png")
-    plt.clf()
+plot_distribution_numeric_value(
+    {"UKRR": ukrr_latest_creatinine, "Primary Care": prim_care_latest_creatinine},
+    "Creatinine UKRR vs Primary Care",
+    "pub/ukrr_pc_overlap/dist_plot_ukrr_pc_creatinine",
+    0,
+    150,
+    10,
+    True
+)
