@@ -6,11 +6,11 @@ from utilities import (
     match_input_files,
     plot_distribution_numeric_value
 )
-from variables import tests
+from variables import tests_extended
 
 Path.mkdir(OUTPUT_DIR / f"pub/numeric_values", parents=True, exist_ok=True)
 
-for test in tests:
+for test in tests_extended:
     numeric_values = []
     for file in (OUTPUT_DIR / "joined").iterdir():
         if match_input_files(file.name):
