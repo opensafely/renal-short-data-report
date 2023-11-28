@@ -185,7 +185,11 @@ for file in (OUTPUT_DIR / "joined").iterdir():
                 lambda x: map_numeric_values(x, numeric_value_mappings[test])
             )
 
-            for operator in ["<", ">", "<=", ">=", "~", "=", "missing"]:
+            # replace missing and ~ with = 
+            df[f"{test}_operator"].replace("missing", "=", inplace=True)
+            df[f"{test}_operator"].replace("~", "=", inplace=True)
+
+            for operator in ["<", ">", "<=", ">=", "="]:
                 numeric_value_operator_counts[test][operator] = []
                 subset = df.loc[df[f"{test}_operator"] == operator, :]
 
@@ -245,7 +249,7 @@ for test in tests_extended:
     # 4. A count of each numeric value-operator pair
 
     combined_values = []
-    for operator in ["<", ">", "<=", ">=", "~", "=", "missing"]:
+    for operator in ["<", ">", "<=", ">=", "="]:
         operator_combined = pd.concat(
             numeric_value_operator_counts[test][operator]
         ).reset_index()
