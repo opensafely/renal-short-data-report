@@ -171,6 +171,29 @@ for test in tests_extended:
     )
 
 
+    df_recorded_stage = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_{test}_stage_population_rate.csv",
+        parse_dates=["date"],
+    )
+
+
+    df_recorded_stage = df_recorded_stage.replace(np.inf, np.nan)
+    df_recorded_stage["rate"] = (df_recorded_stage[test] / df_recorded_stage["population"]) * 1000
+    df_recorded_stage = redact_small_numbers(
+        df_recorded_stage, 7, 5, test, "population", "rate", "date")
+    
+    plot_measures(
+        df=df_recorded_stage,
+        filename=f"pub/tests_by_ckd_stage/plot_ckd_recorded_stage_{test}",
+        title=f"",
+        column_to_plot="rate",
+        y_label="Rate per 1000",
+        as_bar=False,
+        category="ckd_primis_stage",
+    )
+
+   
+
 # 4. plot rate of each test fop those biochem stage 3-5, vs primis recorded 3-5 vs single reduced egfr
 
 for test in tests_extended:
