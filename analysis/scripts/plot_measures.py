@@ -51,7 +51,7 @@ for i in [
                 period_column="date",
                 column="rate",
                 count_column=i,
-                ylabel="Percentage",
+                ylabel="Proportion",
             )
 
 
@@ -104,7 +104,7 @@ for test in tests_extended:
         OUTPUT_DIR / f"joined/measure_{test}_single_egfr_population_rate.csv",
         parse_dates=["date"],
     )
-
+    
     df = df.loc[df["single_egfr"] == 1, :]
     redact_small_numbers(df, 7, 5, test, "population", "value", "date")
 
@@ -178,16 +178,15 @@ for test in tests_extended:
 
 
     df_recorded_stage = df_recorded_stage.replace(np.inf, np.nan)
-    df_recorded_stage["rate"] = (df_recorded_stage[test] / df_recorded_stage["population"]) * 1000
     df_recorded_stage = redact_small_numbers(
-        df_recorded_stage, 7, 5, test, "population", "rate", "date")
+        df_recorded_stage, 7, 5, test, "population", "value", "date")
     
     plot_measures(
         df=df_recorded_stage,
         filename=f"pub/tests_by_ckd_stage/plot_ckd_recorded_stage_{test}",
         title=f"",
         column_to_plot="rate",
-        y_label="Rate per 1000",
+        y_label="Proportion",
         as_bar=False,
         category="ckd_primis_stage",
     )
@@ -233,19 +232,19 @@ for test in tests_extended:
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.plot(
         single_egfr["date"],
-        single_egfr["value"] * 1000,
+        single_egfr["value"],
         label="Single reduced eGFR",
         color="red",
     )
     ax.plot(
         primis_stage["date"],
-        primis_stage["value"] * 1000,
+        primis_stage["value"],
         label="CKD stage (recorded)",
         color="blue",
     )
     ax.plot(
         ckd_stage["date"],
-        ckd_stage["value"] * 1000,
+        ckd_stage["value"],
         label="CKD stage (biochemical)",
         color="green",
     )
@@ -255,7 +254,7 @@ for test in tests_extended:
     ax.set_xticks(x_labels)
     ax.set_xticklabels(x_labels, rotation="vertical")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-    ax.set_ylabel("Rate per 1000")
+    ax.set_ylabel("Proportion")
     ax.set_xlabel("Date")
     ax.margins(x=0)
     ax.grid(True)
