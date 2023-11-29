@@ -35,7 +35,7 @@ for i in [
 
         for k, df in dfs.items():
 
-            df = df.drop(["value"], axis=1)
+        
             df = df.replace(np.inf, np.nan)
 
             df_deciles = compute_deciles(df, "date", i)
@@ -43,7 +43,7 @@ for i in [
             df_deciles.to_csv(
                 f"output/pub/deciles/data/plot_{i}_{j}_{k}_deciles.csv", index=False
             )
-
+      
             deciles_chart(
                 df,
                 filename=f"output/pub/deciles/figures/plot_{i}_{j}_{k}.jpeg",
