@@ -235,25 +235,30 @@ def plot_distribution_numeric_value(
     """
     plt.figure(figsize=(10, 6))
 
-    # Define bin edges based on start, end, and bin_width
     bins = np.arange(start, end + bin_width, bin_width)
-
-    # remove any values outside of the range
 
     if combined:
         for label, data in x.items():
             data = data[(data >= start) & (data <= end)]
             counts, bin_edges = np.histogram(data, bins=bins)
+
             counts[counts <= 7] = 0
             counts = 5 * np.round(counts / 5)
-            plt.hist(data, bins=bin_edges, alpha=0.5, label=label, density=True)
 
             if counts.sum() > 0:
-                relative_frequencies = np.zeros(len(counts))
-            
+                relative_frequencies = np.round(counts / counts.sum(), 2)
+
             else:
                 relative_frequencies = np.zeros(len(counts))
-            # Creating a DataFrame
+
+            plt.bar(
+                bin_edges[:-1],
+                relative_frequencies,
+                width=bin_width,
+                align="edge",
+                alpha=0.5,
+            )
+
             df = pd.DataFrame(
                 {
                     "Bin_Edges": bin_edges[:-1],
@@ -262,21 +267,29 @@ def plot_distribution_numeric_value(
                 }
             )
 
-            # Optional: Save the DataFrame as a CSV
             df.to_csv(OUTPUT_DIR / f"{filename}_{label}_data.csv", index=False)
     else:
         x = x[(x >= start) & (x <= end)]
         counts, bin_edges = np.histogram(x, bins=bins)
+
         counts[counts <= 7] = 0
         counts = 5 * np.round(counts / 5)
-        plt.hist(x, bins=bin_edges, alpha=0.5, density=True)
 
         if counts.sum() > 0:
-            relative_frequencies = np.zeros(len(counts))
-        
+            relative_frequencies = np.round(counts / counts.sum(), 2)
+
         else:
             relative_frequencies = np.zeros(len(counts))
-        # Creating a DataFrame
+
+        # plot the relative frequencies as bar
+        plt.bar(
+            bin_edges[:-1],
+            relative_frequencies,
+            width=bin_width,
+            align="edge",
+            alpha=0.5,
+        )
+
         df = pd.DataFrame(
             {
                 "Bin_Edges": bin_edges[:-1],
@@ -285,7 +298,6 @@ def plot_distribution_numeric_value(
             }
         )
 
-        # Optional: Save the DataFrame as a CSV
         df.to_csv(OUTPUT_DIR / f"{filename}_data.csv", index=False)
 
     plt.title(title)
@@ -297,9 +309,6 @@ def plot_distribution_numeric_value(
     plt.xlim(left=start)
     plt.savefig(OUTPUT_DIR / f"{filename}.jpeg")
     plt.clf()
-
-
-    
 
 
 def write_csv(df, path, **kwargs):
