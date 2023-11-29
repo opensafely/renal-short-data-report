@@ -22,7 +22,6 @@ for i in [
     "cr_cl",
 ]:
     for j in ["population", "at_risk"]:
-        
         df = pd.read_csv(
             OUTPUT_DIR / f"joined/measure_{i}_{j}_rate.csv", parse_dates=["date"]
         )
@@ -34,8 +33,6 @@ for i in [
         dfs["all"] = df
 
         for k, df in dfs.items():
-
-        
             df = df.replace(np.inf, np.nan)
 
             df_deciles = compute_deciles(df, "date", i)
@@ -43,7 +40,7 @@ for i in [
             df_deciles.to_csv(
                 f"output/pub/deciles/data/plot_{i}_{j}_{k}_deciles.csv", index=False
             )
-      
+
             deciles_chart(
                 df,
                 filename=f"output/pub/deciles/figures/plot_{i}_{j}_{k}.jpeg",
@@ -66,7 +63,7 @@ df_ckd_stage = pd.read_csv(
 
 df_ckd_stage = df_ckd_stage.loc[df_ckd_stage["ckd_primis_1_5"] == 1, :]
 
-ckd_stage  = df_ckd_stage["ckd_primis_stage"]
+ckd_stage = df_ckd_stage["ckd_primis_stage"]
 
 ckd_stage_count = ckd_stage.value_counts()
 ckd_stage_count.rename("count", inplace=True)
@@ -103,7 +100,7 @@ for test in tests_extended:
         OUTPUT_DIR / f"joined/measure_{test}_single_egfr_population_rate.csv",
         parse_dates=["date"],
     )
-    
+
     df = df.loc[df["single_egfr"] == 1, :]
     redact_small_numbers(df, 7, 5, test, "population", "value", "date")
 
@@ -126,7 +123,7 @@ for test in tests_extended:
         .sum()
         .reset_index()
     )
-   
+
     df_ckd_stage_egfr = df_ckd_stage_egfr.replace(np.inf, np.nan)
     df_ckd_stage_egfr = redact_small_numbers(
         df_ckd_stage_egfr, 7, 5, test, "population", "value", "date"
@@ -147,7 +144,6 @@ for test in tests_extended:
         .sum()
         .reset_index()
     )
-  
 
     # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
     df_ckd_stage_acr = redact_small_numbers(
@@ -164,17 +160,16 @@ for test in tests_extended:
         category="ckd_acr_category",
     )
 
-
     df_recorded_stage = pd.read_csv(
         OUTPUT_DIR / f"joined/measure_{test}_stage_population_rate.csv",
         parse_dates=["date"],
     )
 
-
     df_recorded_stage = df_recorded_stage.replace(np.inf, np.nan)
     df_recorded_stage = redact_small_numbers(
-        df_recorded_stage, 7, 5, test, "population", "value", "date")
-    
+        df_recorded_stage, 7, 5, test, "population", "value", "date"
+    )
+
     plot_measures(
         df=df_recorded_stage,
         filename=f"pub/tests_by_ckd_stage/plot_ckd_recorded_stage_{test}",
@@ -185,7 +180,6 @@ for test in tests_extended:
         category="ckd_primis_stage",
     )
 
-   
 
 # 4. plot rate of each test fop those biochem stage 3-5, vs primis recorded 3-5 vs single reduced egfr
 
@@ -272,6 +266,7 @@ measures = {}
 
 for path in Path("output/joined").glob("input_20*.csv.gz"):
     df = pd.read_csv(path)
+    df = df.loc[(df["at_risk"] == 1), :]
     date = get_date_input_file(path.name)
 
     # if the file is between Jan 2020 and end of Dec 2020,
@@ -293,8 +288,6 @@ for path in Path("output/joined").glob("input_20*.csv.gz"):
 
         elif year == "2022":
             df["in_ukrr"] = df["ukrr_2021"]
-
-        df = df.loc[(df["at_risk"] == 1), :]
 
         for test in tests_extended:
             if test not in measures:
