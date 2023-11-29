@@ -106,8 +106,8 @@ plot_distribution_numeric_value(
     "eGFR UKRR vs Primary Care",
     "pub/ukrr_pc_overlap/dist_plot_ukrr_pc_egfr",
     0,
-    120,
-    10,
+    60,
+    5,
     True
 )
 
@@ -141,8 +141,8 @@ plot_distribution_numeric_value(
     {"UKRR": ukrr_latest_creatinine, "Primary Care": prim_care_latest_creatinine},
     "Creatinine UKRR vs Primary Care",
     "pub/ukrr_pc_overlap/dist_plot_ukrr_pc_creatinine",
-    0,
-    150,
+    50,
+    200,
     10,
     True
 )

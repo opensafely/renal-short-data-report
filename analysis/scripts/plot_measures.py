@@ -34,9 +34,8 @@ for i in [
         dfs["all"] = df
 
         for k, df in dfs.items():
-            df["rate"] = df[f"value"] * 100
 
-            df = df.drop(["value"], axis=1)
+        
             df = df.replace(np.inf, np.nan)
 
             df_deciles = compute_deciles(df, "date", i)
@@ -44,14 +43,14 @@ for i in [
             df_deciles.to_csv(
                 f"output/pub/deciles/data/plot_{i}_{j}_{k}_deciles.csv", index=False
             )
-
+      
             deciles_chart(
                 df,
                 filename=f"output/pub/deciles/figures/plot_{i}_{j}_{k}.jpeg",
                 period_column="date",
-                column="rate",
+                column="value",
                 count_column=i,
-                ylabel="Percentage",
+                ylabel="Proportion",
             )
 
 
@@ -88,7 +87,7 @@ df_ckd_stage.to_csv(OUTPUT_DIR / f"pub/ckd_stage/plot_ckd_stage.csv", index=Fals
 
 plt.figure(figsize=(12, 8))
 plt.bar(df_ckd_stage["ckd_primis_stage"], df_ckd_stage["proportion"] * 100)
-plt.xlabel("CKD stage")
+plt.xlabel("CKD stage (recorded)")
 plt.ylabel("Proportion")
 plt.title("CKD stage")
 plt.tight_layout()
@@ -104,7 +103,7 @@ for test in tests_extended:
         OUTPUT_DIR / f"joined/measure_{test}_single_egfr_population_rate.csv",
         parse_dates=["date"],
     )
-
+    
     df = df.loc[df["single_egfr"] == 1, :]
     redact_small_numbers(df, 7, 5, test, "population", "value", "date")
 
@@ -127,20 +126,17 @@ for test in tests_extended:
         .sum()
         .reset_index()
     )
-    df_ckd_stage_egfr["rate"] = (
-        df_ckd_stage_egfr[test] / df_ckd_stage_egfr["population"]
-    ) * 100
-
+   
     df_ckd_stage_egfr = df_ckd_stage_egfr.replace(np.inf, np.nan)
     df_ckd_stage_egfr = redact_small_numbers(
-        df_ckd_stage_egfr, 7, 5, test, "population", "rate", "date"
+        df_ckd_stage_egfr, 7, 5, test, "population", "value", "date"
     )
 
     plot_measures(
         df=df_ckd_stage_egfr,
         filename=f"pub/tests_by_ckd_stage/plot_ckd_biochemical_stage_{test}_egfr",
         title=f"",
-        column_to_plot="rate",
+        column_to_plot="value",
         y_label="Proportion",
         as_bar=False,
         category="ckd_egfr_category",
@@ -151,25 +147,45 @@ for test in tests_extended:
         .sum()
         .reset_index()
     )
-    df_ckd_stage_acr["rate"] = (
-        df_ckd_stage_acr[test] / df_ckd_stage_acr["population"]
-    ) * 100
+  
 
     # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
     df_ckd_stage_acr = redact_small_numbers(
-        df_ckd_stage_acr, 7, 5, test, "population", "rate", "date"
+        df_ckd_stage_acr, 7, 5, test, "population", "value", "date"
     )
 
     plot_measures(
         df=df_ckd_stage_acr,
         filename=f"plot_ckd_biochemical_stage_{test}_acr",
         title=f"",
-        column_to_plot="rate",
+        column_to_plot="value",
         y_label="Proportion",
         as_bar=False,
         category="ckd_acr_category",
     )
 
+
+    df_recorded_stage = pd.read_csv(
+        OUTPUT_DIR / f"joined/measure_{test}_stage_population_rate.csv",
+        parse_dates=["date"],
+    )
+
+
+    df_recorded_stage = df_recorded_stage.replace(np.inf, np.nan)
+    df_recorded_stage = redact_small_numbers(
+        df_recorded_stage, 7, 5, test, "population", "value", "date")
+    
+    plot_measures(
+        df=df_recorded_stage,
+        filename=f"pub/tests_by_ckd_stage/plot_ckd_recorded_stage_{test}",
+        title=f"",
+        column_to_plot="value",
+        y_label="Proportion",
+        as_bar=False,
+        category="ckd_primis_stage",
+    )
+
+   
 
 # 4. plot rate of each test fop those biochem stage 3-5, vs primis recorded 3-5 vs single reduced egfr
 
@@ -210,19 +226,19 @@ for test in tests_extended:
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.plot(
         single_egfr["date"],
-        single_egfr["value"] * 1000,
+        single_egfr["value"],
         label="Single reduced eGFR",
         color="red",
     )
     ax.plot(
         primis_stage["date"],
-        primis_stage["value"] * 1000,
-        label="CKD stage (PRIMIS)",
+        primis_stage["value"],
+        label="CKD stage (recorded)",
         color="blue",
     )
     ax.plot(
         ckd_stage["date"],
-        ckd_stage["value"] * 1000,
+        ckd_stage["value"],
         label="CKD stage (biochemical)",
         color="green",
     )
@@ -232,7 +248,7 @@ for test in tests_extended:
     ax.set_xticks(x_labels)
     ax.set_xticklabels(x_labels, rotation="vertical")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-    ax.set_ylabel("Rate per 1000")
+    ax.set_ylabel("Proportion")
     ax.set_xlabel("Date")
     ax.margins(x=0)
     ax.grid(True)
