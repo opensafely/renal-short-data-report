@@ -88,7 +88,7 @@ df_ckd_stage.to_csv(OUTPUT_DIR / f"pub/ckd_stage/plot_ckd_stage.csv", index=Fals
 
 plt.figure(figsize=(12, 8))
 plt.bar(df_ckd_stage["ckd_primis_stage"], df_ckd_stage["proportion"] * 100)
-plt.xlabel("CKD stage")
+plt.xlabel("CKD stage (recorded)")
 plt.ylabel("Proportion")
 plt.title("CKD stage")
 plt.tight_layout()
@@ -240,7 +240,7 @@ for test in tests_extended:
     ax.plot(
         primis_stage["date"],
         primis_stage["value"] * 1000,
-        label="CKD stage (PRIMIS)",
+        label="CKD stage (recorded)",
         color="blue",
     )
     ax.plot(
