@@ -34,7 +34,6 @@ for i in [
         dfs["all"] = df
 
         for k, df in dfs.items():
-            df["rate"] = df[f"value"] * 100
 
             df = df.drop(["value"], axis=1)
             df = df.replace(np.inf, np.nan)
@@ -49,7 +48,7 @@ for i in [
                 df,
                 filename=f"output/pub/deciles/figures/plot_{i}_{j}_{k}.jpeg",
                 period_column="date",
-                column="rate",
+                column="value",
                 count_column=i,
                 ylabel="Proportion",
             )
@@ -127,20 +126,17 @@ for test in tests_extended:
         .sum()
         .reset_index()
     )
-    df_ckd_stage_egfr["rate"] = (
-        df_ckd_stage_egfr[test] / df_ckd_stage_egfr["population"]
-    ) * 100
-
+   
     df_ckd_stage_egfr = df_ckd_stage_egfr.replace(np.inf, np.nan)
     df_ckd_stage_egfr = redact_small_numbers(
-        df_ckd_stage_egfr, 7, 5, test, "population", "rate", "date"
+        df_ckd_stage_egfr, 7, 5, test, "population", "value", "date"
     )
 
     plot_measures(
         df=df_ckd_stage_egfr,
         filename=f"pub/tests_by_ckd_stage/plot_ckd_biochemical_stage_{test}_egfr",
         title=f"",
-        column_to_plot="rate",
+        column_to_plot="value",
         y_label="Proportion",
         as_bar=False,
         category="ckd_egfr_category",
@@ -151,20 +147,18 @@ for test in tests_extended:
         .sum()
         .reset_index()
     )
-    df_ckd_stage_acr["rate"] = (
-        df_ckd_stage_acr[test] / df_ckd_stage_acr["population"]
-    ) * 100
+  
 
     # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
     df_ckd_stage_acr = redact_small_numbers(
-        df_ckd_stage_acr, 7, 5, test, "population", "rate", "date"
+        df_ckd_stage_acr, 7, 5, test, "population", "value", "date"
     )
 
     plot_measures(
         df=df_ckd_stage_acr,
         filename=f"plot_ckd_biochemical_stage_{test}_acr",
         title=f"",
-        column_to_plot="rate",
+        column_to_plot="value",
         y_label="Proportion",
         as_bar=False,
         category="ckd_acr_category",
@@ -185,7 +179,7 @@ for test in tests_extended:
         df=df_recorded_stage,
         filename=f"pub/tests_by_ckd_stage/plot_ckd_recorded_stage_{test}",
         title=f"",
-        column_to_plot="rate",
+        column_to_plot="value",
         y_label="Proportion",
         as_bar=False,
         category="ckd_primis_stage",
