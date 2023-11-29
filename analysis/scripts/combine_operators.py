@@ -29,11 +29,16 @@ operator_counts = {}
 numeric_value_operator_counts = {}
 
 
+
+
 for test in tests_extended:
     code_counts[test] = []
     numeric_value_counts[test] = []
     operator_counts[test] = []
     numeric_value_operator_counts[test] = {}
+    
+    for operator in ["<", ">", "<=", ">=", "="]:
+        numeric_value_operator_counts[test][operator] = []
 
 
 numeric_value_mappings = {
@@ -165,48 +170,37 @@ for file in (OUTPUT_DIR / "joined").iterdir():
 
             # 4. A count of each numeric value-operator pair
 
-            num_with_numeric_value_and_operator = (
-                df.loc[
-                    (
-                        (df[f"{test}_numeric_value"].notnull())
-                        & (df[f"{test}_numeric_value"] > 0)
-                    ),
-                    :,
-                ]
-                .groupby(f"{test}_operator")[[test]]
-                .sum()
-            )
-
-            df[f"{test}_numeric_value"] = df[f"{test}_numeric_value"].apply(
+            df_subset_with_numeric_value[
+                f"{test}_numeric_value"
+            ] = df_subset_with_numeric_value[f"{test}_numeric_value"].apply(
                 lambda x: round_value(x)
             )
 
-            df[f"{test}_numeric_value"] = df[f"{test}_numeric_value"].apply(
+            df_subset_with_numeric_value[
+                f"{test}_numeric_value"
+            ] = df_subset_with_numeric_value[f"{test}_numeric_value"].apply(
                 lambda x: map_numeric_values(x, numeric_value_mappings[test])
             )
 
-            # replace missing and ~ with = 
-            df[f"{test}_operator"].replace("missing", "=", inplace=True)
-            df[f"{test}_operator"].replace("~", "=", inplace=True)
+            # replace missing and ~ with =
+            df_subset_with_numeric_value[f"{test}_operator"].replace(
+                "missing", "=", inplace=True
+            )
+            df_subset_with_numeric_value[f"{test}_operator"].replace(
+                "~", "=", inplace=True
+            )
 
             for operator in ["<", ">", "<=", ">=", "="]:
-                numeric_value_operator_counts[test][operator] = []
-                subset = df.loc[df[f"{test}_operator"] == operator, :]
-
+                subset = df_subset_with_numeric_value.loc[
+                    df[f"{test}_operator"] == operator,
+                    [f"{test}_numeric_value", f"{test}_operator"],
+                ]
 
                 numeric_value_operator_counts[test][operator].append(
-                    subset.loc[
-                        (
-                            (subset[f"{test}_numeric_value"].notnull())
-                            & (subset[f"{test}_numeric_value"] > 0)
-                        ),
-                        [f"{test}_numeric_value", f"{test}_operator"],
-                    ]
-                    .groupby([f"{test}_numeric_value", f"{test}_operator"])
-                    .size()
+                    subset.groupby([f"{test}_numeric_value", f"{test}_operator"]).size()
                 )
 
-
+print(len(numeric_value_operator_counts["albumin"]["="]))
 for test in tests_extended:
     # 1 A count of each code
     test_codes = pd.concat(code_counts[test], axis=1, sort=False).sum(axis=1)
@@ -214,7 +208,7 @@ for test in tests_extended:
     test_codes.rename("count", inplace=True)
     test_codes = test_codes.reset_index()
     test_codes.rename(columns={"index": "code"}, inplace=True)
-    
+
     test_codes["count"] = drop_and_round(test_codes["count"])
 
     test_codes.to_csv(
@@ -235,7 +229,8 @@ for test in tests_extended:
         test_codes_with_numeric_value["count"]
     )
     test_codes_with_numeric_value.to_csv(
-        OUTPUT_DIR / f"pub/operator_counts/{test}_codes_with_numeric_value_count.csv", index=False
+        OUTPUT_DIR / f"pub/operator_counts/{test}_codes_with_numeric_value_count.csv",
+        index=False,
     )
 
     # 3. A count of each operator
@@ -254,7 +249,6 @@ for test in tests_extended:
             numeric_value_operator_counts[test][operator]
         ).reset_index()
 
- 
         operator_combined.rename(
             columns={
                 0: "count",
@@ -268,9 +262,17 @@ for test in tests_extended:
 
     combined_values = pd.concat(combined_values)
 
+    combined_values = combined_values.groupby(
+        [f"{test}_numeric_value", f"{test}_operator"]
+    ).sum()
+
     combined_values["count"] = combined_values["count"].apply(round_value, args=(5,))
+  
+    combined_values.sort_values(
+        by=[f"{test}_operator", f"{test}_numeric_value"], inplace=True
+    )
 
     combined_values.to_csv(
         OUTPUT_DIR / f"pub/operator_counts/{test}_numeric_value_operator_count.csv",
-        index=False,
+        index=True,
     )
