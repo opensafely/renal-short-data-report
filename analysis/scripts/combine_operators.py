@@ -8,7 +8,7 @@ from utilities import (
     get_date_input_file,
     round_value,
 )
-from redaction_utils import group_low_values, group_low_values_series, drop_and_round
+from redaction_utils import group_low_values_series, drop_and_round
 
 
 Path(OUTPUT_DIR / f"pub/operator_counts").mkdir(parents=True, exist_ok=True)
@@ -29,21 +29,18 @@ operator_counts = {}
 numeric_value_operator_counts = {}
 
 
-
-
 for test in tests_extended:
     code_counts[test] = []
     numeric_value_counts[test] = []
     operator_counts[test] = []
     numeric_value_operator_counts[test] = {}
-    
+
     for operator in ["<", ">", "<=", ">=", "="]:
         numeric_value_operator_counts[test][operator] = []
 
 
 numeric_value_mappings = {
     "albumin": {
-        (-float("inf"), 0): -1,
         (16, 20): 20,
         (21, 30): 30,
         (31, 40): 40,
@@ -52,8 +49,7 @@ numeric_value_mappings = {
         (101, float("inf")): 101,
     },
     "creatinine": {
-        (-float("inf"), 0): -1,
-        (0, 10): 50,
+        (0, 10): 10,
         (11, 20): 20,
         (21, 30): 30,
         (31, 40): 40,
@@ -74,8 +70,7 @@ numeric_value_mappings = {
         (1001, float("inf")): 1001,
     },
     "eGFR": {
-        (-float("inf"), 0): -1,
-        (0, 5): 5,
+        (1, 5): 5,
         (6, 10): 10,
         (11, 15): 15,
         (16, 20): 20,
@@ -102,7 +97,6 @@ numeric_value_mappings = {
         (121, float("inf")): 121,
     },
     "acr": {
-        (-float("inf"), 0): -1,
         (11, 15): 15,
         (16, 20): 20,
         (21, 25): 25,
@@ -115,7 +109,6 @@ numeric_value_mappings = {
         (101, float("inf")): 101,
     },
     "cr_cl": {
-        (-float("inf"), 0): -1,
         (21, 25): 25,
         (26, 30): 30,
         (31, float("inf")): 31,
@@ -123,11 +116,33 @@ numeric_value_mappings = {
 }
 
 
-def map_numeric_values(value, mapping):
-    for (lower, upper), mapped_value in mapping.items():
-        if lower <= value <= upper:
-            return mapped_value
-    return value
+def map_numeric_values(series, mapping):
+    conditions = [
+        series.between(lower, upper, inclusive="left")
+        for (lower, upper), _ in mapping.items()
+    ]
+    choices = [mapped_value for _, mapped_value in mapping.items()]
+
+    return np.select(conditions, choices, default=series)
+
+
+def convert_values(df, test, mapping):
+    df.loc[df[f"{test}_numeric_value"] < 0, f"{test}_numeric_value"] = -1
+
+    df.loc[
+        (df[f"{test}_numeric_value"] > 0) & (df[f"{test}_numeric_value"] < 1),
+        f"{test}_numeric_value",
+    ] = 1
+
+    df[f"{test}_numeric_value"] = df[f"{test}_numeric_value"].apply(
+        lambda x: round_value(x)
+    )
+
+
+    df[f"{test}_numeric_value"] = map_numeric_values(
+        df[f"{test}_numeric_value"], mapping[test]
+    )
+    return df
 
 
 for file in (OUTPUT_DIR / "joined").iterdir():
@@ -170,17 +185,9 @@ for file in (OUTPUT_DIR / "joined").iterdir():
 
             # 4. A count of each numeric value-operator pair
 
-            df_subset_with_numeric_value[
-                f"{test}_numeric_value"
-            ] = df_subset_with_numeric_value[f"{test}_numeric_value"].apply(
-                lambda x: round_value(x)
-            )
+            # convert any negative values to -1, any values exactly 0 remain as 0, any values between 0 and 1 are rounded to 1
 
-            df_subset_with_numeric_value[
-                f"{test}_numeric_value"
-            ] = df_subset_with_numeric_value[f"{test}_numeric_value"].apply(
-                lambda x: map_numeric_values(x, numeric_value_mappings[test])
-            )
+            convert_values(df_subset_with_numeric_value, test, numeric_value_mappings)
 
             # replace missing and ~ with =
             df_subset_with_numeric_value[f"{test}_operator"].replace(
@@ -200,7 +207,6 @@ for file in (OUTPUT_DIR / "joined").iterdir():
                     subset.groupby([f"{test}_numeric_value", f"{test}_operator"]).size()
                 )
 
-print(len(numeric_value_operator_counts["albumin"]["="]))
 for test in tests_extended:
     # 1 A count of each code
     test_codes = pd.concat(code_counts[test], axis=1, sort=False).sum(axis=1)
@@ -266,13 +272,21 @@ for test in tests_extended:
         [f"{test}_numeric_value", f"{test}_operator"]
     ).sum()
 
-    combined_values["count"] = combined_values["count"].apply(round_value, args=(5,))
-  
     combined_values.sort_values(
         by=[f"{test}_operator", f"{test}_numeric_value"], inplace=True
     )
 
     combined_values.to_csv(
         OUTPUT_DIR / f"pub/operator_counts/{test}_numeric_value_operator_count.csv",
+        index=True,
+    )
+
+    # remove any rows where count is <=7
+    combined_values = combined_values[combined_values["count"] > 7]
+    combined_values["count"] = combined_values["count"].apply(round_value, args=(5,))
+
+    combined_values.to_csv(
+        OUTPUT_DIR
+        / f"pub/operator_counts/{test}_numeric_value_operator_count_rounded.csv",
         index=True,
     )

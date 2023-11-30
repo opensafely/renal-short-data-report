@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from utilities import OUTPUT_DIR, plot_distribution_numeric_value
 from redaction_utils import drop_and_round, round_values
-import seaborn as sns
-import numpy as np
+
 
 Path.mkdir(OUTPUT_DIR / "pub/ukrr_pc_overlap", parents=True, exist_ok=True)
 
