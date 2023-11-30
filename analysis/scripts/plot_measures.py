@@ -340,7 +340,7 @@ for test in tests_extended:
         )
 
         combined = pd.concat([df_total, df_ukrr])
-
+        combined["value"] = combined["numerator"] / combined["denominator"]
         combined.to_csv(
             f"output/pub/ukrr_testing/plot_{test}_total_ukrr.csv", index=False
         )
@@ -348,8 +348,8 @@ for test in tests_extended:
         plot_measures(
             df=combined,
             filename=f"pub/ukrr_testing/plot_{test}_total_ukrr",
-            title=f"",
-            column_to_plot="numerator",
+            title="",
+            column_to_plot="value",
             y_label="Proportion",
             as_bar=False,
             category="group",
