@@ -304,6 +304,9 @@ def plot_distribution_numeric_value(
     plt.xlabel("Numeric Value")
     plt.ylabel("Relative Frequency")
     plt.legend()
+
+    if combined:
+        plt.legend(x.keys())
     plt.grid(True)
     plt.margins(x=0)
     plt.xlim(left=start)
