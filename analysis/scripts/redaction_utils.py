@@ -86,7 +86,8 @@ def redact_small_numbers(
         df_subset = df.loc[df[date_column] == d, :]
 
         for column in [numerator, denominator]:
-            df_subset[column] = suppress_column(df_subset[column])
+            df_subset = df_subset.assign(column=suppress_column(df_subset[column]))
+
             df_subset[column] = round_column(df_subset[column], base=rounding_base)
 
         df_subset.loc[
@@ -98,7 +99,6 @@ def redact_small_numbers(
 
 
 def group_low_values_series(series):
-
     suppressed_count = series[series <= 7].sum()
 
     if suppressed_count == 0:
@@ -143,7 +143,6 @@ def group_low_values(df, count_column, code_column, threshold, rounding_base):
     if (suppressed_count > 0) | (
         (suppressed_count == 0) & (len(suppressed_df) != len(df))
     ):
-
         # redact counts <= threshold
         df.loc[df[count_column] <= threshold, count_column] = np.nan
 

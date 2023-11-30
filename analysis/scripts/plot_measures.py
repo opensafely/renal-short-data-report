@@ -117,12 +117,13 @@ for test in tests_extended:
         OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
         parse_dates=["date"],
     )
-
+    
     df_ckd_stage_egfr = (
         df_ckd_stage.groupby(by=["ckd_egfr_category", "date"])[[test, "population"]]
         .sum()
         .reset_index()
     )
+    df_ckd_stage_egfr["value"] = df_ckd_stage_egfr[test] / df_ckd_stage_egfr["population"]
 
     df_ckd_stage_egfr = df_ckd_stage_egfr.replace(np.inf, np.nan)
     df_ckd_stage_egfr = redact_small_numbers(
@@ -145,6 +146,8 @@ for test in tests_extended:
         .reset_index()
     )
 
+    df_ckd_stage_acr["value"] = df_ckd_stage_acr[test] / df_ckd_stage_acr["population"]
+
     # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
     df_ckd_stage_acr = redact_small_numbers(
         df_ckd_stage_acr, 7, 5, test, "population", "value", "date"
@@ -166,6 +169,8 @@ for test in tests_extended:
     )
 
     df_recorded_stage = df_recorded_stage.replace(np.inf, np.nan)
+
+   
     df_recorded_stage = redact_small_numbers(
         df_recorded_stage, 7, 5, test, "population", "value", "date"
     )
