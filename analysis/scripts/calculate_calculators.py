@@ -3,9 +3,10 @@ import numpy as np
 from variables import tests
 from utilities import (
     OUTPUT_DIR,
+    cockcroft_gault,
+    ckd_epi
 )
 
-from utilities import cockcroft_gault, ckd_epi
 
 df = pd.read_csv((OUTPUT_DIR) / "input_calculators.csv.gz", parse_dates=["weight_numeric_value_date", "creatinine_numeric_value_date"])
 
