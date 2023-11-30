@@ -257,7 +257,6 @@ def plot_distribution_numeric_value(
                 width=bin_width,
                 align="edge",
                 alpha=0.5,
-                edgecolor="black",
             )
 
             df = pd.DataFrame(
