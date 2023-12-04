@@ -344,8 +344,13 @@ for test in tests_extended:
         )
 
         combined = pd.concat([df_total, df_ukrr])
+
+        # redact any values <=7 in numerator and denominator, then round the values to the nearest 5
+        combined = redact_small_numbers(
+            combined, 7, 5, "numerator", "denominator", "value", "date"
+        )
         combined["value"] = combined["numerator"] / combined["denominator"]
-        combined.to_csv(
+        combined.loc[:, ["date", "numerator", "denominator", "value"]].to_csv(
             f"output/pub/ukrr_testing/plot_{test}_total_ukrr.csv", index=False
         )
 
