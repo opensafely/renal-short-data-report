@@ -57,6 +57,7 @@ def drop_irrelevant_practices(df):
 def deciles_chart(
     df,
     filename,
+    data_filename,
     period_column=None,
     column=None,
     count_column=None,
@@ -66,6 +67,7 @@ def deciles_chart(
     """period_column must be dates / datetimes"""
 
     df = compute_deciles(df, period_column, column, has_outer_percentiles=False)
+    df.to_csv(data_filename, index=False)
 
     """period_column must be dates / datetimes"""
     sns.set_style("whitegrid", {"grid.color": ".9"})

@@ -37,13 +37,12 @@ for i in [
 
             df_deciles = compute_deciles(df, "date", i)
 
-            df_deciles.to_csv(
-                f"output/pub/deciles/data/plot_{i}_{j}_{k}_deciles.csv", index=False
-            )
+            
 
             deciles_chart(
                 df,
                 filename=f"output/pub/deciles/figures/plot_{i}_{j}_{k}.jpeg",
+                data_filename=f"output/pub/deciles/data/plot_{i}_{j}_{k}_deciles.csv",
                 period_column="date",
                 column="value",
                 count_column=i,
