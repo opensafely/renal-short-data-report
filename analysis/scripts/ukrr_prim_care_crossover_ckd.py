@@ -141,7 +141,7 @@ plot_distribution_numeric_value(
     "Creatinine UKRR vs Primary Care",
     "pub/ukrr_pc_overlap/dist_plot_ukrr_pc_creatinine",
     50,
-    200,
+    300,
     10,
     True
 )
