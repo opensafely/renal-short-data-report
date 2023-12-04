@@ -13,7 +13,7 @@ study = StudyDefinition(
         "incidence": 0.5,
     },
     # End of the study period
-    index_date="2021-12-31",
+    index_date="2023-07-01",
     population=patients.all(),
     
     # Ethnicity
