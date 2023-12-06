@@ -35,6 +35,7 @@ def create_table_from_paths(paths, columns, condition_column=None):
             df = update_df(df, updated_df, columns=columns)
 
     df = df.drop("patient_id", axis=1)
+    df = df.replace("missing", "Missing")
     df_counts = df.apply(lambda x: x.value_counts()).T.stack()
     df_counts = redact_table_1(df_counts)
     df_counts.index.names = ["condition", "condition_value"]
