@@ -94,7 +94,9 @@ def redact_small_numbers(
             (df_subset[numerator].isna()) | (df_subset[denominator].isna()), rate_column
         ] = np.nan
         df_list.append(df_subset)
-
+    
+    combined_df = pd.concat(df_list, axis=0)
+    combined_df[rate_column] = combined_df[numerator] / combined_df[denominator]
     return pd.concat(df_list, axis=0)
 
 
