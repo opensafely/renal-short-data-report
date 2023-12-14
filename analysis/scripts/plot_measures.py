@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from utilities import *
-from redaction_utils import compute_deciles, redact_small_numbers
+from redaction_utils import compute_deciles, redact_small_numbers, round_column
 from variables import tests_extended
 import matplotlib.dates as mdates
 
@@ -102,7 +102,7 @@ for test in tests_extended:
 
     df = df.loc[df["single_egfr"] == 1, :]
     redact_small_numbers(df, 7, 5, test, "population", "value", "date")
-
+    
     plot_measures(
         df=df,
         filename=f"plot_single_reduced_egfr_{test}",
@@ -129,6 +129,12 @@ for test in tests_extended:
         df_ckd_stage_egfr, 7, 5, test, "population", "value", "date"
     )
 
+    df_ckd_stage_egfr.to_csv(
+        f"output/pub/tests_by_ckd_stage/plot_ckd_biochemical_stage_{test}_egfr.csv",
+        index=False,
+    )
+
+
     plot_measures(
         df=df_ckd_stage_egfr,
         filename=f"pub/tests_by_ckd_stage/plot_ckd_biochemical_stage_{test}_egfr",
@@ -150,6 +156,11 @@ for test in tests_extended:
     # df_ckd_stage = df_ckd_stage.replace(np.inf, np.nan)
     df_ckd_stage_acr = redact_small_numbers(
         df_ckd_stage_acr, 7, 5, test, "population", "value", "date"
+    )
+
+    df_ckd_stage_acr.to_csv(
+        f"output/pub/tests_by_ckd_stage/plot_ckd_biochemical_stage_{test}_acr.csv",
+        index=False,
     )
 
     plot_measures(
@@ -174,6 +185,10 @@ for test in tests_extended:
         df_recorded_stage, 7, 5, test, "population", "value", "date"
     )
 
+    df_recorded_stage.to_csv(
+        f"output/pub/tests_by_ckd_stage/plot_ckd_recorded_stage_{test}.csv",
+        index=False,
+    )
     plot_measures(
         df=df_recorded_stage,
         filename=f"pub/tests_by_ckd_stage/plot_ckd_recorded_stage_{test}",
@@ -199,6 +214,10 @@ for test in tests_extended:
         ],
         axis=1,
     )
+    # round test column and population column to nearest 5 and recalculate value
+    single_egfr[test] = round_column(single_egfr[test], 5)
+    single_egfr["population"] = round_column(single_egfr["population"], 5)
+    single_egfr["value"] = single_egfr[test] / single_egfr["population"]
 
     primis_stage = pd.read_csv(
         OUTPUT_DIR / f"joined/measure_{test}_stage_population_rate.csv",
@@ -208,7 +227,11 @@ for test in tests_extended:
     primis_stage = (
         primis_stage.groupby(by=["date"])[[test, "population"]].sum().reset_index()
     )
+    primis_stage[test] = round_column(primis_stage[test], 5)
+    primis_stage["population"] = round_column(primis_stage["population"], 5)
+    
     primis_stage["value"] = primis_stage[test] / primis_stage["population"]
+
 
     ckd_stage = pd.read_csv(
         OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
@@ -218,6 +241,8 @@ for test in tests_extended:
         ckd_stage["ckd_egfr_category"].isin(["G3a", "G3b", "G4", "G5"]), :
     ]
     ckd_stage = ckd_stage.groupby(by=["date"])[[test, "population"]].sum().reset_index()
+    ckd_stage[test] = round_column(ckd_stage[test], 5)
+    ckd_stage["population"] = round_column(ckd_stage["population"], 5)
     ckd_stage["value"] = ckd_stage[test] / ckd_stage["population"]
 
     # now plot on the same axis
@@ -241,6 +266,12 @@ for test in tests_extended:
         color="green",
     )
 
+    # combine 3 dfs and save
+    combined = pd.concat([single_egfr, primis_stage, ckd_stage])
+    combined.to_csv(
+        f"output/pub/tests_by_ckd_stage/plot_{test}_single_biochem_stage.csv",
+        index=False,
+    )
     x_labels = sorted(single_egfr["date"])
 
     ax.set_xticks(x_labels)
