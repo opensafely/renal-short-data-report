@@ -122,6 +122,13 @@ actions:
         tests_ckd_stage_csv: output/pub/tests_by_ckd_stage/*.csv
         ukrr: output/pub/ukrr_testing/*.jpeg
         ukrr_data: output/pub/ukrr_testing/*.csv
+  
+  practice_numbers:
+    run: python:latest python analysis/scripts/practice_numbers_deciles.py
+    needs: [generate_measures]
+    outputs:
+      moderately_sensitive:
+        tables: output/pub/deciles/num_practices*.csv
 
   generate_plots_numeric_values:
     run: python:latest python analysis/scripts/plot_numeric_values.py
