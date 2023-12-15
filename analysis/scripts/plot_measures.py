@@ -268,8 +268,8 @@ for test in tests_extended:
 
     # combine 3 dfs and save
     single_egfr["category"] = "single_egfr"
-    primis_stage["category"] = "primis_stage"
-    ckd_stage["category"] = "ckd_stage"
+    primis_stage["category"] = "recorded_stage"
+    ckd_stage["category"] = "biochemical_stage"
     combined = pd.concat([single_egfr, primis_stage, ckd_stage])
     combined.to_csv(
         f"output/pub/tests_by_ckd_stage/plot_{test}_single_biochem_stage.csv",
