@@ -12,6 +12,7 @@ df = pd.read_csv(
     usecols=[
         "ckd_primis_stage",
         "ckd_egfr_category",
+        "ckd_acr_category",
         "ukrr_2020",
         "ukrr_ckd2020",
         "ukrr_ckd2020_creat",
@@ -20,6 +21,15 @@ df = pd.read_csv(
         "creatinine_numeric_value_history",
     ],
 )
+
+# Drop anyone with stage 1 or 2 who dont have stage A2 or A3 for ACR results. set their egfr_category to Uncategorised
+df.loc[
+    (
+        ((df["ckd_primis_stage"] == "1") | (df["ckd_primis_stage"] == "2"))
+        & ((df["ckd_acr_category"] != "A2") & (df["ckd_egfr_category"] != "A3"))
+    ),
+    "ckd_egfr_category",
+] = "Uncategorised"
 
 # Overlap between those in ukkr_ckd2020 and those with ckd stage using primis
 stage_subset = df.loc[:, ["ckd_primis_stage", "ukrr_ckd2020"]]
@@ -83,9 +93,13 @@ counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_biochem.csv")
 
 stage_subset = df.loc[:, ["ckd_primis_stage", "ukrr_ckd2020", "ukrr_2020"]]
 stage_subset = stage_subset.fillna("Missing")
-stage_subset = stage_subset.loc[(stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)]
+stage_subset = stage_subset.loc[
+    (stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)
+]
 
-stage_subset["in_ukrr"] = (stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)
+stage_subset["in_ukrr"] = (stage_subset["ukrr_ckd2020"] == 1) | (
+    stage_subset["ukrr_2020"] == 1
+)
 stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(int)
 stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
 stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(str)
@@ -102,7 +116,6 @@ stage_subset_encoded = stage_subset_encoded.rename(
         "in_ukrr_0": "Not in UKRR",
         "in_ukrr_1": "In UKRR",
     }
-
 )
 
 counts = stage_subset_encoded.groupby(
@@ -111,8 +124,6 @@ counts = stage_subset_encoded.groupby(
 counts = drop_and_round(counts)
 
 counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_stage_combined.csv")
-
-
 
 
 # Overlap between those in ukkr_2020 and those with ckd stage using primis
@@ -176,9 +187,13 @@ counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_rrt_overlap_biochem.csv")
 
 stage_subset = df.loc[:, ["ckd_primis_stage", "ukrr_ckd2020", "ukrr_2020"]]
 stage_subset = stage_subset.fillna("Missing")
-stage_subset = stage_subset.loc[(stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)]
+stage_subset = stage_subset.loc[
+    (stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)
+]
 
-stage_subset["in_ukrr"] = (stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)
+stage_subset["in_ukrr"] = (stage_subset["ukrr_ckd2020"] == 1) | (
+    stage_subset["ukrr_2020"] == 1
+)
 stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(int)
 stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
 stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(str)
@@ -195,7 +210,6 @@ stage_subset_encoded = stage_subset_encoded.rename(
         "in_ukrr_0": "Not in UKRR",
         "in_ukrr_1": "In UKRR",
     }
-
 )
 
 counts = stage_subset_encoded.groupby(

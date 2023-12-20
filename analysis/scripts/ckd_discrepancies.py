@@ -10,6 +10,7 @@ df = pd.read_csv(
         "ckd_primis_stage",
         "ckd_egfr_category",
         "latest_rrt_status",
+        "ckd_acr_category"
     ],
     dtype={
         "ckd_primis_stage": "str",
@@ -20,6 +21,20 @@ df = pd.read_csv(
 
 # Fill missing values
 df = df.fillna("Missing")
+
+# Drop anyone with stage 1 or 2 who dont have stage A2 or A3 for ACR results. set their egfr_category to Uncategorised
+df.loc[
+    (
+        (
+            (df["ckd_primis_stage"] == "1") | (df["ckd_primis_stage"] == "2")
+        ) &
+        (
+            (df["ckd_acr_category"] != "A2") & (df["ckd_egfr_category"] != "A3")
+        )
+    )
+    ,
+    "ckd_egfr_category",
+] = "Uncategorised"
 
 # Count the overlap of the different categories
 counts = df.groupby(
