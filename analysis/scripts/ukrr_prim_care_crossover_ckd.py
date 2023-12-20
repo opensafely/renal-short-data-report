@@ -11,6 +11,7 @@ df = pd.read_csv(
     OUTPUT_DIR / "joined/input_2020-12-01.csv.gz",
     usecols=[
         "ckd_primis_stage",
+        "ckd_egfr_category",
         "ukrr_2020",
         "ukrr_ckd2020",
         "ukrr_ckd2020_creat",
@@ -49,6 +50,70 @@ counts = drop_and_round(counts)
 
 counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_stage.csv")
 
+# Overlap between those in ukkr_ckd2020 and those with ckd stage using biochemical
+biochem_subset = df.loc[:, ["ckd_egfr_category", "ukrr_ckd2020"]]
+biochem_subset = biochem_subset.fillna("Missing")
+biochem_subset = biochem_subset.loc[biochem_subset["ukrr_ckd2020"] == 1]
+biochem_subset["ckd_egfr_category"] = biochem_subset["ckd_egfr_category"].astype(str)
+biochem_subset["ukrr_ckd2020"] = biochem_subset["ukrr_ckd2020"].astype(str)
+biochem_subset_encoded = pd.get_dummies(biochem_subset)
+
+biochem_subset_encoded = biochem_subset_encoded.rename(
+    columns={
+        "ckd_egfr_category_G1": "Biochemical Stage 1",
+        "ckd_egfr_category_G2": "Biochemical Stage 2",
+        "ckd_egfr_category_G3a": "Biochemical Stage 3a",
+        "ckd_egfr_category_G3b": "Biochemical Stage 3b",
+        "ckd_egfr_category_G4": "Biochemical Stage 4",
+        "ckd_egfr_category_G5": "Biochemical Stage 5",
+        "ckd_egfr_category_Uncategorised": "Biochemical Stage Uncategorised",
+    }
+)
+
+counts = biochem_subset_encoded.groupby(
+    by=biochem_subset_encoded.columns.tolist()
+).grouper.size()
+
+
+counts = drop_and_round(counts)
+
+counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_biochem.csv")
+
+# Overlap between those in ukkr_ckd2020 OR ukrr_2020 and those with ckd stage using primis
+
+stage_subset = df.loc[:, ["ckd_primis_stage", "ukrr_ckd2020", "ukrr_2020"]]
+stage_subset = stage_subset.fillna("Missing")
+stage_subset = stage_subset.loc[(stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)]
+
+stage_subset["in_ukrr"] = (stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)
+stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(int)
+stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
+stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(str)
+stage_subset_encoded = pd.get_dummies(stage_subset)
+
+stage_subset_encoded = stage_subset_encoded.rename(
+    columns={
+        "ckd_primis_stage_1.0": "Primary Care Stage 1",
+        "ckd_primis_stage_2.0": "Primary Care Stage 2",
+        "ckd_primis_stage_3.0": "Primary Care Stage 3",
+        "ckd_primis_stage_4.0": "Primary Care Stage 4",
+        "ckd_primis_stage_5.0": "Primary Care Stage 5",
+        "ckd_primis_stage_Missing": "Primary Care Stage Missing",
+        "in_ukrr_0": "Not in UKRR",
+        "in_ukrr_1": "In UKRR",
+    }
+
+)
+
+counts = stage_subset_encoded.groupby(
+    by=stage_subset_encoded.columns.tolist()
+).grouper.size()
+counts = drop_and_round(counts)
+
+counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_overlap_stage_combined.csv")
+
+
+
 
 # Overlap between those in ukkr_2020 and those with ckd stage using primis
 stage_subset_rrt = df.loc[:, ["ckd_primis_stage", "ukrr_2020"]]
@@ -79,6 +144,66 @@ counts = drop_and_round(counts)
 
 counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_rrt_overlap_stage.csv")
 
+# Overlap between those in ukkr_2020 and those with ckd stage using biochemical
+biochem_subset = df.loc[:, ["ckd_egfr_category", "ukrr_2020"]]
+biochem_subset = biochem_subset.fillna("Missing")
+biochem_subset = biochem_subset.loc[biochem_subset["ukrr_2020"] == 1]
+biochem_subset["ckd_egfr_category"] = biochem_subset["ckd_egfr_category"].astype(str)
+biochem_subset["ukrr_2020"] = biochem_subset["ukrr_2020"].astype(str)
+biochem_subset_encoded = pd.get_dummies(biochem_subset)
+
+biochem_subset_encoded = biochem_subset_encoded.rename(
+    columns={
+        "ckd_egfr_category_G1": "Biochemical Stage 1",
+        "ckd_egfr_category_G2": "Biochemical Stage 2",
+        "ckd_egfr_category_G3a": "Biochemical Stage 3a",
+        "ckd_egfr_category_G3b": "Biochemical Stage 3b",
+        "ckd_egfr_category_G4": "Biochemical Stage 4",
+        "ckd_egfr_category_G5": "Biochemical Stage 5",
+        "ckd_egfr_category_Uncategorised": "Biochemical Stage Uncategorised",
+    }
+)
+
+counts = biochem_subset_encoded.groupby(
+    by=biochem_subset_encoded.columns.tolist()
+).grouper.size()
+
+counts = drop_and_round(counts)
+
+counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_rrt_overlap_biochem.csv")
+
+# Overlap between those in ukkr_2020 OR ukrr_ckd2020 and those with ckd stage using primis
+
+stage_subset = df.loc[:, ["ckd_primis_stage", "ukrr_ckd2020", "ukrr_2020"]]
+stage_subset = stage_subset.fillna("Missing")
+stage_subset = stage_subset.loc[(stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)]
+
+stage_subset["in_ukrr"] = (stage_subset["ukrr_ckd2020"] == 1) | (stage_subset["ukrr_2020"] == 1)
+stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(int)
+stage_subset["ckd_primis_stage"] = stage_subset["ckd_primis_stage"].astype(str)
+stage_subset["in_ukrr"] = stage_subset["in_ukrr"].astype(str)
+stage_subset_encoded = pd.get_dummies(stage_subset)
+
+stage_subset_encoded = stage_subset_encoded.rename(
+    columns={
+        "ckd_primis_stage_1.0": "Primary Care Stage 1",
+        "ckd_primis_stage_2.0": "Primary Care Stage 2",
+        "ckd_primis_stage_3.0": "Primary Care Stage 3",
+        "ckd_primis_stage_4.0": "Primary Care Stage 4",
+        "ckd_primis_stage_5.0": "Primary Care Stage 5",
+        "ckd_primis_stage_Missing": "Primary Care Stage Missing",
+        "in_ukrr_0": "Not in UKRR",
+        "in_ukrr_1": "In UKRR",
+    }
+
+)
+
+counts = stage_subset_encoded.groupby(
+    by=stage_subset_encoded.columns.tolist()
+).grouper.size()
+counts = drop_and_round(counts)
+
+counts.to_csv(OUTPUT_DIR / "pub/ukrr_pc_overlap/ukrr_rrt_overlap_stage_combined.csv")
 
 # ukrr latest egfr where not null or 0
 
@@ -97,7 +222,7 @@ prim_care_latest_egfr = df["egfr_numeric_value_history"][
 ]
 
 
-#ukrr_latest_egfr, prim_care_latest_egfr
+# ukrr_latest_egfr, prim_care_latest_egfr
 
 
 plot_distribution_numeric_value(
@@ -107,7 +232,7 @@ plot_distribution_numeric_value(
     0,
     60,
     5,
-    True
+    True,
 )
 
 ukrr_latest_creatinine = df["ukrr_ckd2020_creat"][
@@ -127,7 +252,9 @@ counts_table = pd.DataFrame(
         "egfr UKRR (n=)": [round(len(ukrr_latest_egfr) / 5) * 5],
         "egfr Primary Care (n=)": [round(len(prim_care_latest_egfr) / 5) * 5],
         "creatinine UKRR (n=)": [round(len(ukrr_latest_creatinine) / 5) * 5],
-        "creatinine Primary Care (n=)": [round(len(prim_care_latest_creatinine) / 5) * 5],
+        "creatinine Primary Care (n=)": [
+            round(len(prim_care_latest_creatinine) / 5) * 5
+        ],
     }
 )
 
@@ -143,5 +270,5 @@ plot_distribution_numeric_value(
     50,
     500,
     10,
-    True
+    True,
 )
