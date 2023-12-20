@@ -242,7 +242,7 @@ for test in tests_extended:
     # 3. A count of each operator
 
     test_operators = pd.concat(operator_counts[test], axis=1, sort=False).sum(axis=1)
-    test_operators = group_low_values_series(test_operators)
+   
     drop_and_round(test_operators).to_csv(
         OUTPUT_DIR / f"pub/operator_counts/{test}_operators_count.csv"
     )
