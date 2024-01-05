@@ -29,7 +29,7 @@ df.loc[
             (df["ckd_primis_stage"] == "1") | (df["ckd_primis_stage"] == "2")
         ) &
         (
-            (df["ckd_acr_category"] != "A2") & (df["ckd_egfr_category"] != "A3")
+            (df["ckd_acr_category"] != "A2") & (df["ckd_acr_category"] != "A3")
         )
     )
     ,
