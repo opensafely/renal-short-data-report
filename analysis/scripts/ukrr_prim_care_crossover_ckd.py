@@ -25,7 +25,7 @@ df = pd.read_csv(
 # Drop anyone with stage 1 or 2 who dont have stage A2 or A3 for ACR results. set their egfr_category to Uncategorised
 df.loc[
     (
-        ((df["ckd_primis_stage"] == "1") | (df["ckd_primis_stage"] == "2"))
+        ((df["ckd_egfr_category"] == "G1") | (df["ckd_egfr_category"] == "G2"))
         & ((df["ckd_acr_category"] != "A2") & (df["ckd_acr_category"] != "A3"))
     ),
     "ckd_egfr_category",

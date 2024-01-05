@@ -26,7 +26,7 @@ df = df.fillna("Missing")
 df.loc[
     (
         (
-            (df["ckd_primis_stage"] == "1") | (df["ckd_primis_stage"] == "2")
+            (df["ckd_egfr_category"] == "G1") | (df["ckd_egfr_category"] == "G2")
         ) &
         (
             (df["ckd_acr_category"] != "A2") & (df["ckd_acr_category"] != "A3")
