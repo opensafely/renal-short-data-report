@@ -37,8 +37,6 @@ for i in [
 
             df_deciles = compute_deciles(df, "date", i)
 
-            
-
             deciles_chart(
                 df,
                 filename=f"output/pub/deciles/figures/plot_{i}_{j}_{k}.jpeg",
@@ -102,7 +100,7 @@ for test in tests_extended:
 
     df = df.loc[df["single_egfr"] == 1, :]
     redact_small_numbers(df, 7, 5, test, "population", "value", "date")
-    
+
     plot_measures(
         df=df,
         filename=f"plot_single_reduced_egfr_{test}",
@@ -116,24 +114,31 @@ for test in tests_extended:
         OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
         parse_dates=["date"],
     )
-    
+
     df_ckd_stage_egfr = (
         df_ckd_stage.groupby(by=["ckd_egfr_category", "date"])[[test, "population"]]
         .sum()
         .reset_index()
     )
-    df_ckd_stage_egfr["value"] = df_ckd_stage_egfr[test] / df_ckd_stage_egfr["population"]
+    df_ckd_stage_egfr["value"] = (
+        df_ckd_stage_egfr[test] / df_ckd_stage_egfr["population"]
+    )
 
     df_ckd_stage_egfr = df_ckd_stage_egfr.replace(np.inf, np.nan)
     df_ckd_stage_egfr = redact_small_numbers(
         df_ckd_stage_egfr, 7, 5, test, "population", "value", "date"
     )
 
+    df_ckd_stage_egfr = df_ckd_stage_egfr.drop(
+        [
+            "column",
+        ],
+        axis=1,
+    )
     df_ckd_stage_egfr.to_csv(
         f"output/pub/tests_by_ckd_stage/plot_ckd_biochemical_stage_{test}_egfr.csv",
         index=False,
     )
-
 
     plot_measures(
         df=df_ckd_stage_egfr,
@@ -158,6 +163,13 @@ for test in tests_extended:
         df_ckd_stage_acr, 7, 5, test, "population", "value", "date"
     )
 
+    df_ckd_stage_acr = df_ckd_stage_acr.drop(
+        [
+            "column",
+        ],
+        axis=1,
+    )
+
     df_ckd_stage_acr.to_csv(
         f"output/pub/tests_by_ckd_stage/plot_ckd_biochemical_stage_{test}_acr.csv",
         index=False,
@@ -180,9 +192,15 @@ for test in tests_extended:
 
     df_recorded_stage = df_recorded_stage.replace(np.inf, np.nan)
 
-   
     df_recorded_stage = redact_small_numbers(
         df_recorded_stage, 7, 5, test, "population", "value", "date"
+    )
+
+    df_recorded_stage = df_recorded_stage.drop(
+        [
+            "column",
+        ],
+        axis=1,
     )
 
     df_recorded_stage.to_csv(
@@ -229,9 +247,8 @@ for test in tests_extended:
     )
     primis_stage[test] = round_column(primis_stage[test], 5)
     primis_stage["population"] = round_column(primis_stage["population"], 5)
-    
-    primis_stage["value"] = primis_stage[test] / primis_stage["population"]
 
+    primis_stage["value"] = primis_stage[test] / primis_stage["population"]
 
     ckd_stage = pd.read_csv(
         OUTPUT_DIR / f"joined/measure_{test}_biochemical_stage_population_rate.csv",
