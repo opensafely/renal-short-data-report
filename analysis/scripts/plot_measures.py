@@ -128,7 +128,9 @@ for test in tests_extended:
     df_ckd_stage_egfr = redact_small_numbers(
         df_ckd_stage_egfr, 7, 5, test, "population", "value", "date"
     )
-
+    df_ckd_stage_egfr["value"] = (
+        df_ckd_stage_egfr[test] / df_ckd_stage_egfr["population"]
+    )
     df_ckd_stage_egfr = df_ckd_stage_egfr.drop(
         [
             "column",
@@ -163,6 +165,8 @@ for test in tests_extended:
         df_ckd_stage_acr, 7, 5, test, "population", "value", "date"
     )
 
+    df_ckd_stage_acr["value"] = df_ckd_stage_acr[test] / df_ckd_stage_acr["population"]
+
     df_ckd_stage_acr = df_ckd_stage_acr.drop(
         [
             "column",
@@ -195,6 +199,8 @@ for test in tests_extended:
     df_recorded_stage = redact_small_numbers(
         df_recorded_stage, 7, 5, test, "population", "value", "date"
     )
+
+    df_recorded_stage["value"] = df_recorded_stage[test] / df_recorded_stage["population"]
 
     df_recorded_stage = df_recorded_stage.drop(
         [
