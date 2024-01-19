@@ -250,7 +250,7 @@ for test in tests_extended:
     # 4. A count of each numeric value-operator pair
 
     combined_values = []
-    for operator in ["<", ">", "<=", ">=", "="]:
+    for operator in ["<", ">", "<=", ">=", "=", "missing"]:
         operator_combined = pd.concat(
             numeric_value_operator_counts[test][operator]
         ).reset_index()
@@ -291,39 +291,3 @@ for test in tests_extended:
         index=True,
     )
 
-    # same for missing
-    missing_values = pd.concat(
-        numeric_value_operator_counts[test]["missing"]
-    ).reset_index()
-
-    missing_values.rename(
-        columns={
-            0: "count",
-        },
-        inplace=True,
-    )
-    print(missing_values)
-
-    missing_values.sort_values(by=f"{test}_numeric_value", inplace=True)
-
-    missing_values = missing_values.groupby(
-        [f"{test}_numeric_value", f"{test}_operator"]
-    ).sum()
-
-    missing_values.sort_values(
-        by=[f"{test}_operator", f"{test}_numeric_value"], inplace=True
-    )
-
-    missing_values.to_csv(
-        OUTPUT_DIR / f"pub/operator_counts/{test}_numeric_value_operator_count_missing.csv",
-        index=True,
-    )
-
-    # remove any rows where count is <=7
-    missing_values = missing_values[missing_values["count"] > 7]
-    missing_values["count"] = missing_values["count"].apply(round_value, args=(5,))
-    missing_values.to_csv(
-        OUTPUT_DIR
-        / f"pub/operator_counts/{test}_numeric_value_operator_count_missing_rounded.csv",
-        index=True,
-    )
